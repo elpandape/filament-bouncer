@@ -7,6 +7,20 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.0.3] - 2026-08-10
+
+### Fixed
+
+- **The grid was unreadable on any real panel.** Three buttons carrying words were laid
+  side by side inside a cell one column wide, and from about four actions onwards they
+  overlapped into a smear. They are stacked now, and the section takes the whole width
+  instead of half of it. Found by looking at it in a browser, which no test does.
+- **The detail screen offered an Edit button that led to a refusal.** Filament does not
+  ask the resource before drawing its header actions, so on the role you hold yourself
+  and on the one that holds everything the button was shown and then answered 403. It is
+  hidden now, as the equivalent action in the table already was. The same goes for the
+  delete button on the edit screen.
+
 ## [1.0.2] - 2026-08-10
 
 ### Fixed
@@ -216,6 +230,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.0.3]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.3
 [1.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.2
 [1.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.0
