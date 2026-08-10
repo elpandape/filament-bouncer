@@ -253,14 +253,16 @@ final class RoleForm
                     ->helperText(self::inheritance($ability))
                     ->options(app(Labels::class)->stances())
                     ->colors(Stance::colors())
+                    ->icons(Stance::icons())
+                    // Marks, not words. The word survives as the button's accessible name
+                    // and as its tooltip, so nothing is lost by not printing it in a cell
+                    // too narrow to hold it.
+                    ->hiddenButtonLabels()
+                    ->tooltips(app(Labels::class)->stances())
+                    ->inline()
+                    ->grouped()
                     ->default(Stance::Neutral->value)
                     ->required()
-                    // Stacked, not side by side. A cell is one of as many columns as the
-                    // catalogue has actions, so on any real panel it is a hundred pixels
-                    // wide, and three buttons carrying words do not fit in that: they
-                    // overlap into an unreadable smear. Height is cheap here and width is
-                    // not.
-                    ->columns(1)
                 : Text::make('');
         }
 
