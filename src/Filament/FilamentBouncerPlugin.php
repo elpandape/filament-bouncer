@@ -29,6 +29,6 @@ final class FilamentBouncerPlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        //
+        app(PanelGuard::class)->check($panel);
     }
 }
