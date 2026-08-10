@@ -195,6 +195,17 @@ nobody left is able to hand anything out. Name a role in `privileged_role` and
 `filament-bouncer:reconcile` will make sure it exists and holds Bouncer's wildcard on every
 run — including after somebody deletes it. `--check` fails while it is missing.
 
+A role nobody holds opens no doors, so there is a command for the last step too:
+
+```bash
+php artisan filament-bouncer:assign owner amaru@example.com
+```
+
+It takes a key or an email address, and it **refuses a role that does not exist** rather
+than creating one. That refusal is the point: `Bouncer::assign()` creates a role it cannot
+find, so a misspelling otherwise leaves somebody holding a brand new role that grants
+nothing at all, under a line of output saying it worked.
+
 The wildcard is granted rather than every ability the catalogue holds today, so that a
 resource added tomorrow is covered without anybody remembering to come back. That the
 wildcard also grants abilities nobody ever declared is exactly what is wanted for this role,

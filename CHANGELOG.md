@@ -32,6 +32,10 @@ road to it left open, now settled in writing.
 
 ### Added
 
+- `filament-bouncer:assign`, the last step of the way back in: a role nobody holds opens
+  no doors, and reaching for tinker to undo a lockout means reaching for it while locked
+  out. It refuses a role that does not exist rather than creating one, which is the
+  guarantee Bouncer itself gave up when it started creating roles it could not find.
 - The stored ability names are now part of the compatibility promise.
 
 ## [0.6.0] - 2026-08-10
