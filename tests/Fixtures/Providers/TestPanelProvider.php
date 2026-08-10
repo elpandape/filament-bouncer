@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Tests\Fixtures\Providers;
 
+use ElPandaPe\FilamentBouncer\Filament\FilamentBouncerPlugin;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\CommentResource;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\PostResource;
@@ -30,6 +31,7 @@ final class TestPanelProvider extends PanelProvider
             ->widgets([
                 Stats::class,
                 Activity::make(),
-            ]);
+            ])
+            ->plugin(FilamentBouncerPlugin::make());
     }
 }
