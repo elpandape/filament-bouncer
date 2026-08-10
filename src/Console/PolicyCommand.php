@@ -35,7 +35,7 @@ final class PolicyCommand extends Command
         $models = $this->models($panels);
 
         if ($models === []) {
-            $this->components->info('Every resource in the panel already has a policy.');
+            $this->components->info(__('filament-bouncer::console.policies.none'));
 
             return self::SUCCESS;
         }
@@ -46,7 +46,7 @@ final class PolicyCommand extends Command
             $path = $this->path($model);
 
             if ($files->exists($path) && ! $this->option('force')) {
-                $this->components->twoColumnDetail($this->relative($path), '<fg=yellow>already there</>');
+                $this->components->twoColumnDetail($this->relative($path), '<fg=yellow>'.__('filament-bouncer::console.policies.kept').'</>');
 
                 continue;
             }
@@ -54,13 +54,13 @@ final class PolicyCommand extends Command
             $files->ensureDirectoryExists(dirname($path));
             $files->put($path, $this->render($files, $model, $this->userModel($config)));
 
-            $this->components->twoColumnDetail($this->relative($path), '<fg=green>written</>');
+            $this->components->twoColumnDetail($this->relative($path), '<fg=green>'.__('filament-bouncer::console.policies.written').'</>');
 
             $written++;
         }
 
         if ($written > 0) {
-            $this->components->info('Run filament-bouncer:reconcile so the abilities these policies declare come into being.');
+            $this->components->info(__('filament-bouncer::console.policies.next'));
         }
 
         return self::SUCCESS;

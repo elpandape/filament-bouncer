@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Catalog;
 
+use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Pages\Page;
 use Filament\Panel;
 use Filament\Resources\Resource as FilamentResource;
@@ -27,7 +28,10 @@ final readonly class CatalogBuilder
      */
     private const string POLICY_HOOK = 'before';
 
-    public function __construct(private Repository $config) {}
+    public function __construct(
+        private Repository $config,
+        private Labels $labels,
+    ) {}
 
     public function build(Panel $panel): Catalog
     {
@@ -195,9 +199,14 @@ final readonly class CatalogBuilder
         );
     }
 
+    /**
+     * What the ability is called where a human meets it, which is Bouncer's own title
+     * column as well as the screen. It follows whichever locale was in force when the
+     * reconciliation ran, since that is when the column is written.
+     */
     private function title(string $label, string $action): string
     {
-        return $label.': '.Str::headline($action);
+        return $label.': '.$this->labels->action($action);
     }
 
     /**

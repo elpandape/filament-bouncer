@@ -36,6 +36,8 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         //
         // An application registering its own policy for the role model does so from a
         // provider that boots after this one, and wins.
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'filament-bouncer');
+
         Gate::policy(Models::classname(Role::class), RolePolicy::class);
 
         if ($this->app->runningInConsole()) {
@@ -46,6 +48,10 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../stubs/policy.stub' => base_path('stubs/filament-bouncer.policy.stub'),
             ], 'filament-bouncer-stubs');
+
+            $this->publishes([
+                __DIR__.'/../lang' => lang_path('vendor/filament-bouncer'),
+            ], 'filament-bouncer-translations');
 
             $this->commands([
                 PolicyCommand::class,

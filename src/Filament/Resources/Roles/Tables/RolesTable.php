@@ -24,7 +24,7 @@ final class RolesTable
                 TextColumn::make('title')
                     ->searchable(),
                 TextColumn::make('abilities_count')
-                    ->label('Abilities')
+                    ->label(__('filament-bouncer::roles.table.abilities'))
                     ->counts('abilities'),
                 TextColumn::make('created_at')
                     ->dateTime()

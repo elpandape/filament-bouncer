@@ -24,20 +24,6 @@ enum Stance: string
     /**
      * @return array<string, string>
      */
-    public static function labels(): array
-    {
-        $labels = [];
-
-        foreach (self::cases() as $stance) {
-            $labels[$stance->value] = $stance->label();
-        }
-
-        return $labels;
-    }
-
-    /**
-     * @return array<string, string>
-     */
     public static function colors(): array
     {
         $colors = [];
@@ -47,15 +33,6 @@ enum Stance: string
         }
 
         return $colors;
-    }
-
-    public function label(): string
-    {
-        return match ($this) {
-            self::Granted => 'Granted',
-            self::Neutral => 'Not granted',
-            self::Forbidden => 'Forbidden',
-        };
     }
 
     public function color(): string

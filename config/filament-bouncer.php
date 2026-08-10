@@ -62,6 +62,20 @@ return [
     ],
 
     /*
+     * The words the grid is read in, when yours differ from the package's. Anything set
+     * here wins over the package's translations, which in turn win over the readable
+     * form of the method name — so an action your own policy invented reads sensibly
+     * without anything being translated first.
+     */
+    'labels' => [
+        'actions' => [
+            // 'viewAny' => 'Browse',
+        ],
+        'scopes' => [],
+        'stances' => [],
+    ],
+
+    /*
      * The role that holds everything. The roles screen refuses to edit it, and the
      * reconcile command makes sure it exists and is granted the wildcard. That is what
      * makes it the way back in when a mistake leaves nobody able to hand out abilities.

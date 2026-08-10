@@ -45,11 +45,11 @@ final class ReconcileCommand extends Command
         $privileged->restore();
 
         $store->create($missing);
-        $this->components->info(sprintf('Created %d %s.', count($missing), $this->noun(count($missing))));
+        $this->components->info($this->say('created', count($missing)));
 
         if ($this->option('prune')) {
             $store->delete($extra);
-            $this->components->info(sprintf('Deleted %d %s, and every grant that pointed at one.', count($extra), $this->noun(count($extra))));
+            $this->components->info($this->say('deleted', count($extra)));
         } else {
             $this->keep($extra);
         }
@@ -68,22 +68,22 @@ final class ReconcileCommand extends Command
      */
     private function report(array $missing, array $extra, PrivilegedRole $privileged, array $open): int
     {
-        $this->list('Missing from the store', array_map(static fn (Ability $ability): string => $ability->describe(), $missing));
-        $this->list('Stored but no longer declared', array_map($this->describe(...), $extra));
-        $this->list('Open to everybody, because their model has no policy', $open);
+        $this->list(__('filament-bouncer::console.missing'), array_map(static fn (Ability $ability): string => $ability->describe(), $missing));
+        $this->list(__('filament-bouncer::console.extra'), array_map($this->describe(...), $extra));
+        $this->list(__('filament-bouncer::console.open'), $open);
 
         if ($open !== []) {
             return self::FAILURE;
         }
 
         if ($privileged->needsRestoring()) {
-            $this->components->warn(sprintf('The privileged role [%s] is missing, or no longer holds the wildcard.', (string) $privileged->name()));
+            $this->components->warn(__('filament-bouncer::console.privileged', ['name' => (string) $privileged->name()]));
 
             return self::FAILURE;
         }
 
         if ($missing === [] && $extra === []) {
-            $this->components->info('The store matches the catalogue.');
+            $this->components->info(__('filament-bouncer::console.matches'));
 
             return self::SUCCESS;
         }
@@ -100,7 +100,7 @@ final class ReconcileCommand extends Command
             return;
         }
 
-        $this->components->warn(sprintf('Left %d %s in place that the catalogue no longer declares. Pass --prune to delete them.', count($extra), $this->noun(count($extra))));
+        $this->components->warn($this->say('kept', count($extra)));
     }
 
     /**
@@ -141,8 +141,12 @@ final class ReconcileCommand extends Command
         return $declared;
     }
 
-    private function noun(int $count): string
+    /**
+     * The count decides which of the two forms is read, which is the only reason these
+     * lines are written as a pair rather than as a sentence with a number dropped in.
+     */
+    private function say(string $key, int $count): string
     {
-        return $count === 1 ? 'ability' : 'abilities';
+        return trans_choice('filament-bouncer::console.'.$key, $count, ['count' => $count]);
     }
 }

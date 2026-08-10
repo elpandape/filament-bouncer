@@ -10,6 +10,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Component;
@@ -17,7 +18,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 /**
  * The roles form: a name, and a grid of subjects against actions.
@@ -37,18 +37,20 @@ final class RoleForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Role')
+            Section::make(__('filament-bouncer::roles.form.role'))
                 ->schema([
                     TextInput::make('name')
+                        ->label(__('filament-bouncer::roles.form.name'))
                         ->required()
                         ->maxLength(150)
                         ->unique(ignoreRecord: true),
                     TextInput::make('title')
+                        ->label(__('filament-bouncer::roles.form.title'))
                         ->maxLength(150),
                 ])
                 ->columns(2),
-            Section::make('Abilities')
-                ->description('Only the abilities you hold yourself are shown, because those are the only ones you are able to hand on — or to take away.')
+            Section::make(__('filament-bouncer::roles.form.abilities'))
+                ->description(__('filament-bouncer::roles.form.description'))
                 ->schema(self::matrix(app(EditableCatalog::class)->current())),
         ]);
     }
@@ -59,7 +61,7 @@ final class RoleForm
     private static function matrix(Catalog $catalog): array
     {
         if ($catalog->isEmpty()) {
-            return [Text::make('You hold no abilities of your own, so there is nothing here to hand on.')];
+            return [Text::make(__('filament-bouncer::roles.form.empty'))];
         }
 
         $columns = count($catalog->actions) + 1;
@@ -96,7 +98,7 @@ final class RoleForm
         foreach ($spans as $value => $span) {
             $scope = AbilityScope::from($value);
 
-            $cells[] = Text::make(Str::headline($value))
+            $cells[] = Text::make(app(Labels::class)->scope($scope))
                 ->color($scope->color())
                 ->columnSpan($span);
         }
@@ -112,7 +114,7 @@ final class RoleForm
         $cells = [Text::make('')];
 
         foreach (array_keys($catalog->actions) as $action) {
-            $cells[] = Text::make(Str::headline($action));
+            $cells[] = Text::make(app(Labels::class)->action($action));
         }
 
         return $cells;
@@ -132,7 +134,7 @@ final class RoleForm
                 ? ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
                     ->label($ability->title)
                     ->hiddenLabel()
-                    ->options(Stance::labels())
+                    ->options(app(Labels::class)->stances())
                     ->colors(Stance::colors())
                     ->default(Stance::Neutral->value)
                     ->required()
