@@ -12,6 +12,7 @@ use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
 use Silber\Bouncer\Database\Role;
 
@@ -40,6 +41,20 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'filament-bouncer');
 
         Gate::policy(Models::classname(Role::class), RolePolicy::class);
+
+        // Nobody owns a role, and saying so out loud is what keeps this package working
+        // in an application that runs Eloquent strictly.
+        //
+        // Bouncer asks about ownership on every check it answers, and with nothing told
+        // to it, it guesses the column from the name of whoever is asking: for a user
+        // asking about a role it reaches for `roles.user_id`. That column has never
+        // existed. Left lax the read returns null and the guess merely fails; under
+        // `Model::shouldBeStrict()` it throws, and the roles screen dies with a message
+        // naming a column nobody ever wrote.
+        //
+        // An application wanting a different answer registers its own after this, from a
+        // provider of its own, and wins.
+        Bouncer::ownedVia(Models::classname(Role::class), static fn (): bool => false);
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
