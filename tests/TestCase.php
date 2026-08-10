@@ -23,6 +23,7 @@ use Filament\Support\SupportServiceProvider;
 use Filament\Tables\TablesServiceProvider;
 use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
@@ -58,6 +59,12 @@ abstract class TestCase extends ApplicationTestCase
         parent::setUp();
 
         $this->environment = $this->app->environment();
+
+        // The applications this package is built for run Eloquent strictly, and that
+        // changes what Bouncer does: a guess at a column that is not there stops being a
+        // null and becomes an exception. Without this the suite tests a laxer world than
+        // the one the package ships into.
+        Model::shouldBeStrict();
 
         // No request has been through the panel's middleware here, so nothing has told
         // Filament which panel it is serving. Without this every resource resolves
