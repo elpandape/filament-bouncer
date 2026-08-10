@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Widgets;
 
-use ElPandaPe\FilamentBouncer\Filament\Concerns\AuthorizesWidget;
 use Filament\Widgets\Widget;
 
-final class Stats extends Widget
+final class Unguarded extends Widget
 {
-    use AuthorizesWidget;
-
     protected string $view = 'filament-widgets::stats-overview-widget';
 }
