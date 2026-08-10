@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer;
 
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use Illuminate\Support\ServiceProvider;
 
 final class FilamentBouncerServiceProvider extends ServiceProvider
@@ -11,6 +12,11 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/filament-bouncer.php', 'filament-bouncer');
+
+        // Shared, because building a catalogue walks every component of the panel and
+        // reflects over every policy behind them, and one request asks for it more
+        // than once.
+        $this->app->singleton(CatalogRegistry::class);
     }
 
     public function boot(): void

@@ -5,15 +5,60 @@ declare(strict_types=1);
 return [
 
     /*
-     * Cómo se llama el recurso de roles dentro del panel. Son decisiones del consumidor,
-     * no del paquete: el grupo puede llamarse de otro modo, el orden depende de qué más
-     * tenga ese panel, y el icono de la familia que ese proyecto ya use.
+     * The panel whose resources, pages and widgets declare the catalogue. Leaving this
+     * null uses the panel the application marked as its default, which is the right
+     * answer for the single-panel applications this package is built for.
+     */
+    'panel' => null,
+
+    /*
+     * How the roles resource presents itself inside the panel. These are the consuming
+     * application's decisions, not the package's: the group may be called something
+     * else, the order depends on what else that panel holds, and the icon on whichever
+     * family that project already uses.
      */
     'navigation' => [
         'icon' => null,
         'group' => null,
         'sort' => null,
         'slug' => 'security/roles',
+    ],
+
+    /*
+     * Which actions weigh the same. The grid groups its columns by these and tints the
+     * headings, so that "see a list" cannot sit next to "delete for good" looking like
+     * the same decision. Anything not named here counts as a write.
+     */
+    'scopes' => [
+        'read' => ['viewAny', 'view'],
+        'withdraw' => ['delete', 'deleteAny'],
+        'irreversible' => ['forceDelete', 'forceDeleteAny'],
+    ],
+
+    /*
+     * Models that have a policy but no resource in the panel, and would otherwise never
+     * reach the catalogue. A model that lives in a vendor package is the usual case.
+     */
+    'models' => [
+        // \Laravel\Passkeys\Models\Passkey::class,
+    ],
+
+    /*
+     * Abilities no component declares, as a map of name to scope. Anything listed here
+     * has to be asked about by hand somewhere in the application, because nothing else
+     * will: Bouncer answers "no" to an ability nobody was ever granted, and never warns
+     * that the name does not exist.
+     */
+    'custom' => [
+        // 'impersonate-users' => 'write',
+    ],
+
+    /*
+     * Resources, pages and widgets the catalogue leaves out. This is the escape hatch
+     * for a component that is deliberately open to everyone who reaches the panel.
+     */
+    'ignore' => [
+        // \Filament\Pages\Dashboard::class,
     ],
 
 ];
