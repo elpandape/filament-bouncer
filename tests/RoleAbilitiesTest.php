@@ -167,3 +167,52 @@ test('reading a role back gives the grid the shape the form holds', function ():
         'viewAny' => Stance::Neutral->value,
     ]);
 });
+
+test('a grant for only what the role owns is not read as a grant over everything', function (): void {
+    grant(signInAsRoleManager(), [['delete', Post::class]]);
+
+    $role = editor();
+    Bouncer::allow($role)->toOwn(Post::class)->to('delete');
+    Bouncer::refresh();
+
+    expect(postState($role)['delete'])->toBe(Stance::Neutral->value);
+});
+
+test('a grant about one record is not read as a grant over all of them', function (): void {
+    grant(signInAsRoleManager(), [['delete', Post::class]]);
+
+    $role = editor();
+    Bouncer::allow($role)->to('delete', Post::forceCreate([]));
+    Bouncer::refresh();
+
+    expect(postState($role)['delete'])->toBe(Stance::Neutral->value);
+});
+
+test('the grid leaves alone the rules it never offered', function (): void {
+    grant(signInAsRoleManager(), [['delete', Post::class]]);
+
+    $role = editor();
+    Bouncer::allow($role)->toOwn(Post::class)->to('delete');
+    Bouncer::refresh();
+
+    saveStances($role, ['delete' => Stance::Neutral]);
+
+    expect(restrictedRows($role))->toBe(1);
+});
+
+/**
+ * The rows about this ability that the grid never offers: the ones naming a record and
+ * the ones covering only what their holder owns.
+ */
+function restrictedRows(Model $role): int
+{
+    return Models::ability()->newQuery()
+        ->join(Models::table('permissions'), Models::table('permissions').'.ability_id', '=', Models::table('abilities').'.id')
+        ->where(Models::table('permissions').'.entity_id', $role->getKey())
+        ->where(Models::table('permissions').'.entity_type', $role->getMorphClass())
+        ->where(static function ($query): void {
+            $query->whereNotNull(Models::table('abilities').'.entity_id')
+                ->orWhere(Models::table('abilities').'.only_owned', true);
+        })
+        ->count();
+}

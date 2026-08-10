@@ -175,3 +175,18 @@ test('a cell says so when a broader denial beats the grant made in it', function
         ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Granted->value])
         ->assertSee(__('filament-bouncer::roles.form.overruled'));
 });
+
+test('a cell says so when the role holds rules about it that the grid cannot write', function (): void {
+    grant(signInAsRoleManager(), [['delete', Post::class]]);
+
+    $role = role();
+    Bouncer::allow($role)->toOwn(Post::class)->to('delete');
+    Bouncer::allow($role)->to('delete', Post::forceCreate([]));
+    Bouncer::allow($role)->to('delete', Post::forceCreate([]));
+    Bouncer::refresh();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertFormSet(["abilities.{$this->post}.delete" => Stance::Neutral->value])
+        ->assertSee(__('filament-bouncer::roles.form.restricted_owned'))
+        ->assertSee(trans_choice('filament-bouncer::roles.form.restricted_records', 2, ['count' => 2]));
+});
