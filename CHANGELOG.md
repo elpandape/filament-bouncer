@@ -7,6 +7,48 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [3.0.0] - 2026-08-10
+
+The abilities screen is a resource, like roles.
+
+### Changed
+
+- **The abilities page is now a resource**, with a list, a detail screen and a form. The
+  list is a real table — searchable, sortable, filterable — and its columns follow the
+  design: the title, the name the code asks, the model, who holds it **and how**, and
+  whether the code still declares it.
+- The detail and edit screens carry the panel of holders: one ability, every role, each
+  a cell that walks the three stances. **It writes the same rows the roles screen
+  writes** — a cell here and the cell there are the same row of the same table — through
+  the roles store, one role at a time, so this side inherits the same guarantees.
+
+### Added
+
+- A policy for the ability model, so the screen is governed like everything else. It
+  carries no `create` and no `delete`, on purpose.
+- The list flags every row the catalogue no longer declares. Such a row is not a mistake
+  in itself — an application may check a name of its own — but it is drift, and `--prune`
+  removes it without asking twice.
+
+### Fixed
+
+- **Nobody owns an ability.** With the screen registered, Bouncer starts asking about
+  ownership of the ability rows themselves and reaches for `abilities.user_id`; under
+  strict Eloquent the screen dies inside a Filament view naming a column nobody ever
+  wrote. The same fix the roles table got in 1.0.2.
+
+### Removed
+
+- The `Abilities` page added in 2.1.0. The resource replaces it, and keeps its
+  configuration keys.
+
+### Not included, on purpose
+
+- **Creating an ability.** An ability is a method on a policy, a page, a widget or a name
+  in the `custom` configuration, and `filament-bouncer:reconcile` is what writes it. One
+  made from a form would be a row the catalogue does not declare, which `--check` fails
+  on and `--prune` deletes.
+
 ## [2.1.0] - 2026-08-10
 
 ### Added
@@ -421,6 +463,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[3.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v3.0.0
 [2.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.1.0
 [2.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.2
 [2.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.1
