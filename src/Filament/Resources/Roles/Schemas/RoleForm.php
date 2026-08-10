@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 
+use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\TextInput;
@@ -21,6 +23,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * The roles form: a name, and a grid of subjects against actions.
@@ -119,6 +122,38 @@ final class RoleForm
     }
 
     /**
+     * What the cell cannot say by itself.
+     *
+     * The buttons hold the row that names this ability exactly, because that is the
+     * row they write back. Bouncer answers on more than that: a role granted
+     * everything holds no row for any of these and still answers yes to all of them,
+     * and a broader denial beats a grant made right here. Left unsaid, the grid would
+     * report "not granted" about an ability the role plainly has — the one lie a
+     * screen like this must not tell.
+     */
+    private static function inheritance(Ability $ability): Closure
+    {
+        return static function (mixed $record, mixed $state) use ($ability): ?string {
+            if (! $record instanceof Model) {
+                return null;
+            }
+
+            $direct = Stance::tryFrom(is_string($state) ? $state : '') ?? Stance::Neutral;
+            $holds = app(RoleAbilities::class)->holds($record, $ability);
+
+            if ($direct === Stance::Neutral && $holds) {
+                return __('filament-bouncer::roles.form.inherited');
+            }
+
+            if ($direct === Stance::Granted && ! $holds) {
+                return __('filament-bouncer::roles.form.overruled');
+            }
+
+            return null;
+        };
+    }
+
+    /**
      * A subject with a single ability: a door, not a grid.
      *
      * The buttons are joined and the label sits beside them, because here there is a
@@ -133,7 +168,8 @@ final class RoleForm
 
         return ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
             ->label($subject->label)
-            ->helperText($ability->title)
+            ->helperText(self::inheritance($ability))
+            ->hint($ability->title)
             ->inlineLabel()
             ->grouped()
             ->options(app(Labels::class)->stances())
@@ -198,6 +234,7 @@ final class RoleForm
                 ? ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
                     ->label($ability->title)
                     ->hiddenLabel()
+                    ->helperText(self::inheritance($ability))
                     ->options(app(Labels::class)->stances())
                     ->colors(Stance::colors())
                     ->default(Stance::Neutral->value)
