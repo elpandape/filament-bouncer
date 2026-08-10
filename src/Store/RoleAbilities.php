@@ -6,9 +6,11 @@ namespace ElPandaPe\FilamentBouncer\Store;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Bouncer;
 use Silber\Bouncer\Contracts\Scope;
+use Silber\Bouncer\Database\Ability as StoredAbility;
 use Silber\Bouncer\Database\Models;
 
 /**
@@ -56,6 +58,50 @@ final readonly class RoleAbilities
     public function holds(Model $role, Ability $ability): bool
     {
         return $this->bouncer->getClipboard()->check($role, $ability->name, $ability->entityType);
+    }
+
+    /**
+     * The rules the grid never offers, counted per ability.
+     *
+     * These are the rows the stances deliberately skip: the ones naming a single record
+     * and the ones covering only what their holder owns. The grid cannot write them and
+     * must not remove them, so the one thing left to do is say they are there.
+     *
+     * @return array<string, Restriction>
+     */
+    public function restrictions(Model $role): array
+    {
+        $abilities = Models::table('abilities');
+
+        $rows = $this->rows($role)
+            ->where(static function (Builder $query) use ($abilities): void {
+                $query->whereNotNull($abilities.'.entity_id')
+                    ->orWhere($abilities.'.only_owned', true);
+            })
+            ->get([
+                $abilities.'.name as name',
+                $abilities.'.entity_type as entity_type',
+                $abilities.'.only_owned as only_owned',
+            ]);
+
+        $restrictions = [];
+
+        foreach ($rows as $row) {
+            /** @var string $name */
+            $name = $row->getAttribute('name');
+
+            /** @var string|null $entityType */
+            $entityType = $row->getAttribute('entity_type');
+
+            $identity = Ability::identityFor($name, $entityType);
+            $restriction = $restrictions[$identity] ?? new Restriction;
+
+            $restrictions[$identity] = $row->getAttribute('only_owned')
+                ? $restriction->withOwned()
+                : $restriction->withRecord();
+        }
+
+        return $restrictions;
     }
 
     /**
@@ -134,20 +180,21 @@ final readonly class RoleAbilities
         $abilities = Models::table('abilities');
         $permissions = Models::table('permissions');
 
-        $query = Models::ability()->newQuery()
-            ->join($permissions, $permissions.'.ability_id', '=', $abilities.'.id')
-            ->where($permissions.'.entity_id', $role->getKey())
-            ->where($permissions.'.entity_type', $role->getMorphClass());
-
-        /** @var Scope $scope */
-        $scope = Models::scope();
-        $scope->applyToRelationQuery($query, $permissions);
-
-        $rows = $query->get([
-            $abilities.'.name as name',
-            $abilities.'.entity_type as entity_type',
-            $permissions.'.forbidden as forbidden',
-        ]);
+        $rows = $this->rows($role)
+            // Only the plain row, because the plain row is the only one the grid writes.
+            // Bouncer keeps a grant over a whole model, a grant over one record and a
+            // grant over what the holder owns in three separate rows, and the conductor
+            // behind `allow()->to($name, Post::class)` matches exactly the first of them
+            // (`entity_id` null, `only_owned` false). Reading the other two here would
+            // put the cell in a state it has no way to write back: turning it off would
+            // remove nothing and the screen would repaint the stance it just cleared.
+            ->whereNull($abilities.'.entity_id')
+            ->where($abilities.'.only_owned', false)
+            ->get([
+                $abilities.'.name as name',
+                $abilities.'.entity_type as entity_type',
+                $permissions.'.forbidden as forbidden',
+            ]);
 
         $stances = [];
 
@@ -170,5 +217,30 @@ final readonly class RoleAbilities
         }
 
         return $stances;
+    }
+
+    /**
+     * Every ability row this role has a permission for.
+     *
+     * The pivot is joined by hand rather than read through the role's own relation,
+     * because the role model is whatever the application configured and nothing
+     * promises the analyser that it carries Bouncer's traits.
+     *
+     * @return Builder<StoredAbility>
+     */
+    private function rows(Model $role): Builder
+    {
+        $permissions = Models::table('permissions');
+
+        $query = Models::ability()->newQuery()
+            ->join($permissions, $permissions.'.ability_id', '=', Models::table('abilities').'.id')
+            ->where($permissions.'.entity_id', $role->getKey())
+            ->where($permissions.'.entity_type', $role->getMorphClass());
+
+        /** @var Scope $scope */
+        $scope = Models::scope();
+        $scope->applyToRelationQuery($query, $permissions);
+
+        return $query;
     }
 }
