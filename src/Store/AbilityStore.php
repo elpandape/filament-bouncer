@@ -79,17 +79,34 @@ final class AbilityStore
     }
 
     /**
-     * The stored row for one catalogued ability, if the reconciliation has written it.
+     * Whether the reconciliation speaks for this row at all.
+     *
+     * Three answers hide behind one question on the screen, and only this one separates
+     * them: a row the catalogue declares, a row it does not — which is drift, and which
+     * `--prune` takes away — and a row that was never the catalogue's to declare. The
+     * query is asked rather than the four conditions being spelled out a second time,
+     * because a second spelling is how the two would come to disagree.
      */
-    public function find(string $name, ?string $entityMorphClass): ?StoredAbility
+    public function speaksFor(Model $ability): bool
     {
-        $query = $this->query()->where('name', $name);
+        return $this->query()->whereKey($ability->getKey())->exists();
+    }
 
-        $entityMorphClass === null
-            ? $query->whereNull('entity_type')
-            : $query->where('entity_type', $entityMorphClass);
+    /**
+     * Whether the row narrows an ability to one record or to what its holder owns.
+     *
+     * These are two of the three kinds `catalogued()` leaves out, and the two the roles
+     * grid cannot write: it matches the plain row and only the plain row, so a cell there
+     * would report a stance it has no way to clear. Asked here because both screens need
+     * to know when to stop going through the catalogue and write the row itself.
+     */
+    public function isRestricted(Model $ability): bool
+    {
+        if ($ability->getAttribute('entity_id') !== null) {
+            return true;
+        }
 
-        return $query->first();
+        return (bool) $ability->getAttribute('only_owned');
     }
 
     public function identity(Model $ability): string

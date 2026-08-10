@@ -65,7 +65,7 @@
                 @endforeach
             </div>
 
-            <p class="fb-legend">{{ $words['legend'] }}</p>
+            <p class="fb-legend">{{ $getLegend() }}</p>
         @endif
     </div>
 </x-dynamic-component>

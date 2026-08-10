@@ -34,8 +34,9 @@ A wall of checkboxes is the easy part. These are the parts that are not:
   not `view_any_post`. Renaming a resource orphans nothing, two models with the same
   basename in different namespaces do not collide, and grants on a single record remain
   possible later without migrating anything already stored.
-- **Nobody hands out what they do not hold**, and it is checked twice: once to decide what
-  the screen offers, and again where the write happens.
+- **A rule can be narrowed from the screen.** "This editor, but only their own posts" is
+  something Bouncer stores in columns a policy method has no way to name, so the abilities
+  screen composes it: the same rule, held down to what its holder owns or to one record.
 - **The panel refuses to boot** with a page or a widget that authorises nobody.
 - **A build goes red** when the store has drifted from the catalogue, or when a resource
   has no policy and is therefore open to everybody.
@@ -149,7 +150,39 @@ integration: it fails a build whose catalogue and store have drifted apart.
 Three kinds of row are never touched, in either direction: abilities about one record,
 abilities restricted to what their holder owns, and the wildcards that a blanket grant such
 as `everything()` leaves behind. The catalogue does not declare them, so it does not get to
-delete them either.
+delete them either — which is exactly why the abilities screen is allowed to make the first
+two of them.
+
+## The abilities screen
+
+The other axis of the same table: not what a role may do, but who may do a thing. It lists
+every stored row with its title, the name the code asks the Gate, the model, **how far it
+reaches**, who holds it **and how**, and where it stands with the reconciliation — declared
+by the code, declared by nothing (which is drift, and `--prune` will take it), or outside
+the catalogue altogether, which is no danger at all.
+
+Opening a row gives the roles grid read the other way round: one ability, every role, each
+a cell walking the same three stances. It writes the same rows the roles screen writes.
+
+### Narrowing a rule
+
+The plain rule — "may change posts" — comes from the code that asks about it, so the screen
+does not invent one. What the code has no way to say is how far a rule reaches, and that is
+what the composer makes:
+
+| Narrowed to | What Bouncer stores | What it means |
+|---|---|---|
+| What its holder owns | `only_owned = true` | The rule holds for the records that belong to whoever has it |
+| One record | `entity_id = 7` | The rule holds for that record and no other |
+
+Pick the model, pick the action, say how far it reaches, and the title writes itself as you
+go — yours to change, because the title is read by people and by nothing else. The name and
+the model are taken from the catalogue entry the first two choices land on, never from the
+request, so a narrowed rule is always spelled the way the code spells the rule it narrows.
+A rule that narrows nothing is refused: that one is the reconciliation's to write.
+
+A narrowed row has no cell on the roles grid, because the grid matches the plain row and
+only the plain row. Handing it out therefore happens here, and writes exactly that row.
 
 ## The roles screen
 
@@ -175,14 +208,15 @@ would be arguable that restricting is a smaller power than granting, and the dec
 went the other way: a denial you cannot lift afterwards is a way to lock people out of
 something you were never trusted with, so both go through the same gate.
 
-Three things the screen refuses to do, and none of them is only a hidden button — each is
-checked again where the write happens, so a request built by hand meets the same refusal:
+Whoever the policy lets onto this screen hands out **everything the panel declares**,
+whether or not they hold it themselves — including the wildcard, and including to
+themselves. That is a deliberate choice, and the same one `yadahan/nova-bouncer` makes:
+being trusted to edit roles is the whole of the trust. If that is more than you want to
+give somebody, the answer is not to let them onto the screen.
 
-- **Nobody decides about what they do not hold.** The grid is the catalogue narrowed to the
-  abilities of whoever is filling it in, and the save is driven off that same narrowed
-  catalogue rather than off what arrived in the request. A cell smuggled in for an ability
-  they do not hold has nothing to match against, and a stance they cannot see is never
-  overwritten either.
+Two things it still refuses, and neither is only a hidden button — each is checked again
+where the write happens, so a request built by hand meets the same refusal:
+
 - **Nobody edits a role they hold themselves.** Otherwise raising your own reach is one save
   away.
 - **Nobody edits the role that holds everything.** It is the way back in, and a way back in
@@ -323,15 +357,12 @@ package, which is why they are read from configuration rather than from a static
 Each of these was considered and turned down. They are written here so that the next
 person to want one finds the reasoning rather than the silence.
 
-- **Handing out an ability you do not hold yourself, even by delegation.** A role that
-  administers roles can only pass on what it has. Separating the two sets — what you hold
-  and what you may hand on — is a legitimate feature, and it breaks the single invariant
-  that makes the screen safe to leave open to more than one person. If it is ever added it
-  needs an explicit list of delegators and tests that attack it.
-- **Abilities on one record, or on what somebody owns.** Bouncer stores both, and the
-  reconciliation already refuses to touch either, so nothing here forecloses them. They
-  are absent because a grid of subjects against actions has no honest place to draw "this
-  editor, but only their own posts", and inventing one badly is worse than not having it.
+- **Deleting an ability from a screen.** A row goes away when the reconciliation stops
+  declaring it, and `--prune` says how many it took. Offering a button would be offering
+  to take every grant pointing at the row with it, on one click and no second question.
+- **Narrowing anything but a model.** A page or a widget is reached or it is not: there is
+  no record to point at and nothing to own, so the composer only offers subjects that
+  stand for a model.
 - **Bouncer's Constraints.** They are persisted and never evaluated: an ability with an
   impossible constraint still passes. Offering them would be writing decorative JSON.
   Making them real means a clipboard of our own, which is a component and not an adapter.

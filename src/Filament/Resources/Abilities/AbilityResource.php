@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities;
 
 use BackedEnum;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\CreateAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\EditAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ListAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ViewAbility;
@@ -22,11 +23,12 @@ use UnitEnum;
 /**
  * The other axis, as a resource: not what a role can do, but who can do a thing.
  *
- * It reads and it renames, and it does not create. An ability is a method on a policy, a
- * page, a widget or a name in configuration, and `filament-bouncer:reconcile` is what
- * writes it. A row made from a form would be one the catalogue does not declare, which
- * `--check` fails on and `--prune` deletes — so the screen says where abilities come
- * from instead of offering a button that makes work for the next deploy.
+ * It reads, it renames, and it narrows. What it does not do is invent: a plain ability is
+ * a method on a policy, a page, a widget or a name in configuration, and
+ * `filament-bouncer:reconcile` is what writes it — a row made from a form would be one
+ * the catalogue does not declare, which `--check` fails on and `--prune` deletes. The
+ * create screen therefore composes the one row the reconciliation never speaks for: an
+ * ability narrowed to a single record, or to what its holder owns.
  */
 final class AbilityResource extends Resource
 {
@@ -75,14 +77,6 @@ final class AbilityResource extends Resource
         return 'title';
     }
 
-    /**
-     * Nothing creates an ability from a form. The list says what does.
-     */
-    public static function canCreate(): bool
-    {
-        return false;
-    }
-
     public static function form(Schema $schema): Schema
     {
         return AbilityForm::configure($schema);
@@ -100,6 +94,7 @@ final class AbilityResource extends Resource
     {
         return [
             'index' => ListAbilities::route('/'),
+            'create' => CreateAbility::route('/create'),
             'view' => ViewAbility::route('/{record}'),
             'edit' => EditAbility::route('/{record}/edit'),
         ];

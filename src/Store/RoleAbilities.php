@@ -105,6 +105,63 @@ final readonly class RoleAbilities
     }
 
     /**
+     * What a role says about one stored row, rather than about a catalogued ability.
+     *
+     * The row is addressed by its key, so a narrowed ability — one about a single record,
+     * or one covering only what its holder owns — is read exactly as it was written.
+     * Going through the catalogue would have matched it to the plain row of the same
+     * name, which is a different rule granting a great deal more.
+     */
+    public function stanceOnRow(Model $role, Model $ability): Stance
+    {
+        $permissions = Models::table('permissions');
+
+        $rows = $this->rows($role)
+            ->where(Models::table('abilities').'.id', $ability->getKey())
+            ->get([$permissions.'.forbidden as forbidden']);
+
+        $stance = Stance::Neutral;
+
+        foreach ($rows as $row) {
+            // A role may hold both rows at once, and Bouncer answers no when it does.
+            if ($row->getAttribute('forbidden')) {
+                return Stance::Forbidden;
+            }
+
+            $stance = Stance::Granted;
+        }
+
+        return $stance;
+    }
+
+    /**
+     * Set what a role says about one stored row.
+     *
+     * Both kinds of row go first for the same reason they do on the grid: Bouncer keeps
+     * granting and forbidding apart and lets a role hold both, so clearing one would
+     * leave the other behind.
+     */
+    public function saveRow(Model $role, Model $ability, Stance $stance): void
+    {
+        if ($stance === $this->stanceOnRow($role, $ability)) {
+            return;
+        }
+
+        $this->bouncer->disallow($role)->to($ability);
+        $this->bouncer->unforbid($role)->to($ability);
+
+        if ($stance === Stance::Granted) {
+            $this->bouncer->allow($role)->to($ability);
+        }
+
+        if ($stance === Stance::Forbidden) {
+            $this->bouncer->forbid($role)->to($ability);
+        }
+
+        $this->bouncer->refresh();
+    }
+
+    /**
      * Bring the role's stances in line with what the form was saved holding.
      *
      * The incoming state is never walked. Everything is driven off the catalogue, so a

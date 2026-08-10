@@ -26,7 +26,35 @@ return [
 
     'unreconciled' => 'Esta habilidad todavía no tiene fila. Ejecuta antes filament-bouncer:reconcile.',
 
-    'declared' => 'Las habilidades las declara el código que pregunta por ellas —un método de Policy, una página, un widget o la clave «custom» de la configuración— y las escribe filament-bouncer:reconcile. Una creada aquí sería una fila que el catálogo no declara: --check fallaría por ella y --prune la borraría.',
+    'declared' => 'El nombre que el código le pregunta al Gate, y el modelo sobre el que pregunta, los declara el código que pregunta —un método de Policy, una página, un widget o la clave «custom» de la configuración— y los escribe filament-bouncer:reconcile. Ninguno de los dos se reescribe aquí.',
+
+    'narrow' => 'Acotar una habilidad',
+
+    'narrow_note' => 'La regla llana —«puede cambiar artículos»— la declara el código que pregunta por ella y la escribe filament-bouncer:reconcile, así que aquí no se compone. Lo que el código no tiene forma de decir es hasta dónde llega la regla: eso es lo que hace esta pantalla. Una fila acotada a un registro, o a lo que su titular posee, es una de las que la conciliación nunca reclama, así que --check no falla por ella y --prune no se la lleva.',
+
+    'narrow_required' => 'Una habilidad que no acota nada es la llana, que declara el código y escribe filament-bouncer:reconcile. Acótala a lo que su titular posee, a un registro, o a las dos cosas.',
+
+    'duplicate' => 'Esa fila ya existe. Ábrela en vez de escribir una segunda: dos filas que dicen lo mismo se reparten y se quitan por separado, y la pantalla solo te enseñaría una de ellas.',
+
+    'action_field' => 'Acción',
+
+    'only_owned_note' => 'La regla vale solo para los registros que su titular posee.',
+
+    'record_field' => 'Un registro',
+
+    'record_note' => 'La clave del único registro para el que vale la regla. Déjalo vacío para alcanzarlos todos.',
+
+    'compose_note' => 'Se escribe solo según eliges, y puedes cambiarlo. El título lo lee la gente y nadie más.',
+
+    'owned_suffix' => 'solo lo suyo',
+
+    'record_suffix' => 'registro :id',
+
+    'reach' => 'Alcance',
+
+    'reach_all' => 'todos',
+
+    'narrowed_legend' => 'Esta regla llega menos lejos que la de la rejilla, así que allí no tiene casilla. Repartirla aquí escribe exactamente esta fila y deja la llana en paz.',
 
     'name_field' => 'Nombre',
 
@@ -41,6 +69,8 @@ return [
     'declared_yes' => 'por el código',
 
     'declared_no' => 'por nada',
+
+    'declared_apart' => 'fuera del catálogo',
 
     'only_owned' => 'Solo lo que su titular posee',
 

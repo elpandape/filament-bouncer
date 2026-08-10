@@ -7,6 +7,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Forms;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
@@ -35,13 +36,30 @@ final class AbilityHolders extends Field
 
     private string $cell = '';
 
+    /**
+     * The stored row itself, kept only when it narrows an ability.
+     */
+    private ?Model $row = null;
+
     private bool $located = false;
 
     public function isOffered(): bool
     {
         $this->locate();
 
-        return $this->ability instanceof Ability;
+        return $this->row instanceof Model || $this->ability instanceof Ability;
+    }
+
+    /**
+     * The line under the list, which is not the same sentence for both kinds of row.
+     */
+    public function getLegend(): string
+    {
+        $this->locate();
+
+        return $this->row instanceof Model
+            ? __('filament-bouncer::abilities.narrowed_legend')
+            : __('filament-bouncer::abilities.broader');
     }
 
     /**
@@ -52,6 +70,10 @@ final class AbilityHolders extends Field
     public function getHolders(): array
     {
         $this->locate();
+
+        if ($this->row instanceof Model) {
+            return $this->narrowedHolders($this->row);
+        }
 
         if (! $this->ability instanceof Ability || ! $this->subject instanceof Subject) {
             return [];
@@ -110,17 +132,54 @@ final class AbilityHolders extends Field
             'broader' => __('filament-bouncer::abilities.broader_short'),
             'nobody' => __('filament-bouncer::abilities.nobody'),
             'withheld' => __('filament-bouncer::abilities.withheld'),
-            'legend' => __('filament-bouncer::abilities.broader'),
         ];
     }
 
     /**
-     * Locates the catalogue entry a stored row stands for.
+     * Every role, and what it says about one narrowed row.
      *
-     * A row the catalogue no longer declares carries no cells: there is nothing to line
-     * them up against, and the list says as much in its own column.
+     * Read off the row itself rather than through the catalogue, because the catalogue
+     * knows this ability only in its plain form: matching by name and model alone would
+     * line "may update the posts they wrote" up against the cell for "may update posts",
+     * report the wrong stance, and write the wrong rule when somebody changed it.
+     *
+     * There is no `broader` here for the same reason there is no cell on the grid: a role
+     * holding a wildcard answers yes to the narrowed question too, but that is a fact
+     * about the wildcard, and saying it against a rule this screen can actually clear
+     * would invite somebody to clear it and watch nothing change.
+     *
+     * @return array<int, array{key: string, name: string, stance: string, how: string|null}>
      */
+    private function narrowedHolders(Model $row): array
+    {
+        $abilities = app(RoleAbilities::class);
+        $holders = [];
+
+        foreach (Models::role()->newQuery()->orderBy('name')->get() as $role) {
+            /** @var Model $role */
+            /** @var string $name */
+            $name = $role->getAttribute('name');
+
+            $stance = $abilities->stanceOnRow($role, $row);
+
+            $holders[] = [
+                'key' => $this->keyOf($role),
+                'name' => $name,
+                'stance' => $stance->value,
+                'how' => $stance === Stance::Neutral ? null : 'direct',
+            ];
+        }
+
+        return $holders;
+    }
+
     /**
+     * Locates what this screen is deciding about: a narrowed row, or a catalogue entry.
+     *
+     * A plain row the catalogue no longer declares is neither, and carries no cells:
+     * there is nothing to line them up against, and the list says as much in its own
+     * column.
+     *
      * Resolved on first use rather than while the schema is being built: a component has
      * no container yet at that point, so it has no record to ask about either.
      */
@@ -133,6 +192,12 @@ final class AbilityHolders extends Field
         $this->located = true;
 
         $record = $this->getRecord();
+
+        if ($record instanceof Model && app(AbilityStore::class)->isRestricted($record)) {
+            $this->row = $record;
+
+            return;
+        }
 
         // Composed in one step rather than guarded: a component with no record simply
         // matches nothing, which is the same answer as a row the catalogue dropped.

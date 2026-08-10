@@ -7,6 +7,45 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [4.1.0] - 2026-08-10
+
+The abilities screen makes the one row the code cannot write.
+
+### Added
+
+- **A rule can be narrowed from the screen.** Pick a model, pick an action, and hold it
+  down to what its holder owns, to one record, or to both. Those are the rows the
+  reconciliation deliberately never speaks for, so `--check` does not fail on them and
+  `--prune` does not take them away — which is what makes offering the button honest. The
+  plain row stays out of reach: that one the catalogue owns.
+- The title writes itself as the choices are made, and stays editable.
+- `create` on `AbilityRowPolicy`, so narrowing is governed like everything else. **The
+  catalogue grows by one ability, so a deploy needs `filament-bouncer:reconcile`.**
+- A **Reach** column on the list, saying how far each row goes. `update` on posts and
+  `update` on the posts you wrote are the same two words and different rules.
+- `RoleAbilities::stanceOnRow()` and `saveRow()`, which read and write one stored row
+  instead of one catalogue entry.
+- `AbilityStore::speaksFor()` and `isRestricted()`.
+
+### Changed
+
+- **The Declared column now has three answers, not two.** A row the reconciliation never
+  spoke for — a wildcard, a narrowed rule — used to read "by nothing", the same warning as
+  genuine drift that `--prune` will delete. It now reads "outside the catalogue".
+- The holders panel writes a narrowed row **as itself**. Matching it to the catalogue by
+  name would have found the plain rule and handed out that instead.
+- The README no longer describes the narrowing that `4.0.0` removed.
+
+### Fixed
+
+- **"by the code" was true of every plain row, including drift.** The column asked the
+  store whether the row existed, which it always did, instead of asking the catalogue
+  whether it was declared. Nothing could ever be reported as undeclared.
+
+### Removed
+
+- `AbilityStore::find()`, whose only caller was that column.
+
 ## [4.0.0] - 2026-08-10
 
 Whoever may work the screen hands out anything.
