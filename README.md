@@ -3,10 +3,9 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.5.x` closes the panel: policies, a guard that refuses to boot with a
-> component that authorises nobody, and a check that fails a build whose panel has drifted
-> from its own authorisation. The API will change without a major bump while this package
-> is on `0.x`.
+> **Early days.** `0.6.x` is the last stop before `1.0.0`: the grid reads in the reader's
+> own words, and the public surface has had its pass. The API will change without a major
+> bump while this package is on `0.x`.
 
 ## Why Bouncer
 
@@ -264,6 +263,30 @@ ability the store holds and the catalogue no longer declares, or a resource whos
 no policy at all. Put it in continuous integration and the panel cannot drift away from its
 own authorisation without a build going red.
 
+## The words on the screen
+
+Three sources are asked, in this order:
+
+1. **What you put in `labels`**, because you know what your own people call these things
+   and should not have to publish a language file to say so.
+2. **The package's translations.** English and Spanish ship with it; publish them with
+   `--tag=filament-bouncer-translations` to add or change a language.
+3. **The method name, made readable.** An action your own policy invented shows up reading
+   sensibly with nothing translated first.
+
+```php
+'labels' => [
+    'actions' => ['viewAny' => 'Browse'],
+],
+```
+
+Everything a person reads — in the panel and in the console — goes through that chain.
+Exception messages do not: they are for whoever is reading a stack trace, and a translated
+one cannot be searched for.
+
+The title Bouncer stores alongside each ability follows the locale in force when
+`filament-bouncer:reconcile` ran, since that is when the column is written.
+
 ## Configuration
 
 | Key | What it decides |
@@ -278,6 +301,7 @@ own authorisation without a build going red.
 | `custom` | Abilities no component declares, as a map of name to scope |
 | `ignore` | Resources, pages and widgets the catalogue leaves out |
 | `privileged_role` | The role that holds everything, and that the screen refuses to edit |
+| `labels` | Your own words for the actions, scopes and stances |
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.

@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
 version is below `1.0.0`, a minor bump may carry a breaking change.
 
+## [0.6.0] - 2026-08-10
+
+The words, and a pass over the public surface.
+
+### Added
+
+- English and Spanish translations under the package's own domain, publishable with
+  `--tag=filament-bouncer-translations`.
+- A `labels` setting that beats them, for an application whose people call these things
+  something else.
+- A readable fallback beneath both, so that an action a policy invented reads sensibly
+  with nothing translated first.
+- Counting in the singular or the plural as the count requires, on screen and in the
+  console.
+
+### Changed
+
+- `Stance` no longer carries its own words; they come from the resolution chain. Its
+  colours stay where they were.
+- `illuminate/filesystem` is now a declared dependency, which it has been in practice
+  since the policy writer arrived.
+
 ## [0.5.0] - 2026-08-10
 
 The panel closes. Until now nothing was actually shut: Filament asks a policy, and where
@@ -129,6 +151,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[0.6.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.3.0
