@@ -61,4 +61,13 @@ return [
         // \Filament\Pages\Dashboard::class,
     ],
 
+    /*
+     * The role that holds everything. The roles screen refuses to edit it, and the
+     * reconcile command makes sure it exists and is granted the wildcard. That is what
+     * makes it the way back in when a mistake leaves nobody able to hand out abilities.
+     *
+     * Leaving it null means there is no such way back.
+     */
+    'privileged_role' => null,
+
 ];
