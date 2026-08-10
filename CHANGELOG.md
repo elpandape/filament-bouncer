@@ -7,6 +7,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.0.1] - 2026-08-10
+
+### Fixed
+
+- **The policy written for the user model itself did not parse.** Both the person asking
+  and the record being asked about were called `$user`, which is a compile error rather
+  than a subtle one, so the file could not be loaded at all. The record now falls back to
+  `$model`, the same way Laravel's own generator does. Found by installing `1.0.0` into an
+  application and running the generator against its user model.
+- The generated files are now handed to PHP itself to check, rather than to the
+  tokeniser. Two parameters alike tokenise perfectly well and only fall over on compile,
+  which is why the original test passed.
+
 ## [1.0.0] - 2026-08-10
 
 The loop is closed and the surface is frozen. Nothing new here beyond the decisions the
@@ -183,6 +196,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.0
 [0.6.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.5.0
