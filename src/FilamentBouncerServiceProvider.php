@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,6 +29,10 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/filament-bouncer.php' => config_path('filament-bouncer.php'),
             ], 'filament-bouncer-config');
+
+            $this->commands([
+                ReconcileCommand::class,
+            ]);
         }
     }
 }
