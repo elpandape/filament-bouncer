@@ -3,10 +3,9 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.1.x` is a walking skeleton: it registers a service provider and
-> publishes a configuration file, and that is all it does today. It exists so the release
-> pipeline is proven before any feature depends on it. The API will change without a major
-> bump while this package is on `0.x`.
+> **Early days.** `0.2.x` derives the catalogue of abilities a panel is able to ask about
+> and keeps Bouncer's store in step with it. There are no screens yet: roles are still
+> edited by hand. The API will change without a major bump while this package is on `0.x`.
 
 ## Why Bouncer
 
@@ -69,17 +68,68 @@ Bouncer::tables([
 The rename has to happen before the migration runs, so it belongs in a service provider that
 registers early.
 
+## The catalogue
+
+The catalogue is the list of abilities your panel is able to ask about. It is derived from
+your code on every build and never read back from the store, so an ability that nothing
+consults cannot survive in it.
+
+| Where it comes from | What it contributes |
+|---|---|
+| A resource | One ability per method its model's policy declares, stored against that model |
+| A model listed in `models` | The same, for a model that has a policy but no resource |
+| A page | One ability, `page:<class>`, standing for reaching it at all |
+| A widget | One ability, `widget:<class>`, standing for seeing it at all |
+| An entry in `custom` | One ability under exactly the name you gave it |
+
+**A model with no policy contributes nothing, on purpose.** Its abilities would be ones no
+code ever consults, and a switch that decides nothing is worse than no switch at all. If a
+resource is missing from the grid, the answer is to write its policy.
+
+Every action is sorted into one of four scopes — `read`, `write`, `withdraw`,
+`irreversible` — which is what lets a screen stop "see a list" from looking like the same
+decision as "delete for good". Anything the `scopes` map does not name counts as a write.
+
+## Keeping the store in step
+
+```bash
+php artisan filament-bouncer:reconcile
+```
+
+Creates every ability the catalogue declares and the store is missing, in a single insert,
+and clears Bouncer's cache afterwards. Run it after `migrate` on every deploy.
+
+| Option | What it does |
+|---|---|
+| `--panel=` | Walk a named panel instead of the default one |
+| `--prune` | Delete stored abilities the catalogue no longer declares |
+| `--check` | Write nothing, report the differences, and exit non-zero if there are any |
+
+Without `--prune` an undeclared ability is reported and left alone, because deleting an
+ability takes every grant that pointed at it with it. `--check` is the shape for continuous
+integration: it fails a build whose catalogue and store have drifted apart.
+
+Three kinds of row are never touched, in either direction: abilities about one record,
+abilities restricted to what their holder owns, and the wildcards that a blanket grant such
+as `everything()` leaves behind. The catalogue does not declare them, so it does not get to
+delete them either.
+
 ## Configuration
 
 | Key | What it decides |
 |---|---|
+| `panel` | The panel whose components declare the catalogue. `null` uses the default one |
 | `navigation.icon` | The icon of the roles resource. `null` leaves it without one |
 | `navigation.group` | The navigation group it belongs to. `null` leaves it ungrouped |
 | `navigation.sort` | Its position. `null` leaves Filament's own ordering |
 | `navigation.slug` | The path under the panel. Defaults to `security/roles` |
+| `scopes` | Which actions count as reading, withdrawing and irreversible |
+| `models` | Models with a policy but no resource, which would otherwise never be reached |
+| `custom` | Abilities no component declares, as a map of name to scope |
+| `ignore` | Resources, pages and widgets the catalogue leaves out |
 
-These are presentation decisions that belong to the application, not to the package, which is
-why they are read from configuration rather than from a static property.
+The navigation keys are presentation decisions that belong to the application, not to the
+package, which is why they are read from configuration rather than from a static property.
 
 ## Things about Bouncer worth knowing before you build on it
 

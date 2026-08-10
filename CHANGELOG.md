@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
 version is below `1.0.0`, a minor bump may carry a breaking change.
 
+## [0.2.0] - 2026-08-10
+
+The catalogue: what the panel is able to ask about, derived from the code that asks.
+
+### Added
+
+- A catalogue built by walking a panel's resources, pages and widgets. A resource
+  contributes one ability per method its model's policy declares; a page and a widget
+  contribute one each; a model with no policy contributes nothing.
+- Four scopes — reading, writing, withdrawing, irreversible — that every action is sorted
+  into, so that a screen can weigh them differently.
+- Configuration for the panel to walk, for models with a policy but no resource, for
+  abilities no component declares, and for components to leave out.
+- `filament-bouncer:reconcile`, which creates the missing abilities in a single insert,
+  reports the ones the catalogue no longer declares, deletes them with `--prune`, and with
+  `--check` writes nothing and fails on any difference.
+
+### Not included
+
+No Filament resource and no screens: roles are still edited by hand. No policies, no panel
+guard, and no migration path from `spatie/laravel-permission`.
+
 ## [0.1.0] - 2026-08-10
 
 The first published version. It is deliberately a walking skeleton: its purpose is to prove
@@ -28,4 +50,5 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[0.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.1.0
