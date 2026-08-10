@@ -7,6 +7,27 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [2.1.0] - 2026-08-10
+
+### Added
+
+- **An abilities screen: the other axis.** Not what a role can do, but who can do a
+  thing — abilities down the side, roles across the top, which is the roles grid read
+  sideways. For each holder it says whether somebody granted it or it merely fell out of
+  a broader rule, which is the question the roles screen cannot answer without being
+  opened once per role.
+- It is read only, and has to be: an ability is a method on a policy, a page, a widget or
+  a name in configuration, and the reconciliation is what puts it in the store. Offering
+  to create one would be offering to store a name no `can()` will ever ask about.
+- Its icon, sort order and slug are configurable under `abilities`; it shares the
+  navigation group with the roles resource, because they are two sides of one thing.
+
+### Changed
+
+- The screen is a component of the panel like any other, so it governs itself and joins
+  the catalogue. Every panel gains one ability, `page:…-abilities`, and somebody has to
+  be granted it before the screen can be reached.
+
 ## [2.0.2] - 2026-08-10
 
 ### Fixed
@@ -400,6 +421,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[2.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.1.0
 [2.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.2
 [2.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.1
 [2.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.0
