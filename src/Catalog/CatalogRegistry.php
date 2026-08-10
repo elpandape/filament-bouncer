@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Catalog;
 
+use Filament\Facades\Filament;
 use Filament\Panel;
 
 /**
@@ -25,6 +26,14 @@ final class CatalogRegistry
     public function get(Panel $panel): Catalog
     {
         return $this->catalogs[$panel->getId()] ??= $this->builder->build($panel);
+    }
+
+    /**
+     * The catalogue of the panel being served, or of the default one outside a request.
+     */
+    public function current(): Catalog
+    {
+        return $this->get(Filament::getCurrentPanel() ?? Filament::getDefaultPanel());
     }
 
     public function forget(): void

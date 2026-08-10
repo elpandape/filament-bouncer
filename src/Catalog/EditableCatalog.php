@@ -29,11 +29,9 @@ final readonly class EditableCatalog
      */
     public function current(): Catalog
     {
-        $panel = Filament::getCurrentPanel() ?? Filament::getDefaultPanel();
-
         $authority = Filament::auth()->user();
 
-        return $this->for($this->catalogs->get($panel), $authority instanceof Model ? $authority : null);
+        return $this->for($this->catalogs->current(), $authority instanceof Model ? $authority : null);
     }
 
     public function for(Catalog $catalog, ?Model $authority): Catalog
