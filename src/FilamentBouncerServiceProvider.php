@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Console\AssignCommand;
 use ElPandaPe\FilamentBouncer\Console\PolicyCommand;
 use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
+use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use Filament\Support\Assets\Css;
@@ -15,6 +16,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Silber\Bouncer\BouncerFacade as Bouncer;
+use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Models;
 use Silber\Bouncer\Database\Role;
 
@@ -58,6 +60,11 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
 
         Gate::policy(Models::classname(Role::class), RolePolicy::class);
 
+        // And the abilities screen is governed the same way. Without a policy Filament
+        // falls open, and the screen that names every ability in the panel is exactly
+        // the one nobody unasked should be reading.
+        Gate::policy(Models::classname(Ability::class), AbilityRowPolicy::class);
+
         // Nobody owns a role, and saying so out loud is what keeps this package working
         // in an application that runs Eloquent strictly.
         //
@@ -71,6 +78,12 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         // An application wanting a different answer registers its own after this, from a
         // provider of its own, and wins.
         Bouncer::ownedVia(Models::classname(Role::class), static fn (): bool => false);
+
+        // And nobody owns an ability either, for exactly the same reason: with the
+        // abilities screen registered, Bouncer starts being asked about ownership of the
+        // ability rows themselves and reaches for `abilities.user_id`. The screen dies
+        // inside a Filament view with a message naming a column nobody ever wrote.
+        Bouncer::ownedVia(Models::classname(Ability::class), static fn (): bool => false);
 
         if ($this->app->runningInConsole()) {
             $this->publishes([

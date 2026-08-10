@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament;
 
-use ElPandaPe\FilamentBouncer\Filament\Pages\Abilities;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
@@ -24,11 +24,8 @@ final class FilamentBouncerPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->resources([
+            AbilityResource::class,
             RoleResource::class,
-        ]);
-
-        $panel->pages([
-            Abilities::class,
         ]);
     }
 

@@ -78,6 +78,20 @@ final class AbilityStore
         ))->delete();
     }
 
+    /**
+     * The stored row for one catalogued ability, if the reconciliation has written it.
+     */
+    public function find(string $name, ?string $entityMorphClass): ?StoredAbility
+    {
+        $query = $this->query()->where('name', $name);
+
+        $entityMorphClass === null
+            ? $query->whereNull('entity_type')
+            : $query->where('entity_type', $entityMorphClass);
+
+        return $query->first();
+    }
+
     public function identity(Model $ability): string
     {
         /** @var string $name */
