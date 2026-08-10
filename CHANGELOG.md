@@ -7,6 +7,25 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.5.0] - 2026-08-10
+
+### Added
+
+- **An «All» column: the grant that covers a whole model.** Bouncer spells it `*` against
+  the model, which is what `allow()->toManage()` writes. Until now it could only be made
+  from tinker, and the grid could only report it — as an inherited stance on every other
+  cell of the row. It is a column of its own now, tinted like the irreversible band it
+  belongs to, and it grants the actions the model's policy has not been given yet.
+- The column appears only where somebody can fill it, and a grant smuggled into the
+  request by an authority who cannot manage that model writes nothing. Same rule as
+  every other cell: nobody hands out what they do not hold.
+
+### Unchanged on purpose
+
+- The whole-model grant is kept out of the catalogue the reconciliation walks. Nothing
+  ever checks it — the Gate is asked `view` or `delete`, and Bouncer matches this row on
+  the way — so it is not an ability the panel asks about and must not be created as one.
+
 ## [1.4.0] - 2026-08-10
 
 ### Changed
@@ -312,6 +331,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.0
 [1.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.4.0
 [1.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.3.0
 [1.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.2.0
