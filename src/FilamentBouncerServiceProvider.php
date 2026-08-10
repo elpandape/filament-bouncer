@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Console\PolicyCommand;
 use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
@@ -42,7 +43,12 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
                 __DIR__.'/../config/filament-bouncer.php' => config_path('filament-bouncer.php'),
             ], 'filament-bouncer-config');
 
+            $this->publishes([
+                __DIR__.'/../stubs/policy.stub' => base_path('stubs/filament-bouncer.policy.stub'),
+            ], 'filament-bouncer-stubs');
+
             $this->commands([
+                PolicyCommand::class,
                 ReconcileCommand::class,
             ]);
         }

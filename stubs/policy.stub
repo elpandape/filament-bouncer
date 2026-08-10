@@ -1,0 +1,38 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ imports }}
+
+class {{ class }} extends AbilityPolicy
+{
+    public function viewAny({{ userClass }} $user): bool
+    {
+        return $this->allows($user, 'viewAny', {{ modelClass }}::class);
+    }
+
+    public function view({{ userClass }} $user, {{ modelClass }} ${{ modelVariable }}): bool
+    {
+        return $this->allows($user, 'view', ${{ modelVariable }});
+    }
+
+    public function create({{ userClass }} $user): bool
+    {
+        return $this->allows($user, 'create', {{ modelClass }}::class);
+    }
+
+    public function update({{ userClass }} $user, {{ modelClass }} ${{ modelVariable }}): bool
+    {
+        return $this->allows($user, 'update', ${{ modelVariable }});
+    }
+
+    public function delete({{ userClass }} $user, {{ modelClass }} ${{ modelVariable }}): bool
+    {
+        return $this->allows($user, 'delete', ${{ modelVariable }});
+    }
+
+    public function deleteAny({{ userClass }} $user): bool
+    {
+        return $this->allows($user, 'deleteAny', {{ modelClass }}::class);
+    }
+}
