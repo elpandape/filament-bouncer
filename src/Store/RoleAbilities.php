@@ -34,7 +34,7 @@ final readonly class RoleAbilities
         $state = [];
 
         foreach ($this->editable->current()->subjects as $key => $subject) {
-            foreach ($subject->abilities as $action => $ability) {
+            foreach ($subject->cells() as $action => $ability) {
                 $state[$key][$action] = ($stances[$ability->identity()] ?? Stance::Neutral)->value;
             }
         }
@@ -124,7 +124,7 @@ final readonly class RoleAbilities
         $stances = $this->stances($role);
 
         foreach ($this->editable->current()->subjects as $key => $subject) {
-            foreach ($subject->abilities as $action => $ability) {
+            foreach ($subject->cells() as $action => $ability) {
                 $current = $stances[$ability->identity()] ?? Stance::Neutral;
                 $wanted = Stance::tryFrom((string) ($state[$key][$action] ?? '')) ?? Stance::Neutral;
 
