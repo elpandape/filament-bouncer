@@ -36,6 +36,17 @@ final readonly class Ability
     public const string CUSTOM_ACTION = 'use';
 
     /**
+     * What Bouncer stores for a grant that covers a whole model.
+     */
+    public const string MANAGE_NAME = '*';
+
+    /**
+     * The column that grant is read in. It is not a policy method and must never sit
+     * among the action columns: it is the row's own answer to all of them at once.
+     */
+    public const string MANAGE_ACTION = 'manage';
+
+    /**
      * Joins the two halves of the stored identity. A NUL byte cannot occur in a class
      * name nor in an ability name, so no pair of abilities can collide into one key.
      */
@@ -60,6 +71,18 @@ final readonly class Ability
     public static function forModel(string $model, string $action, string $title, AbilityScope $scope): self
     {
         return new self($action, $model, (new $model)->getMorphClass(), $action, $title, $scope);
+    }
+
+    /**
+     * The grant that covers a whole model, including the actions its policy has not
+     * been given yet. Bouncer spells it `*` against the model, which is what
+     * `allow()->toManage()` writes.
+     *
+     * @param  class-string<Model>  $model
+     */
+    public static function manage(string $model, string $title): self
+    {
+        return new self(self::MANAGE_NAME, $model, (new $model)->getMorphClass(), self::MANAGE_ACTION, $title, AbilityScope::Irreversible);
     }
 
     public static function forPage(string $key, string $title): self

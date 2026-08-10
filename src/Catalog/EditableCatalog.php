@@ -56,7 +56,12 @@ final readonly class EditableCatalog
                 continue;
             }
 
-            $subjects[$key] = new Subject($subject->key, $subject->label, $subject->kind, $subject->entityType, $held);
+            $manage = $subject->manage instanceof Ability
+                && $clipboard->check($authority, $subject->manage->name, $subject->manage->entityType)
+                    ? $subject->manage
+                    : null;
+
+            $subjects[$key] = new Subject($subject->key, $subject->label, $subject->kind, $subject->entityType, $held, $manage);
 
             $actions += array_intersect_key($catalog->actions, $held);
         }

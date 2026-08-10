@@ -14,6 +14,10 @@ final readonly class Subject
     /**
      * @param  class-string<Model>|null  $entityType
      * @param  array<string, Ability>  $abilities  keyed by action
+     * @param  Ability|null  $manage  the grant covering the whole model, kept out of the
+     *                                actions because nothing ever checks it: the Gate is
+     *                                asked `view` or `delete`, and Bouncer matches this
+     *                                row on the way
      */
     public function __construct(
         public string $key,
@@ -21,6 +25,7 @@ final readonly class Subject
         public SubjectKind $kind,
         public ?string $entityType,
         public array $abilities,
+        public ?Ability $manage = null,
     ) {}
 
     /**
@@ -33,6 +38,21 @@ final readonly class Subject
     public static function keyFor(string $value): string
     {
         return mb_strtolower(str_replace(['\\', '.'], '-', $value));
+    }
+
+    /**
+     * Every ability the grid holds a cell for, keyed by the action its state path uses.
+     *
+     * The grant covering the whole model comes first and under a key of its own, so it
+     * can never be mistaken for a policy method nor sorted in among the columns.
+     *
+     * @return array<string, Ability>
+     */
+    public function cells(): array
+    {
+        return $this->manage instanceof Ability
+            ? [Ability::MANAGE_ACTION => $this->manage] + $this->abilities
+            : $this->abilities;
     }
 
     public function ability(string $action): ?Ability

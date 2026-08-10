@@ -123,7 +123,8 @@ final readonly class CatalogBuilder
             return null;
         }
 
-        return new Subject(Subject::keyFor($model), $label, $kind, $model, $abilities);
+        return new Subject(Subject::keyFor($model), $label, $kind, $model, $abilities,
+            Ability::manage($model, $this->title($label, Ability::MANAGE_ACTION)));
     }
 
     /**
