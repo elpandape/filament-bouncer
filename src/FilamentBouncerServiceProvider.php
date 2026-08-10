@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Console\AssignCommand;
 use ElPandaPe\FilamentBouncer\Console\PolicyCommand;
 use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
@@ -54,6 +55,7 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
             ], 'filament-bouncer-translations');
 
             $this->commands([
+                AssignCommand::class,
                 PolicyCommand::class,
                 ReconcileCommand::class,
             ]);
