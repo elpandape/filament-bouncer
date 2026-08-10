@@ -12,6 +12,7 @@ use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Providers\TestPanelProvider;
 use Filament\Actions\ActionsServiceProvider;
+use Filament\Facades\Filament;
 use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
 use Filament\Infolists\InfolistsServiceProvider;
@@ -57,6 +58,12 @@ abstract class TestCase extends ApplicationTestCase
         parent::setUp();
 
         $this->environment = $this->app->environment();
+
+        // No request has been through the panel's middleware here, so nothing has told
+        // Filament which panel it is serving. Without this every resource resolves
+        // against no panel at all and its pages refuse to mount.
+        Filament::setCurrentPanel('test');
+        Filament::bootCurrentPanel();
     }
 
     /**
