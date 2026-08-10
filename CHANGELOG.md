@@ -7,6 +7,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.4.0] - 2026-08-10
+
+### Changed
+
+- **A cell is read as a mark, not as three words.** A cell is one of as many columns as
+  the catalogue has actions, so on any real panel it is about a hundred pixels wide.
+  Three words never fitted and had to be stacked, which made the grid as tall as the
+  catalogue is wide. Three marks fit side by side, joined.
+- The word is not lost. It becomes the button's accessible name and its tooltip, so a
+  screen reader announces it and a pointer reveals it — pinned by a test, because an
+  icon-only control that says nothing to either is not a saving, it is a regression.
+
+### Unchanged on purpose
+
+- Pages, widgets and custom abilities keep their words. Those are read as lists, where
+  there is a whole row to spend and nothing to line the cell up against.
+
 ## [1.3.0] - 2026-08-10
 
 ### Fixed
@@ -295,6 +312,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.4.0
 [1.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.3.0
 [1.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.2.0
 [1.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.1.0
