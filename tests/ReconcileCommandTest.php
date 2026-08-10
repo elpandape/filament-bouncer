@@ -163,3 +163,48 @@ test('a stored row and its declaration answer to the same identity', function ()
 
     expect($store->catalogued())->toHaveKey($store->identity($stored));
 });
+
+test('it creates the role that holds everything and grants it the wildcard', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    reconcile();
+
+    $role = Models::role()->newQuery()->where('name', 'owner')->firstOrFail();
+
+    expect(holds($role, 'anything-at-all'))->toBeTrue()
+        ->and(holds($role, 'forceDelete', Post::class))->toBeTrue();
+});
+
+test('it puts the wildcard back after somebody takes it away', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    reconcile();
+
+    Bouncer::disallow('owner')->everything();
+    Bouncer::refresh();
+
+    $role = Models::role()->newQuery()->where('name', 'owner')->firstOrFail();
+    expect(holds($role, 'anything-at-all'))->toBeFalse();
+
+    reconcile();
+
+    expect(holds($role, 'anything-at-all'))->toBeTrue();
+});
+
+test('checking fails while the role that holds everything is missing', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    reconcile();
+    Models::role()->newQuery()->where('name', 'owner')->delete();
+
+    $status = Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
+
+    expect($status)->toBe(1)
+        ->and(Artisan::output())->toContain('The privileged role [owner] is missing');
+});
+
+test('naming no privileged role creates none', function (): void {
+    reconcile();
+
+    expect(Models::role()->newQuery()->count())->toBe(0);
+});
