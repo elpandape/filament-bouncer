@@ -108,15 +108,20 @@ final class RoleForm
             return array_values(array_map(self::row(...), $subjects));
         }
 
-        $columns = count($catalog->actions) + 1;
+        // The column only exists where somebody can fill it. Nobody hands out a grant
+        // over a whole model without holding one themselves, so an authority who holds
+        // none never sees the column at all.
+        $manages = array_filter($subjects, static fn (Subject $subject): bool => $subject->manage instanceof Ability) !== [];
+
+        $columns = count($catalog->actions) + ($manages ? 2 : 1);
 
         $rows = [
-            Grid::make($columns)->schema(self::scopeHeadings($catalog)),
-            Grid::make($columns)->schema(self::actionHeadings($catalog)),
+            Grid::make($columns)->schema(self::scopeHeadings($catalog, $manages)),
+            Grid::make($columns)->schema(self::actionHeadings($catalog, $manages)),
         ];
 
         foreach ($subjects as $subject) {
-            $rows[] = Grid::make($columns)->schema(self::cells($subject, $catalog));
+            $rows[] = Grid::make($columns)->schema(self::cells($subject, $catalog, $manages));
         }
 
         return $rows;
@@ -201,7 +206,7 @@ final class RoleForm
      *
      * @return array<int, Component>
      */
-    private static function scopeHeadings(Catalog $catalog): array
+    private static function scopeHeadings(Catalog $catalog, bool $manages): array
     {
         $spans = [];
 
@@ -210,6 +215,10 @@ final class RoleForm
         }
 
         $cells = [Text::make('')];
+
+        if ($manages) {
+            $cells[] = Text::make('');
+        }
 
         foreach ($spans as $value => $span) {
             $scope = AbilityScope::from($value);
@@ -225,9 +234,14 @@ final class RoleForm
     /**
      * @return array<int, Component>
      */
-    private static function actionHeadings(Catalog $catalog): array
+    private static function actionHeadings(Catalog $catalog, bool $manages): array
     {
         $cells = [Text::make('')];
+
+        if ($manages) {
+            $cells[] = Text::make(__('filament-bouncer::roles.form.manage'))
+                ->color(AbilityScope::Irreversible->color());
+        }
 
         foreach (array_keys($catalog->actions) as $action) {
             $cells[] = Text::make(app(Labels::class)->action($action));
@@ -239,33 +253,44 @@ final class RoleForm
     /**
      * @return array<int, Component>
      */
-    private static function cells(Subject $subject, Catalog $catalog): array
+    private static function cells(Subject $subject, Catalog $catalog, bool $manages): array
     {
         $cells = [Text::make($subject->label)];
+
+        if ($manages) {
+            $cells[] = $subject->manage instanceof Ability
+                ? self::cell($subject, Ability::MANAGE_ACTION, $subject->manage)
+                : Text::make('');
+        }
 
         foreach (array_keys($catalog->actions) as $action) {
             $ability = $subject->ability($action);
 
             $cells[] = $ability instanceof Ability
-                ? ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
-                    ->label($ability->title)
-                    ->hiddenLabel()
-                    ->helperText(self::inheritance($ability))
-                    ->options(app(Labels::class)->stances())
-                    ->colors(Stance::colors())
-                    ->icons(Stance::icons())
-                    // Marks, not words. The word survives as the button's accessible name
-                    // and as its tooltip, so nothing is lost by not printing it in a cell
-                    // too narrow to hold it.
-                    ->hiddenButtonLabels()
-                    ->tooltips(app(Labels::class)->stances())
-                    ->inline()
-                    ->grouped()
-                    ->default(Stance::Neutral->value)
-                    ->required()
+                ? self::cell($subject, $action, $ability)
                 : Text::make('');
         }
 
         return $cells;
+    }
+
+    private static function cell(Subject $subject, string $action, Ability $ability): ToggleButtons
+    {
+        return ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
+            ->label($ability->title)
+            ->hiddenLabel()
+            ->helperText(self::inheritance($ability))
+            ->options(app(Labels::class)->stances())
+            ->colors(Stance::colors())
+            ->icons(Stance::icons())
+            // Marks, not words. The word survives as the button's accessible name and as
+            // its tooltip, so nothing is lost by not printing it in a cell too narrow to
+            // hold it.
+            ->hiddenButtonLabels()
+            ->tooltips(app(Labels::class)->stances())
+            ->inline()
+            ->grouped()
+            ->default(Stance::Neutral->value)
+            ->required();
     }
 }

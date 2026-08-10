@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
 
+    'manage' => 'Manage',
+
     'viewAny' => 'See the list',
     'view' => 'See one',
     'create' => 'Create',
