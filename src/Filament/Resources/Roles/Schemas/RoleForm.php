@@ -7,6 +7,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -16,6 +17,8 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
 
@@ -68,6 +71,39 @@ final class RoleForm
             return [Text::make(__('filament-bouncer::roles.form.empty'))];
         }
 
+        $groups = $catalog->tabs();
+
+        // One tab is not a tab, it is a heading nobody asked for. A panel that only
+        // exposes resources reads exactly as it did before this existed.
+        if (count($groups) === 1) {
+            return self::group(CatalogTab::from(array_key_first($groups)), reset($groups), $catalog);
+        }
+
+        $tabs = [];
+
+        foreach ($groups as $value => $subjects) {
+            $tab = CatalogTab::from((string) $value);
+
+            $tabs[] = Tab::make(__('filament-bouncer::roles.tabs.'.$tab->value))
+                ->badge(count($subjects))
+                ->schema(self::group($tab, $subjects, $catalog));
+        }
+
+        return [Tabs::make()->tabs($tabs)];
+    }
+
+    /**
+     * One tab's worth of the catalogue.
+     *
+     * @param  array<string, Subject>  $subjects
+     * @return array<int, Component>
+     */
+    private static function group(CatalogTab $tab, array $subjects, Catalog $catalog): array
+    {
+        if (! $tab->isGrid()) {
+            return array_values(array_map(self::row(...), $subjects));
+        }
+
         $columns = count($catalog->actions) + 1;
 
         $rows = [
@@ -75,11 +111,35 @@ final class RoleForm
             Grid::make($columns)->schema(self::actionHeadings($catalog)),
         ];
 
-        foreach ($catalog->subjects as $subject) {
+        foreach ($subjects as $subject) {
             $rows[] = Grid::make($columns)->schema(self::cells($subject, $catalog));
         }
 
         return $rows;
+    }
+
+    /**
+     * A subject with a single ability: a door, not a grid.
+     *
+     * The buttons are joined and the label sits beside them, because here there is a
+     * whole row to spend and nothing to line the cell up against.
+     */
+    private static function row(Subject $subject): ToggleButtons
+    {
+        // Asked for by key rather than with reset(), which takes its array by reference
+        // and so cannot be pointed at a readonly property at all.
+        $action = (string) array_key_first($subject->abilities);
+        $ability = $subject->abilities[$action];
+
+        return ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
+            ->label($subject->label)
+            ->helperText($ability->title)
+            ->inlineLabel()
+            ->grouped()
+            ->options(app(Labels::class)->stances())
+            ->colors(Stance::colors())
+            ->default(Stance::Neutral->value)
+            ->required();
     }
 
     /**
