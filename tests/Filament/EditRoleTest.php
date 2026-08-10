@@ -190,3 +190,11 @@ test('a cell says so when the role holds rules about it that the grid cannot wri
         ->assertSee(__('filament-bouncer::roles.form.restricted_owned'))
         ->assertSee(trans_choice('filament-bouncer::roles.form.restricted_records', 2, ['count' => 2]));
 });
+
+test('a cell is read as a mark, and the word survives as its accessible name', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    livewire(EditRole::class, ['record' => role()->getKey()])
+        ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.granted').'"')
+        ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.forbidden').'"');
+});
