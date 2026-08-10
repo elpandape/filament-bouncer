@@ -46,4 +46,18 @@ enum AbilityScope: string
             self::Irreversible => 3,
         };
     }
+
+    /**
+     * The colour its heading is tinted, so that the weight of a column can be seen
+     * before it is read.
+     */
+    public function color(): string
+    {
+        return match ($this) {
+            self::Read => 'gray',
+            self::Write => 'primary',
+            self::Withdraw => 'warning',
+            self::Irreversible => 'danger',
+        };
+    }
 }
