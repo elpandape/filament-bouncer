@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use Illuminate\Support\ServiceProvider;
 
 final class FilamentBouncerServiceProvider extends ServiceProvider
@@ -17,6 +18,8 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         // reflects over every policy behind them, and one request asks for it more
         // than once.
         $this->app->singleton(CatalogRegistry::class);
+
+        $this->app->singleton(AbilityStore::class);
     }
 
     public function boot(): void
