@@ -77,8 +77,10 @@ test('the roles screen becomes a row of the grid it draws', function (): void {
     $role = Subject::keyFor(Models::classname(Role::class));
 
     livewire(CreateRole::class)
-        ->assertFormFieldExists("abilities.{$role}.viewAny")
-        ->assertFormFieldExists("abilities.{$role}.delete");
+        ->assertOk();
 
-    expect($user->exists)->toBeTrue();
+    expect(offeredCells(gridState(livewire(CreateRole::class))))
+        ->toContain("{$role}.viewAny")
+        ->toContain("{$role}.delete")
+        ->and($user->exists)->toBeTrue();
 });

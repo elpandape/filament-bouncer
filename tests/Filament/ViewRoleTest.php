@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
@@ -23,13 +24,13 @@ test('the detail screen shows the same grid, filled and out of reach', function 
     $role = Models::role()->newQuery()->create(['name' => 'editor']);
     grant($role, [['create', Post::class]]);
 
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertFormSet([
-            "abilities.{$post}.viewAny" => Stance::Neutral->value,
-            "abilities.{$post}.create" => Stance::Granted->value,
-        ])
-        ->assertFormFieldDisabled("abilities.{$post}.create")
-        ->assertOk();
+    $component = livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertFormFieldDisabled(RoleForm::ABILITIES);
+
+    $state = gridState($component);
+
+    expect($state[$post]['viewAny'])->toBe(Stance::Neutral->value)
+        ->and($state[$post]['create'])->toBe(Stance::Granted->value);
 });
 
 test('the detail screen shows a denial as a denial', function (): void {
@@ -41,8 +42,8 @@ test('the detail screen shows a denial as a denial', function (): void {
     Bouncer::forbid($role)->to('viewAny', Post::class);
     Bouncer::refresh();
 
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertFormSet(["abilities.{$post}.viewAny" => Stance::Forbidden->value]);
+    expect(gridState(livewire(ViewRole::class, ['record' => $role->getKey()]))[$post]['viewAny'])
+        ->toBe(Stance::Forbidden->value);
 });
 
 test('the detail screen of a role nobody may edit offers no way in', function (): void {

@@ -79,3 +79,46 @@ function signInAsRoleManager(): User
 
     return $user;
 }
+
+/**
+ * The nested array the grid holds, read off the component.
+ *
+ * There is no field per cell any more — the grid is one field carrying the whole array —
+ * so `assertFormSet`, which resolves a field per path, has nothing to resolve. This is
+ * the same array the save walks, which makes it the stronger thing to assert against:
+ * a cell missing from here is a cell nobody can write.
+ *
+ * @param  Livewire\Features\SupportTesting\Testable<Livewire\Component>  $component
+ * @return array<string, array<string, string>>
+ */
+function gridState(Livewire\Features\SupportTesting\Testable $component): array
+{
+    /** @var array<string, array<string, string>> $state */
+    $state = $component->get('data.'.ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm::ABILITIES);
+
+    return $state;
+}
+
+/**
+ * The cells the grid offers, as paths.
+ *
+ * There is no field per cell any more — the grid is one field holding the whole nested
+ * array — so what a cell being offered means is that the narrowed catalogue put it in
+ * that array. It is the same array the save walks, which makes this the stronger check
+ * of the two: a cell nobody can see is also a cell nobody can write.
+ *
+ * @param  array<string, mixed>  $state
+ * @return array<int, string>
+ */
+function offeredCells(array $state): array
+{
+    $paths = [];
+
+    foreach ($state as $subject => $actions) {
+        foreach (array_keys((array) $actions) as $action) {
+            $paths[] = $subject.'.'.$action;
+        }
+    }
+
+    return $paths;
+}

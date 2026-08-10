@@ -196,8 +196,9 @@ test('a cell is read as a mark, and the word survives as its accessible name', f
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(EditRole::class, ['record' => role()->getKey()])
-        ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.granted').'"')
-        ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.forbidden').'"');
+        ->assertSeeHtml('class="fb-cell fb-cell-neutral"')
+        ->assertSeeHtml(__('filament-bouncer::stances.granted'))
+        ->assertSeeHtml(__('filament-bouncer::stances.forbidden'));
 });
 
 test('the grid offers a grant covering a whole model, and writes it as the wildcard', function (): void {

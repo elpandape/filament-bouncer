@@ -16,6 +16,8 @@ return [
         'restricted_owned' => 'También tiene aquí una regla para solo lo suyo, que la rejilla no toca.',
         'restricted_records' => 'También tiene aquí una regla sobre un registro, que la rejilla no toca.|También tiene aquí reglas sobre :count registros, que la rejilla no toca.',
         'manage' => 'Todo',
+        'subject' => 'Sujeto',
+        'undeclared' => 'La Policy de este sujeto no declara esta acción.',
     ],
 
     'tabs' => [

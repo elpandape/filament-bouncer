@@ -27,18 +27,18 @@ beforeEach(function (): void {
 test('the grid offers the abilities the person filling it in holds', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
-    livewire(CreateRole::class)
-        ->assertFormFieldExists("abilities.{$this->post}.viewAny")
-        ->assertFormFieldExists("abilities.{$this->post}.create")
-        ->assertOk();
+    $state = gridState(livewire(CreateRole::class));
+
+    expect($state[$this->post]['viewAny'])->toBe(Stance::Neutral->value)
+        ->and($state[$this->post]['create'])->toBe(Stance::Neutral->value);
 });
 
 test('the grid withholds the abilities they do not', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
-    livewire(CreateRole::class)
-        ->assertFormFieldDoesNotExist("abilities.{$this->post}.forceDelete")
-        ->assertFormFieldDoesNotExist("abilities.{$this->post}.delete");
+    expect(offeredCells(gridState(livewire(CreateRole::class))))
+        ->not->toContain("{$this->post}.forceDelete")
+        ->not->toContain("{$this->post}.delete");
 });
 
 test('creating a role grants exactly the cells that were ticked', function (): void {
@@ -101,9 +101,11 @@ test('somebody holding nothing is told so instead of shown an empty grid', funct
 
     signIn();
 
-    livewire(CreateRole::class)
-        ->assertFormFieldDoesNotExist("abilities.{$this->post}.viewAny")
-        ->assertSee('You hold no abilities of your own');
+    $component = livewire(CreateRole::class);
+
+    expect(offeredCells(gridState($component)))->not->toContain("{$this->post}.viewAny");
+
+    $component->assertSee('You hold no abilities of your own');
 });
 
 test('a subject that cannot be asked an action leaves that cell of its row empty', function (): void {
@@ -111,11 +113,12 @@ test('a subject that cannot be asked an action leaves that cell of its row empty
 
     $tag = Subject::keyFor(Tag::class);
 
-    livewire(CreateRole::class)
-        ->assertFormFieldExists("abilities.{$this->post}.delete")
-        ->assertFormFieldExists("abilities.{$tag}.viewAny")
-        ->assertFormFieldDoesNotExist("abilities.{$tag}.delete")
-        ->assertSee('Withdraw');
+    $component = livewire(CreateRole::class);
+
+    expect(offeredCells(gridState($component)))
+        ->toContain("{$this->post}.delete")
+        ->toContain("{$tag}.viewAny")
+        ->not->toContain("{$tag}.delete");
 });
 
 test('a page, a widget and a custom ability are offered as lists in tabs of their own', function (): void {

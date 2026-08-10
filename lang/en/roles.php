@@ -16,6 +16,8 @@ return [
         'restricted_owned' => 'It also holds a rule here for only what it owns, which the grid leaves untouched.',
         'restricted_records' => 'It also holds a rule here about one record, which the grid leaves untouched.|It also holds rules here about :count records, which the grid leaves untouched.',
         'manage' => 'All',
+        'subject' => 'Subject',
+        'undeclared' => 'The policy behind this subject does not declare this action.',
     ],
 
     'tabs' => [
