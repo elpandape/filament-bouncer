@@ -3,10 +3,10 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.4.x` adds explicit denials, which is the whole reason this package
-> exists. Nothing is closed yet: until the policies arrive, a panel with no policy of its
-> own still lets anybody who reaches it manage roles. The API will change without a major
-> bump while this package is on `0.x`.
+> **Early days.** `0.5.x` closes the panel: policies, a guard that refuses to boot with a
+> component that authorises nobody, and a check that fails a build whose panel has drifted
+> from its own authorisation. The API will change without a major bump while this package
+> is on `0.x`.
 
 ## Why Bouncer
 
@@ -20,6 +20,31 @@ for the two things Bouncer does that spatie does not:
   something Bouncer can store; spatie cannot.
 
 If you need neither, you probably do not need this package.
+
+## What this does that a permissions screen usually does not
+
+A wall of checkboxes is the easy part. These are the parts that are not:
+
+- **The abilities are derived from code, and only from code.** A resource offers exactly
+  the actions its policy declares — there is no fixed list of actions this package
+  invented. Delete a policy method and its switch disappears; add one and it appears. An
+  ability that nothing ever consults cannot exist, which matters because Bouncer answers
+  a name nobody created without ever complaining.
+- **Abilities are stored against models, not as strings.** `view` on `App\Models\Post`,
+  not `view_any_post`. Renaming a resource orphans nothing, two models with the same
+  basename in different namespaces do not collide, and grants on a single record remain
+  possible later without migrating anything already stored.
+- **Nobody hands out what they do not hold**, and it is checked twice: once to decide what
+  the screen offers, and again where the write happens.
+- **The panel refuses to boot** with a page or a widget that authorises nobody.
+- **A build goes red** when the store has drifted from the catalogue, or when a resource
+  has no policy and is therefore open to everybody.
+- **There is a way back in.** Handing out abilities is itself an ability, so it can be
+  handed away; the privileged role is put back on every reconcile.
+- **A denial is a state, not an absence**, and it beats a grant from anywhere else.
+
+Between them those form a loop: the code declares, the catalogue derives, the store is
+reconciled, and the guard and the check refuse to let any of the three drift apart.
 
 ## Requirements
 
@@ -174,6 +199,70 @@ The wildcard is granted rather than every ability the catalogue holds today, so 
 resource added tomorrow is covered without anybody remembering to come back. That the
 wildcard also grants abilities nobody ever declared is exactly what is wanted for this role,
 and for no other.
+
+## Closing the panel
+
+Filament decides what a reader may do by asking a policy, and **when there is no policy it
+asks nobody and lets everybody through**. Three things close that, and none of them is
+optional if you want the panel actually shut.
+
+### Policies
+
+```bash
+php artisan filament-bouncer:policy
+```
+
+Writes a policy for every resource of the panel whose model has none, leaving alone
+anything already there unless you pass `--force`. Name models on the command line to write
+for something that has no resource. Publish the stub with
+`--tag=filament-bouncer-stubs` to write them in your own house style.
+
+The generated methods are the declaration: the catalogue reads them straight back, so what
+an administrator is offered for a model is exactly what its policy is prepared to answer.
+Delete a method you do not want and its column goes with it.
+
+The roles screen is governed the same way, by a policy this package registers for the role
+model. Nothing about it is special-cased. Register your own policy for that model from a
+provider of your own if you want a different answer — yours boots afterwards and wins.
+
+### Pages and widgets
+
+They have no policy to ask, so they decide for themselves:
+
+```php
+use ElPandaPe\FilamentBouncer\Filament\Concerns\AuthorizesPage;
+
+class Reports extends Page
+{
+    use AuthorizesPage;
+}
+```
+
+`AuthorizesWidget` does the same for a widget. Writing `canAccess()` or `canView()` by hand
+satisfies the guard just as well — what it objects to is neither.
+
+### The guard
+
+A panel carrying a page or a widget that authorises nobody does not boot. It throws in
+production too, and that is the decision rather than an oversight: such a component looks
+exactly like one that was meant to be open, so nothing about the screen gives it away. A
+deployment that falls over loudly gets reverted within the hour; a hole of this kind is
+found by whoever goes looking, and they are not on your side.
+
+The way to say "this one really is for everybody" is the `ignore` list, which is that
+decision written down where the next reader will find it. A component named there is also
+left out of the catalogue, so there is no ability to grant and none to withhold.
+
+### The check
+
+```bash
+php artisan filament-bouncer:reconcile --check
+```
+
+Fails on any of three things: an ability the catalogue declares and the store lacks, an
+ability the store holds and the catalogue no longer declares, or a resource whose model has
+no policy at all. Put it in continuous integration and the panel cannot drift away from its
+own authorisation without a build going red.
 
 ## Configuration
 

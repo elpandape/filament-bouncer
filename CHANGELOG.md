@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
 version is below `1.0.0`, a minor bump may carry a breaking change.
 
+## [0.5.0] - 2026-08-10
+
+The panel closes. Until now nothing was actually shut: Filament asks a policy, and where
+there is no policy it asks nobody and lets everybody through.
+
+### Added
+
+- A base policy that answers from Bouncer's clipboard rather than from the Gate, and
+  carries no actions of its own, so that the methods a policy file declares are exactly
+  the abilities its model offers.
+- `filament-bouncer:policy`, which writes one for every resource of the panel whose model
+  has none, leaves alone anything already there, and lets an application keep its own stub.
+- A policy for the role model, registered by the package, so that the screen handing out
+  abilities is itself governed by one. An application registering its own wins.
+- `AuthorizesPage` and `AuthorizesWidget`, for the components that have no policy to ask.
+- A boot guard that refuses to let a panel finish booting with a page or a widget that
+  authorises nobody. It throws in production too; the `ignore` list is the way to say a
+  component really is open to everybody.
+- `--check` now also fails on a resource whose model has no policy, which closes the loop:
+  the code declares, the catalogue derives, the store is reconciled, and the guard and the
+  check refuse to let the three drift apart.
+
+### Decided
+
+- **No bulk actions on the roles table, and no `deleteAny` in the role policy.** Filament
+  authorises a bulk delete once for the whole selection, and the two refusals keeping the
+  privileged role and your own role out of reach live on the resource, so a bulk delete
+  would walk past both. An ability nothing asks about has no business on the grid.
+
+### Changed
+
+- The roles screen now takes a grant to reach, like everything else. After upgrading,
+  assign somebody the privileged role before expecting to get in.
+
 ## [0.4.0] - 2026-08-10
 
 Explicit denials, which is the reason this package exists rather than the one built on
@@ -95,6 +129,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[0.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.2.0
