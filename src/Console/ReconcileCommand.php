@@ -7,6 +7,7 @@ namespace ElPandaPe\FilamentBouncer\Console;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Filament\PanelGuard;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use Illuminate\Console\Command;
@@ -22,19 +23,21 @@ final class ReconcileCommand extends Command
 
     protected $description = "Reconcile a panel's ability catalogue with Bouncer's store";
 
-    public function handle(CatalogRegistry $catalogs, PanelResolver $panels, AbilityStore $store, PrivilegedRole $privileged): int
+    public function handle(CatalogRegistry $catalogs, PanelResolver $panels, AbilityStore $store, PrivilegedRole $privileged, PanelGuard $guard): int
     {
         /** @var string|null $id */
         $id = $this->option('panel');
 
-        $declared = $this->declared($catalogs->get($panels->resolve($id)));
+        $panel = $panels->resolve($id);
+
+        $declared = $this->declared($catalogs->get($panel));
         $stored = $store->catalogued();
 
         $missing = array_diff_key($declared, $stored);
         $extra = array_diff_key($stored, $declared);
 
         if ($this->option('check')) {
-            return $this->report($missing, $extra, $privileged);
+            return $this->report($missing, $extra, $privileged, $guard->openResources($panel));
         }
 
         // Before anything else, because this is the way back in and the rest of the run
@@ -61,11 +64,17 @@ final class ReconcileCommand extends Command
     /**
      * @param  array<string, Ability>  $missing
      * @param  array<string, Model>  $extra
+     * @param  array<int, string>  $open
      */
-    private function report(array $missing, array $extra, PrivilegedRole $privileged): int
+    private function report(array $missing, array $extra, PrivilegedRole $privileged, array $open): int
     {
         $this->list('Missing from the store', array_map(static fn (Ability $ability): string => $ability->describe(), $missing));
         $this->list('Stored but no longer declared', array_map($this->describe(...), $extra));
+        $this->list('Open to everybody, because their model has no policy', $open);
+
+        if ($open !== []) {
+            return self::FAILURE;
+        }
 
         if ($privileged->needsRestoring()) {
             $this->components->warn(sprintf('The privileged role [%s] is missing, or no longer holds the wildcard.', (string) $privileged->name()));
