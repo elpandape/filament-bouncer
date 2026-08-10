@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.5.1] - 2026-08-10
+
+### Fixed
+
+- **A cell overflowed into the column beside it.** Measured on a real panel: three marks
+  side by side are 134 pixels wide and a column of a catalogue with eight actions is 103,
+  so the headings stopped lining up with what they name. The marks are stacked again.
+  They stack far shorter than the words did, which is what 1.4.0 bought; it did not buy
+  room to lay them out in a row.
+
 ## [1.5.0] - 2026-08-10
 
 ### Added
@@ -331,6 +341,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.5.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.1
 [1.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.0
 [1.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.4.0
 [1.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.3.0
