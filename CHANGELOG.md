@@ -7,6 +7,21 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.1.0] - 2026-08-10
+
+### Added
+
+- **The grid divides into tabs.** Resources and models keep their matrix; pages, widgets
+  and abilities declared in configuration are read as lists, because each answers exactly
+  one question and a grid one column wide is a worse way to read a list than a list is.
+  A panel with a dozen pages no longer pushes its resources off the top of the screen.
+- Tab labels in both languages, and a count on each tab.
+
+### Unchanged on purpose
+
+- One tab is not a tab. A panel that only exposes resources reads exactly as it did
+  before, with no heading nobody asked for.
+
 ## [1.0.3] - 2026-08-10
 
 ### Fixed
@@ -230,6 +245,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.1.0
 [1.0.3]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.3
 [1.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.2
 [1.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.1
