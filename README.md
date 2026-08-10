@@ -363,6 +363,23 @@ defects of this package, but they shape what it can honestly offer.
 - **`assigned_roles.restricted_to_id` / `restricted_to_type` are dead columns** in 1.0.4: they
   are created and nothing in the source ever reads or writes them. There is no per-tenant role
   restriction implemented.
+- **Ownership is guessed from a column that often does not exist, and under
+  `Model::shouldBeStrict()` the guess throws.** Bouncer asks whether the authority owns the
+  record on every check it answers, and with nothing configured it looks for a column named
+  after whoever is asking — `user_id`. Ask about a record that has no such column and a lax
+  application gets null, while a strict one gets a `MissingAttributeException` naming a
+  column nobody ever wrote, from inside a Blade view. This package tells Bouncer that nobody
+  owns a role, which covers its own screen; for your own models, say so once:
+
+  ```php
+  Bouncer::ownedVia('*', fn (Model $model, Model $authority): bool => array_key_exists('user_id', $model->getAttributes())
+      && $model->getAttribute('user_id') === $authority->getKey());
+  ```
+
+- **`ownedVia()` cannot be called with one argument.** The single-argument form is documented
+  as the way to set a global rule, and it assigns the closure to `$ownership['*']` and then
+  immediately uses that same closure as an array key, which is a `TypeError`. Pass `'*'`
+  explicitly as the first argument instead, as above.
 
 ## Testing
 

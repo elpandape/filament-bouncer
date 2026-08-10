@@ -7,6 +7,26 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.0.2] - 2026-08-10
+
+### Fixed
+
+- **The roles screen died in any application running Eloquent strictly.** Bouncer asks
+  about ownership on every check and, told nothing, guesses a `user_id` column on the
+  record — which the roles table has never had. Lax applications got a null and never
+  noticed; strict ones got a `MissingAttributeException` from inside a Blade view, naming
+  a column nobody ever wrote. The package now says out loud that nobody owns a role.
+- The test suite runs Eloquent strictly from now on. It did not before, which is the only
+  reason this shipped: eleven existing tests reproduce the crash the moment the setting is
+  turned on.
+
+### Documented
+
+- The ownership guess and how to answer it once for your own models.
+- That `ownedVia()` cannot be called with a single argument at all — the form the
+  documentation shows for setting a global rule uses the closure as an array key and
+  raises a `TypeError`.
+
 ## [1.0.1] - 2026-08-10
 
 ### Fixed
@@ -196,6 +216,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.2
 [1.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.1
 [1.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.0
 [0.6.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.6.0
