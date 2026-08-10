@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
+use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -21,7 +22,7 @@ final class ReconcileCommand extends Command
 
     protected $description = "Reconcile a panel's ability catalogue with Bouncer's store";
 
-    public function handle(CatalogRegistry $catalogs, PanelResolver $panels, AbilityStore $store): int
+    public function handle(CatalogRegistry $catalogs, PanelResolver $panels, AbilityStore $store, PrivilegedRole $privileged): int
     {
         /** @var string|null $id */
         $id = $this->option('panel');
@@ -33,8 +34,12 @@ final class ReconcileCommand extends Command
         $extra = array_diff_key($stored, $declared);
 
         if ($this->option('check')) {
-            return $this->report($missing, $extra);
+            return $this->report($missing, $extra, $privileged);
         }
+
+        // Before anything else, because this is the way back in and the rest of the run
+        // is of no help to somebody who has been locked out.
+        $privileged->restore();
 
         $store->create($missing);
         $this->components->info(sprintf('Created %d %s.', count($missing), $this->noun(count($missing))));
@@ -57,10 +62,16 @@ final class ReconcileCommand extends Command
      * @param  array<string, Ability>  $missing
      * @param  array<string, Model>  $extra
      */
-    private function report(array $missing, array $extra): int
+    private function report(array $missing, array $extra, PrivilegedRole $privileged): int
     {
         $this->list('Missing from the store', array_map(static fn (Ability $ability): string => $ability->describe(), $missing));
         $this->list('Stored but no longer declared', array_map($this->describe(...), $extra));
+
+        if ($privileged->needsRestoring()) {
+            $this->components->warn(sprintf('The privileged role [%s] is missing, or no longer holds the wildcard.', (string) $privileged->name()));
+
+            return self::FAILURE;
+        }
 
         if ($missing === [] && $extra === []) {
             $this->components->info('The store matches the catalogue.');
