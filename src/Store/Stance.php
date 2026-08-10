@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Store;
 
+use Filament\Support\Icons\Heroicon;
+
 /**
  * What a role says about an ability.
  *
@@ -33,6 +35,36 @@ enum Stance: string
         }
 
         return $colors;
+    }
+
+    /**
+     * @return array<string, Heroicon>
+     */
+    public static function icons(): array
+    {
+        $icons = [];
+
+        foreach (self::cases() as $stance) {
+            $icons[$stance->value] = $stance->icon();
+        }
+
+        return $icons;
+    }
+
+    /**
+     * A cell is one of as many columns as the catalogue has actions, so on any real
+     * panel it is about a hundred pixels wide. Three words never fitted in that and
+     * had to be stacked, which made the grid as tall as the catalogue is wide. Three
+     * marks do fit, side by side, and the word goes to the label a screen reader
+     * announces and a pointer reveals.
+     */
+    public function icon(): Heroicon
+    {
+        return match ($this) {
+            self::Granted => Heroicon::Check,
+            self::Neutral => Heroicon::Minus,
+            self::Forbidden => Heroicon::XMark,
+        };
     }
 
     public function color(): string
