@@ -3,9 +3,10 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.2.x` derives the catalogue of abilities a panel is able to ask about
-> and keeps Bouncer's store in step with it. There are no screens yet: roles are still
-> edited by hand. The API will change without a major bump while this package is on `0.x`.
+> **Early days.** `0.3.x` adds the roles screen on top of the catalogue. Nothing is closed
+> yet: until the policies arrive, a panel with no policy of its own still lets anybody who
+> reaches it manage roles. The API will change without a major bump while this package is
+> on `0.x`.
 
 ## Why Bouncer
 
@@ -33,8 +34,19 @@ If you need neither, you probably do not need this package.
 composer require elpandape/filament-bouncer
 ```
 
-The service provider is registered through package discovery, so there is nothing to add by
-hand.
+The service provider is registered through package discovery. Register the plugin on the
+panel that should carry the roles screen:
+
+```php
+use ElPandaPe\FilamentBouncer\Filament\FilamentBouncerPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->plugin(FilamentBouncerPlugin::make());
+}
+```
 
 Publish the configuration if you want to change how the package presents itself in the
 panel:
@@ -114,6 +126,37 @@ abilities restricted to what their holder owns, and the wildcards that a blanket
 as `everything()` leaves behind. The catalogue does not declare them, so it does not get to
 delete them either.
 
+## The roles screen
+
+Subjects down the side, actions across the top, one checkbox per cell. The columns are
+grouped by scope and the group headings are tinted, so that "see a list" and "delete for
+good" cannot look like the same decision.
+
+Three things the screen refuses to do, and none of them is only a hidden button — each is
+checked again where the write happens, so a request built by hand meets the same refusal:
+
+- **Nobody hands out what they do not hold.** The grid is the catalogue narrowed to the
+  abilities of whoever is filling it in, and the save is driven off that same narrowed
+  catalogue rather than off what arrived in the request. A cell smuggled in for an ability
+  they do not hold has nothing to match against, and a grant they cannot see is never taken
+  away either.
+- **Nobody edits a role they hold themselves.** Otherwise raising your own reach is one save
+  away.
+- **Nobody edits the role that holds everything.** It is the way back in, and a way back in
+  that can be edited is not one.
+
+### The way back in
+
+Handing out abilities is itself an ability, so a panel can be talked into a state where
+nobody left is able to hand anything out. Name a role in `privileged_role` and
+`filament-bouncer:reconcile` will make sure it exists and holds Bouncer's wildcard on every
+run — including after somebody deletes it. `--check` fails while it is missing.
+
+The wildcard is granted rather than every ability the catalogue holds today, so that a
+resource added tomorrow is covered without anybody remembering to come back. That the
+wildcard also grants abilities nobody ever declared is exactly what is wanted for this role,
+and for no other.
+
 ## Configuration
 
 | Key | What it decides |
@@ -127,6 +170,7 @@ delete them either.
 | `models` | Models with a policy but no resource, which would otherwise never be reached |
 | `custom` | Abilities no component declares, as a map of name to scope |
 | `ignore` | Resources, pages and widgets the catalogue leaves out |
+| `privileged_role` | The role that holds everything, and that the screen refuses to edit |
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.
@@ -162,6 +206,9 @@ composer test:all
 
 That runs, in order: code style, line coverage, type coverage, profanity, static analysis at
 its maximum level, and a refactoring dry run. All of them are thresholds, not diagnostics.
+
+If the type coverage step dies with a segmentation fault on your machine, it is Xdebug and
+not the code: run that step with `php -d xdebug.mode=off`.
 
 ## Credits
 

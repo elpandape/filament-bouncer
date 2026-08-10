@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
 version is below `1.0.0`, a minor bump may carry a breaking change.
 
+## [0.3.0] - 2026-08-10
+
+The roles screen: subjects down the side, actions across the top.
+
+### Added
+
+- A Filament plugin registering a roles resource, with a list, a create screen, an edit
+  screen and a detail screen that shows the same grid out of reach.
+- A grid of one checkbox per subject and action, its columns grouped by scope and its group
+  headings tinted, so that reading a list and deleting for good cannot look alike.
+- Three refusals, each checked where the write happens and not only on the button: nobody
+  hands out an ability they do not hold themselves, nobody edits a role they hold, and
+  nobody edits the role that holds everything.
+- A `privileged_role` setting, and a reconcile run that makes sure that role exists and
+  holds the wildcard — the way back in when handing out abilities has itself been handed
+  away. `--check` fails while it is missing.
+
+### Not included
+
+No policies: until they arrive, a panel that has none of its own still lets anybody who
+reaches it manage roles. No explicit denials yet either — a cell is ticked or it is not.
+
 ## [0.2.0] - 2026-08-10
 
 The catalogue: what the panel is able to ask about, derived from the code that asks.
@@ -50,5 +72,6 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[0.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.1.0
