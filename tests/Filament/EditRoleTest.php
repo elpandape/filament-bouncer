@@ -217,3 +217,11 @@ test('the grid offers a grant covering a whole model, and writes it as the wildc
     expect(Bouncer::getClipboard()->check($role, 'delete', Post::class))->toBeTrue()
         ->and(Bouncer::getClipboard()->check($role, 'anything-invented-later', Post::class))->toBeTrue();
 });
+
+test('the grid grows no column that no row in it could fill', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['impersonate-users', null]]);
+
+    livewire(EditRole::class, ['record' => role()->getKey()])
+        ->assertSee(__('filament-bouncer::actions.viewAny'))
+        ->assertDontSeeHtml('<span class="fb-col-name">'.Ability::CUSTOM_ACTION.'</span>');
+});

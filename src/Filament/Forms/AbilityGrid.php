@@ -77,6 +77,11 @@ final class AbilityGrid extends Field
     /**
      * The action columns, in the order the catalogue laid them out.
      *
+     * Narrowed to what the gridded subjects actually declare. The catalogue's own list
+     * is the union across every kind, and a page, a widget or an ability declared in
+     * configuration each answer an action of their own — `view` and `use` — which no
+     * model has. Taken whole, the grid grew a column no row in it could ever fill.
+     *
      * Neither `getActions()` nor `getColumns()`: a schema component already has both,
      * and they mean something else entirely — the first is its buttons, the second its
      * responsive column count.
@@ -85,9 +90,14 @@ final class AbilityGrid extends Field
      */
     public function getActionColumns(): array
     {
+        $declared = $this->declaredActions();
         $actions = [];
 
         foreach ($this->catalog->actions as $action => $scope) {
+            if (! in_array($action, $declared, true)) {
+                continue;
+            }
+
             $actions[$action] = [
                 'label' => app(Labels::class)->action($action),
                 'scope' => $scope->value,
@@ -107,8 +117,8 @@ final class AbilityGrid extends Field
     {
         $spans = [];
 
-        foreach ($this->catalog->actions as $scope) {
-            $spans[$scope->value] = ($spans[$scope->value] ?? 0) + 1;
+        foreach ($this->getActionColumns() as $column) {
+            $spans[$column['scope']] = ($spans[$column['scope']] ?? 0) + 1;
         }
 
         $bands = [];
@@ -192,6 +202,28 @@ final class AbilityGrid extends Field
     public function getEmptyLabel(): string
     {
         return __('filament-bouncer::roles.form.empty');
+    }
+
+    /**
+     * Every action the subjects laid out as a grid answer between them.
+     *
+     * @return array<int, string>
+     */
+    private function declaredActions(): array
+    {
+        $declared = [];
+
+        foreach ($this->catalog->subjects as $subject) {
+            if (! $subject->kind->tab()->isGrid()) {
+                continue;
+            }
+
+            foreach (array_keys($subject->abilities) as $action) {
+                $declared[$action] = true;
+            }
+        }
+
+        return array_keys($declared);
     }
 
     /**
