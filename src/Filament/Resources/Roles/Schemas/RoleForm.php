@@ -11,6 +11,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
@@ -138,18 +139,33 @@ final class RoleForm
                 return null;
             }
 
+            $abilities = app(RoleAbilities::class);
             $direct = Stance::tryFrom(is_string($state) ? $state : '') ?? Stance::Neutral;
-            $holds = app(RoleAbilities::class)->holds($record, $ability);
+            $holds = $abilities->holds($record, $ability);
+
+            $said = [];
 
             if ($direct === Stance::Neutral && $holds) {
-                return __('filament-bouncer::roles.form.inherited');
+                $said[] = __('filament-bouncer::roles.form.inherited');
             }
 
             if ($direct === Stance::Granted && ! $holds) {
-                return __('filament-bouncer::roles.form.overruled');
+                $said[] = __('filament-bouncer::roles.form.overruled');
             }
 
-            return null;
+            $restriction = $abilities->restrictions($record)[$ability->identity()] ?? new Restriction;
+
+            if ($restriction->owned) {
+                $said[] = __('filament-bouncer::roles.form.restricted_owned');
+            }
+
+            if ($restriction->records > 0) {
+                $said[] = trans_choice('filament-bouncer::roles.form.restricted_records', $restriction->records, [
+                    'count' => $restriction->records,
+                ]);
+            }
+
+            return $said === [] ? null : implode(' ', $said);
         };
     }
 
