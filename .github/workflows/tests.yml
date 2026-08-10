@@ -1,0 +1,107 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        # There is no `laravel` axis on purpose: `composer.json` pins `php: ^8.5` and
+        # `illuminate/*: ^13.0`, so any second value would only produce combinations the solver
+        # rejects. `php` and `os` stay because they feed `php-version:` and `runs-on:`.
+        os: [ubuntu-latest]
+        # Quoted: unquoted `8.5` is a YAML float, and that rounding turns a future `8.0` into `8`.
+        php: ['8.5']
+        dependency-version: [prefer-lowest, prefer-stable]
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          # `sqlite3` and `pdo_sqlite` back the in-memory `testing` connection set up in
+          # `TestCase::getEnvironmentSetUp()`; the rest are platform requirements of the Filament
+          # and Laravel tree, plus `pcntl` for `nunomaduro/collision`.
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, intl, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Locate Composer's cache
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Composer's cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          # The key hashes `composer.json`, not `composer.lock`: this job runs the solver on every
+          # execution, so only the downloaded tarballs are worth restoring.
+          key: composer-${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependency-version }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependency-version }}-
+
+      - name: Resolve dependencies
+        # `update` and not `install`, even though `composer.lock` is committed: installing from
+        # the lock would hand both matrix legs the same tree. This job exists to run the solver.
+        run: composer update --prefer-dist --no-interaction --no-progress --${{ matrix.dependency-version }}
+
+      - name: Run the suite
+        run: vendor/bin/pest
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    # Unlike the matrix job, this one installs from the lock: a 100% threshold has to be measured
+    # against a fixed tree, or a dependency release moves it with no commit here to blame.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, intl, sqlite3, pdo_sqlite
+          coverage: pcov
+
+      - name: Locate Composer's cache
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Composer's cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php-8.5-lock-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php-8.5-lock-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Line coverage
+        run: composer test:coverage
+
+      - name: Type coverage
+        run: composer test:type-coverage

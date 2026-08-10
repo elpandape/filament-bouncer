@@ -1,0 +1,14 @@
+version: 2
+
+updates:
+  # Besides bumping the committed lock, Dependabot opens a PR when a `composer.json` constraint
+  # blocks a new release and has to be widened by hand (Filament 6, Laravel 14).
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

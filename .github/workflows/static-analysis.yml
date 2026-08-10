@@ -1,0 +1,92 @@
+name: static analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpstan:
+    name: PHPStan
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          # Required by Composer's platform check when resolving the tree, not by the analysis;
+          # trimming the list breaks the install.
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, intl, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Locate Composer's cache
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Composer's cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php-8.5-lock-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php-8.5-lock-
+
+      # `install` and not `update`: PHPStan reads signatures out of the installed vendor tree, so
+      # its verdict is a property of the locked versions. Constraint resolution is the `tests` job.
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Analyse
+        # The `includes` in `phpstan.neon` resolve against the installed `vendor/`, so this step
+        # has to stay after the install step.
+        run: composer test:static
+
+  rector:
+    name: Rector
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, intl, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Locate Composer's cache
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Composer's cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php-8.5-lock-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php-8.5-lock-
+
+      # `install` and not `update`: Rector's verdict depends on the dependency versions in front
+      # of it, so it runs against the locked tree. Constraint resolution is the `tests` job.
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check for pending refactors
+        run: composer test:refactor
