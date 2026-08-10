@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [2.0.2] - 2026-08-10
+
+### Fixed
+
+- **The models grid grew a `use` column that no row in it could fill.** The catalogue's
+  action list is the union across every kind, and an ability declared in configuration
+  answers `use`, which no model does. Harmless before the kinds were split into tabs;
+  since then it was a column of nothing. The columns are the union of what the gridded
+  subjects declare, and the bands are counted from those.
+
 ## [2.0.1] - 2026-08-10
 
 ### Fixed
@@ -390,6 +400,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[2.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.2
 [2.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.1
 [2.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.0
 [1.5.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.1
