@@ -7,6 +7,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [2.0.1] - 2026-08-10
+
+### Fixed
+
+- **The grid was unreadable on a dark panel.** The stylesheet named the light tokens
+  directly, so the subject names came out near-black on near-black and the tab bar was a
+  white slab. Every colour now comes from a token set declared twice, and the dark theme
+  tints its bands with the mid shade instead of the light one, which would have been a
+  near-white slab.
+- The switch is Filament's `dark` class alone. A `prefers-color-scheme` query would have
+  darkened the grid inside a page somebody deliberately kept light — and Filament stamps
+  that class for a system choice too, so nothing is lost.
+
 ## [2.0.0] - 2026-08-10
 
 The grid is a table now, and the package draws it itself.
@@ -377,6 +390,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[2.0.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.1
 [2.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.0
 [1.5.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.1
 [1.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.0
