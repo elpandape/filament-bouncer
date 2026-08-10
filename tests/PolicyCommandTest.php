@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Comment;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Policies\OpenRolePolicy;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\Process\Process;
 
 pest()->extend(TestCase::class);
 
@@ -102,4 +104,23 @@ test('it points at the command that brings the new abilities into being', functi
     Artisan::call('filament-bouncer:policy');
 
     expect(Artisan::output())->toContain('filament-bouncer:reconcile');
+});
+
+test('what it writes is loadable PHP, which is not a given', function (string $class): void {
+    Artisan::call('filament-bouncer:policy', ['model' => [Comment::class, User::class]]);
+
+    // Asked of PHP itself rather than of the tokeniser, because two parameters alike
+    // tokenise perfectly well and only fall over when the file is compiled.
+    $lint = new Process([PHP_BINARY, '-l', policyPath($class)]);
+    $lint->run();
+
+    expect($lint->getExitCode())->toBe(0, $lint->getOutput());
+})->with(['CommentPolicy', 'UserPolicy']);
+
+test('the policy for the user model itself does not name both parameters alike', function (): void {
+    Artisan::call('filament-bouncer:policy', ['model' => [User::class]]);
+
+    expect(File::get(policyPath('UserPolicy')))
+        ->toContain('public function view(User $user, User $model): bool')
+        ->toContain("return \$this->allows(\$user, 'view', \$model);");
 });
