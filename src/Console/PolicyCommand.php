@@ -23,6 +23,13 @@ use Illuminate\Support\Str;
  */
 final class PolicyCommand extends Command
 {
+    /**
+     * What the generated methods call the person asking. A record parameter cannot share
+     * the name, which is not a subtle problem: two parameters alike is a parse error, and
+     * the policy for the user model itself would hit it every time.
+     */
+    private const string AUTHORITY = 'user';
+
     protected $signature = 'filament-bouncer:policy
         {model?* : The models to write a policy for; the panel supplies them when none is named}
         {--panel= : The panel whose resources are walked}
@@ -124,11 +131,25 @@ final class PolicyCommand extends Command
                 implode(PHP_EOL, $imports),
                 class_basename($model).'Policy',
                 class_basename($model),
-                Str::camel(class_basename($model)),
+                $this->variable($model),
                 class_basename($user),
             ],
             $files->get($this->stub($files)),
         );
+    }
+
+    /**
+     * What a record is called in the generated methods, which is the model's own name
+     * unless that is already taken by the person asking. Laravel's own generator falls
+     * back the same way.
+     *
+     * @param  class-string<Model>  $model
+     */
+    private function variable(string $model): string
+    {
+        $variable = Str::camel(class_basename($model));
+
+        return $variable === self::AUTHORITY ? 'model' : $variable;
     }
 
     /**
