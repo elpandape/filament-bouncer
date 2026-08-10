@@ -3,10 +3,10 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.3.x` adds the roles screen on top of the catalogue. Nothing is closed
-> yet: until the policies arrive, a panel with no policy of its own still lets anybody who
-> reaches it manage roles. The API will change without a major bump while this package is
-> on `0.x`.
+> **Early days.** `0.4.x` adds explicit denials, which is the whole reason this package
+> exists. Nothing is closed yet: until the policies arrive, a panel with no policy of its
+> own still lets anybody who reaches it manage roles. The API will change without a major
+> bump while this package is on `0.x`.
 
 ## Why Bouncer
 
@@ -128,18 +128,36 @@ delete them either.
 
 ## The roles screen
 
-Subjects down the side, actions across the top, one checkbox per cell. The columns are
-grouped by scope and the group headings are tinted, so that "see a list" and "delete for
-good" cannot look like the same decision.
+Subjects down the side, actions across the top. The columns are grouped by scope and the
+group headings are tinted, so that "see a list" and "delete for good" cannot look like the
+same decision.
+
+Each cell holds one of three stances, and the middle one is not a quieter way of saying no:
+
+| Stance | What the role is saying |
+|---|---|
+| **Granted** | This ability is given |
+| **Not granted** | This role says nothing; the answer comes from whatever else the person holds |
+| **Forbidden** | Nobody holding this role has it, whatever else grants it |
+
+A denial beats a grant from another role and one made straight to the user. That is the one
+thing Bouncer can express and `spatie/laravel-permission` cannot, and it is why "everything
+except deleting for good" survives the catalogue growing later instead of quietly picking up
+whatever gets added.
+
+**Forbidding is offered on exactly the abilities granting is offered on, and no others.** It
+would be arguable that restricting is a smaller power than granting, and the decision here
+went the other way: a denial you cannot lift afterwards is a way to lock people out of
+something you were never trusted with, so both go through the same gate.
 
 Three things the screen refuses to do, and none of them is only a hidden button — each is
 checked again where the write happens, so a request built by hand meets the same refusal:
 
-- **Nobody hands out what they do not hold.** The grid is the catalogue narrowed to the
+- **Nobody decides about what they do not hold.** The grid is the catalogue narrowed to the
   abilities of whoever is filling it in, and the save is driven off that same narrowed
   catalogue rather than off what arrived in the request. A cell smuggled in for an ability
-  they do not hold has nothing to match against, and a grant they cannot see is never taken
-  away either.
+  they do not hold has nothing to match against, and a stance they cannot see is never
+  overwritten either.
 - **Nobody edits a role they hold themselves.** Otherwise raising your own reach is one save
   away.
 - **Nobody edits the role that holds everything.** It is the way back in, and a way back in

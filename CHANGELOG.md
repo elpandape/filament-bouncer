@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
 version is below `1.0.0`, a minor bump may carry a breaking change.
 
+## [0.4.0] - 2026-08-10
+
+Explicit denials, which is the reason this package exists rather than the one built on
+`spatie/laravel-permission`.
+
+### Added
+
+- A third stance in every cell. A role now grants, says nothing, or forbids, and a denial
+  beats a grant from another role and one made straight to the user.
+- The same three states on the detail screen, so a role is read in the shape it is written.
+
+### Decided
+
+- **Forbidding is offered on exactly the abilities granting is offered on.** It is arguable
+  that restricting is the smaller power and could be handed out more freely; the decision
+  went the other way, because a denial nobody can lift afterwards locks people out of
+  something the person setting it was never trusted with.
+
+### Changed
+
+- The grid's state is now a stance per cell rather than a boolean. Anything reading or
+  writing that state has to be updated.
+
 ## [0.3.0] - 2026-08-10
 
 The roles screen: subjects down the side, actions across the top.
@@ -72,6 +95,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[0.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.1.0
