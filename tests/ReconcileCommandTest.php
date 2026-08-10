@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\CommentResource;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Events\QueryExecuted;
@@ -39,12 +40,17 @@ test('it writes down every ability the catalogue declares', function (): void {
 
     expect(storedNames())->toBe([
         'create',
+        'create',
+        'delete',
         'delete',
         'forceDelete',
         'impersonate-users',
         'page:elpandape-filamentbouncer-tests-fixtures-filament-pages-settings',
         'update',
+        'update',
         'view',
+        'view',
+        'viewAny',
         'viewAny',
         'viewAny',
         'widget:elpandape-filamentbouncer-tests-fixtures-filament-widgets-activity',
@@ -65,7 +71,7 @@ test('running it again writes nothing', function (): void {
     reconcile();
 
     expect(reconcile())->toContain('Created 0 abilities.')
-        ->and(Models::ability()->newQuery()->count())->toBe(11);
+        ->and(Models::ability()->newQuery()->count())->toBe(16);
 });
 
 test('it leaves an ability the catalogue no longer declares in place', function (): void {
@@ -112,6 +118,8 @@ test('checking reports both sides of the difference and fails', function (): voi
 });
 
 test('checking passes once the store matches the catalogue', function (): void {
+    config()->set('filament-bouncer.ignore', [CommentResource::class]);
+
     reconcile();
 
     $status = Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
@@ -123,7 +131,7 @@ test('checking passes once the store matches the catalogue', function (): void {
 test('it accepts the panel to walk on the command line', function (): void {
     reconcile(['--panel' => 'test']);
 
-    expect(Models::ability()->newQuery()->count())->toBe(11);
+    expect(Models::ability()->newQuery()->count())->toBe(16);
 });
 
 test('it refuses a panel that does not exist', function (): void {
@@ -148,7 +156,7 @@ test('a catalogue of a hundred abilities is written in a single insert', functio
     reconcile();
 
     expect($inserts)->toBe(1)
-        ->and(Models::ability()->newQuery()->count())->toBe(110);
+        ->and(Models::ability()->newQuery()->count())->toBe(115);
 });
 
 test('a stored row and its declaration answer to the same identity', function (): void {
@@ -192,6 +200,7 @@ test('it puts the wildcard back after somebody takes it away', function (): void
 });
 
 test('checking fails while the role that holds everything is missing', function (): void {
+    config()->set('filament-bouncer.ignore', [CommentResource::class]);
     config()->set('filament-bouncer.privileged_role', 'owner');
 
     reconcile();
@@ -207,4 +216,21 @@ test('naming no privileged role creates none', function (): void {
     reconcile();
 
     expect(Models::role()->newQuery()->count())->toBe(0);
+});
+
+test('checking denounces a resource whose model has no policy', function (): void {
+    $status = Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
+
+    expect($status)->toBe(1)
+        ->and(Artisan::output())
+        ->toContain('Open to everybody, because their model has no policy')
+        ->toContain(CommentResource::class);
+});
+
+test('a resource named in the ignore list is not denounced', function (): void {
+    config()->set('filament-bouncer.ignore', [CommentResource::class]);
+
+    Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
+
+    expect(Artisan::output())->not->toContain('Open to everybody');
 });

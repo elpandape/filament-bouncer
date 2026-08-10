@@ -55,3 +55,27 @@ function holds(Illuminate\Database\Eloquent\Model $authority, string $ability, ?
 {
     return Bouncer::getClipboard()->check($authority, $ability, $entity);
 }
+
+/**
+ * Signs in somebody who may work the roles screen.
+ *
+ * That screen is governed by abilities like everything else, so reaching it at all takes
+ * a grant. Almost every screen test needs this before it can get to what it is testing.
+ */
+function signInAsRoleManager(): User
+{
+    $user = signIn();
+
+    /** @var class-string $role */
+    $role = Silber\Bouncer\Database\Models::classname(Silber\Bouncer\Database\Role::class);
+
+    grant($user, [
+        ['viewAny', $role],
+        ['view', $role],
+        ['create', $role],
+        ['update', $role],
+        ['delete', $role],
+    ]);
+
+    return $user;
+}

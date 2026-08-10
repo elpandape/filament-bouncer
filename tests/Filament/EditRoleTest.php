@@ -29,7 +29,7 @@ function role(string $name = 'editor'): Model
 }
 
 test('the grid arrives holding what the role was granted', function (): void {
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     $role = role();
     grant($role, [['viewAny', Post::class]]);
@@ -42,7 +42,7 @@ test('the grid arrives holding what the role was granted', function (): void {
 });
 
 test('saving grants what was ticked and takes back what was cleared', function (): void {
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     $role = role();
     grant($role, [['viewAny', Post::class]]);
@@ -62,7 +62,7 @@ test('saving grants what was ticked and takes back what was cleared', function (
 });
 
 test('a grant the editor cannot see survives a save that never mentions it', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role();
     grant($role, [['viewAny', Post::class], ['forceDelete', Post::class]]);
@@ -76,7 +76,7 @@ test('a grant the editor cannot see survives a save that never mentions it', fun
 });
 
 test('the form drops a cell smuggled into the request', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role();
 
@@ -89,7 +89,7 @@ test('the form drops a cell smuggled into the request', function (): void {
 });
 
 test('it refuses to open a role the editor holds themselves', function (): void {
-    $user = signIn();
+    $user = signInAsRoleManager();
     grant($user, [['viewAny', Post::class]]);
 
     $role = role();
@@ -104,7 +104,7 @@ test('it refuses to open a role the editor holds themselves', function (): void 
 test('it refuses to open the role that holds everything', function (): void {
     config()->set('filament-bouncer.privileged_role', 'owner');
 
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role('owner');
 
@@ -115,7 +115,7 @@ test('it refuses to open the role that holds everything', function (): void {
 });
 
 test('an ordinary role stays open', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role();
 
@@ -125,7 +125,7 @@ test('an ordinary role stays open', function (): void {
 });
 
 test('a cell can be set to forbid, and the denial is what the role then carries', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role();
     grant($role, [['viewAny', Post::class]]);

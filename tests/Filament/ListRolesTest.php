@@ -2,19 +2,22 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Filament\Actions\Testing\TestAction;
 use Silber\Bouncer\Database\Models;
+use Silber\Bouncer\Database\Role;
 
 use function Pest\Livewire\livewire;
 
 pest()->extend(TestCase::class);
 
 test('the list shows the roles that exist', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     Models::role()->newQuery()->create(['name' => 'editor']);
     Models::role()->newQuery()->create(['name' => 'reviewer']);
@@ -27,7 +30,7 @@ test('the list shows the roles that exist', function (): void {
 test('the row of the role that holds everything offers no way to edit or delete it', function (): void {
     config()->set('filament-bouncer.privileged_role', 'owner');
 
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $owner = Models::role()->newQuery()->create(['name' => 'owner']);
     $editor = Models::role()->newQuery()->create(['name' => 'editor']);
@@ -39,7 +42,7 @@ test('the row of the role that holds everything offers no way to edit or delete 
 });
 
 test('Filament sends these actions to the pages instead of opening the form in a modal', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = Models::role()->newQuery()->create(['name' => 'editor']);
 
@@ -60,4 +63,22 @@ test('the resource takes how it presents itself from configuration', function ()
         ->and(RoleResource::getNavigationSort())->toBe(7)
         ->and(RoleResource::getSlug())->toBe('access/roles')
         ->and(RoleResource::getRecordTitleAttribute())->toBe('name');
+});
+
+test('the roles screen is governed by an ability like everything else', function (): void {
+    signIn();
+
+    livewire(ListRoles::class)->assertForbidden();
+});
+
+test('the roles screen becomes a row of the grid it draws', function (): void {
+    $user = signInAsRoleManager();
+
+    $role = Subject::keyFor(Models::classname(Role::class));
+
+    livewire(CreateRole::class)
+        ->assertFormFieldExists("abilities.{$role}.viewAny")
+        ->assertFormFieldExists("abilities.{$role}.delete");
+
+    expect($user->exists)->toBeTrue();
 });

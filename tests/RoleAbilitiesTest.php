@@ -26,6 +26,17 @@ function editor(): Model
 }
 
 /**
+ * The part of the grid this file is about. The signed-in authority also holds the
+ * abilities of the roles screen itself, so the whole state carries a row for those too.
+ *
+ * @return array<string, string>
+ */
+function postState(Model $role): array
+{
+    return app(RoleAbilities::class)->toFormState($role)[Subject::keyFor(Post::class)];
+}
+
+/**
  * @param  array<string, Stance>  $cells
  */
 function saveStances(Model $role, array $cells): void
@@ -36,7 +47,7 @@ function saveStances(Model $role, array $cells): void
 }
 
 test('it ignores a cell for an ability the authority does not hold', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
 
@@ -47,18 +58,17 @@ test('it ignores a cell for an ability the authority does not hold', function ()
 });
 
 test('it refuses to forbid an ability the authority does not hold either', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
 
     saveStances($role, ['forceDelete' => Stance::Forbidden]);
 
-    expect(app(RoleAbilities::class)->toFormState($role))
-        ->toBe([$this->post => ['viewAny' => Stance::Neutral->value]]);
+    expect(postState($role))->toBe(['viewAny' => Stance::Neutral->value]);
 });
 
 test('it ignores a whole subject the authority holds nothing of', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
 
@@ -71,7 +81,7 @@ test('it leaves a stance the authority cannot see exactly where it was', functio
     $role = editor();
     grant($role, [['forceDelete', Post::class]]);
 
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     saveStances($role, ['viewAny' => Stance::Granted]);
 
@@ -79,7 +89,7 @@ test('it leaves a stance the authority cannot see exactly where it was', functio
 });
 
 test('a forbidden ability beats a grant the same role was given', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
     grant($role, [['viewAny', Post::class]]);
@@ -87,17 +97,16 @@ test('a forbidden ability beats a grant the same role was given', function (): v
     saveStances($role, ['viewAny' => Stance::Forbidden]);
 
     expect(holds($role, 'viewAny', Post::class))->toBeFalse()
-        ->and(app(RoleAbilities::class)->toFormState($role))
-        ->toBe([$this->post => ['viewAny' => Stance::Forbidden->value]]);
+        ->and(postState($role))->toBe(['viewAny' => Stance::Forbidden->value]);
 });
 
 test('a forbidden ability beats a grant somebody holds from anywhere else', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $reader = editor();
     $forbidder = Models::role()->newQuery()->create(['name' => 'restricted']);
 
-    $user = signIn();
+    $user = signInAsRoleManager();
     grant($user, [['viewAny', Post::class]]);
 
     Bouncer::assign('editor')->to($user);
@@ -110,7 +119,7 @@ test('a forbidden ability beats a grant somebody holds from anywhere else', func
 });
 
 test('lifting a denial hands the ability back', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
 
@@ -121,12 +130,11 @@ test('lifting a denial hands the ability back', function (): void {
     expect(holds($role, 'viewAny', Post::class))->toBeTrue();
 
     saveStances($role, ['viewAny' => Stance::Neutral]);
-    expect(app(RoleAbilities::class)->toFormState($role))
-        ->toBe([$this->post => ['viewAny' => Stance::Neutral->value]]);
+    expect(postState($role))->toBe(['viewAny' => Stance::Neutral->value]);
 });
 
 test('a role holding both rows at once reads back as forbidden', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = editor();
 
@@ -134,15 +142,14 @@ test('a role holding both rows at once reads back as forbidden', function (): vo
     Bouncer::forbid($role)->to('viewAny', Post::class);
     Bouncer::refresh();
 
-    expect(app(RoleAbilities::class)->toFormState($role))
-        ->toBe([$this->post => ['viewAny' => Stance::Forbidden->value]]);
+    expect(postState($role))->toBe(['viewAny' => Stance::Forbidden->value]);
 });
 
 test('it takes back a grant whose cell went neutral', function (): void {
     $role = editor();
     grant($role, [['viewAny', Post::class]]);
 
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     saveStances($role, ['viewAny' => Stance::Neutral]);
 
@@ -153,12 +160,10 @@ test('reading a role back gives the grid the shape the form holds', function ():
     $role = editor();
     grant($role, [['create', Post::class]]);
 
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
-    expect(app(RoleAbilities::class)->toFormState($role))->toBe([
-        $this->post => [
-            'create' => Stance::Granted->value,
-            'viewAny' => Stance::Neutral->value,
-        ],
+    expect(postState($role))->toBe([
+        'create' => Stance::Granted->value,
+        'viewAny' => Stance::Neutral->value,
     ]);
 });

@@ -17,7 +17,7 @@ pest()->extend(TestCase::class);
 test('the detail screen shows the same grid, filled and out of reach', function (): void {
     $post = Subject::keyFor(Post::class);
 
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     $role = Models::role()->newQuery()->create(['name' => 'editor']);
     grant($role, [['create', Post::class]]);
@@ -34,7 +34,7 @@ test('the detail screen shows the same grid, filled and out of reach', function 
 test('the detail screen shows a denial as a denial', function (): void {
     $post = Subject::keyFor(Post::class);
 
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = Models::role()->newQuery()->create(['name' => 'editor']);
     Bouncer::forbid($role)->to('viewAny', Post::class);

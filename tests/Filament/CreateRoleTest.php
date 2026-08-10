@@ -7,8 +7,11 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Policies\OpenRolePolicy;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Illuminate\Support\Facades\Gate;
 use Silber\Bouncer\Database\Models;
+use Silber\Bouncer\Database\Role;
 
 use function Pest\Livewire\livewire;
 
@@ -19,7 +22,7 @@ beforeEach(function (): void {
 });
 
 test('the grid offers the abilities the person filling it in holds', function (): void {
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     livewire(CreateRole::class)
         ->assertFormFieldExists("abilities.{$this->post}.viewAny")
@@ -28,7 +31,7 @@ test('the grid offers the abilities the person filling it in holds', function ()
 });
 
 test('the grid withholds the abilities they do not', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(CreateRole::class)
         ->assertFormFieldDoesNotExist("abilities.{$this->post}.forceDelete")
@@ -36,7 +39,7 @@ test('the grid withholds the abilities they do not', function (): void {
 });
 
 test('creating a role grants exactly the cells that were ticked', function (): void {
-    grant(signIn(), [['viewAny', Post::class], ['create', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     livewire(CreateRole::class)
         ->fillForm([
@@ -56,7 +59,7 @@ test('creating a role grants exactly the cells that were ticked', function (): v
 });
 
 test('the form drops a cell smuggled into the request', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(CreateRole::class)
         ->fillForm(['name' => 'editor'])
@@ -71,7 +74,7 @@ test('the form drops a cell smuggled into the request', function (): void {
 });
 
 test('a role needs a name of its own', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(CreateRole::class)
         ->fillForm(['name' => ''])
@@ -80,7 +83,7 @@ test('a role needs a name of its own', function (): void {
 });
 
 test('a name already taken is refused', function (): void {
-    grant(signIn(), [['viewAny', Post::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     Models::role()->newQuery()->create(['name' => 'editor']);
 
@@ -91,6 +94,8 @@ test('a name already taken is refused', function (): void {
 });
 
 test('somebody holding nothing is told so instead of shown an empty grid', function (): void {
+    Gate::policy(Models::classname(Role::class), OpenRolePolicy::class);
+
     signIn();
 
     livewire(CreateRole::class)
@@ -99,7 +104,7 @@ test('somebody holding nothing is told so instead of shown an empty grid', funct
 });
 
 test('a subject that cannot be asked an action leaves that cell of its row empty', function (): void {
-    grant(signIn(), [['viewAny', Post::class], ['delete', Post::class], ['viewAny', Tag::class]]);
+    grant(signInAsRoleManager(), [['viewAny', Post::class], ['delete', Post::class], ['viewAny', Tag::class]]);
 
     $tag = Subject::keyFor(Tag::class);
 
