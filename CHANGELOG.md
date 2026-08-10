@@ -3,8 +3,36 @@
 All notable changes to `elpandape/filament-bouncer` are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
-project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the
-version is below `1.0.0`, a minor bump may carry a breaking change.
+project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). From
+`1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
+under count as public API, because they are rows in somebody's database.
+
+## [1.0.0] - 2026-08-10
+
+The loop is closed and the surface is frozen. Nothing new here beyond the decisions the
+road to it left open, now settled in writing.
+
+### Decided
+
+- **Nobody hands on an ability they do not hold, not even by delegation.** Separating what
+  you hold from what you may hand on is a real feature and it breaks the one invariant
+  that makes the screen safe. Adding it later needs an explicit list of delegators and
+  tests that attack them.
+- **Abilities on a single record, or on what somebody owns, stay out.** Bouncer stores
+  both and the reconciliation already refuses to touch either, so nothing is foreclosed;
+  they are absent because a grid of subjects against actions has no honest place to draw
+  them.
+- **Constraints are never surfaced.** They are persisted and never evaluated, so offering
+  them would be writing decorative JSON.
+- **A model with a policy but no resource joins the catalogue through `models`.** That is
+  the answer for the ones that live in a vendor package, passkeys being the case that
+  raised the question.
+- **The way back in is the reconcile command**, which is re-runnable, idempotent, and
+  allowed in production: it only ever adds, and `--prune` is the one destructive flag.
+
+### Added
+
+- The stored ability names are now part of the compatibility promise.
 
 ## [0.6.0] - 2026-08-10
 
@@ -151,6 +179,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.0
 [0.6.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v0.4.0

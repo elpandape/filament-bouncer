@@ -3,9 +3,10 @@
 Roles and abilities for [Filament](https://filamentphp.com), built on
 [silber/bouncer](https://github.com/JosephSilber/bouncer).
 
-> **Early days.** `0.6.x` is the last stop before `1.0.0`: the grid reads in the reader's
-> own words, and the public surface has had its pass. The API will change without a major
-> bump while this package is on `0.x`.
+> **Stable from `1.0.0`.** Semantic versioning from here: breaking the public API takes a
+> major bump. That promise covers the **names abilities are stored under** as well as the
+> classes — those names are rows in your database, and changing how one is spelled would
+> silently drop every grant that pointed at it.
 
 ## Why Bouncer
 
@@ -305,6 +306,31 @@ The title Bouncer stores alongside each ability follows the locale in force when
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.
+
+## What this deliberately does not do
+
+Each of these was considered and turned down. They are written here so that the next
+person to want one finds the reasoning rather than the silence.
+
+- **Handing out an ability you do not hold yourself, even by delegation.** A role that
+  administers roles can only pass on what it has. Separating the two sets — what you hold
+  and what you may hand on — is a legitimate feature, and it breaks the single invariant
+  that makes the screen safe to leave open to more than one person. If it is ever added it
+  needs an explicit list of delegators and tests that attack it.
+- **Abilities on one record, or on what somebody owns.** Bouncer stores both, and the
+  reconciliation already refuses to touch either, so nothing here forecloses them. They
+  are absent because a grid of subjects against actions has no honest place to draw "this
+  editor, but only their own posts", and inventing one badly is worse than not having it.
+- **Bouncer's Constraints.** They are persisted and never evaluated: an ability with an
+  impossible constraint still passes. Offering them would be writing decorative JSON.
+  Making them real means a clipboard of our own, which is a component and not an adapter.
+- **Bulk actions on the roles table.** Filament authorises a bulk delete once for the
+  whole selection, and the two refusals that keep the privileged role and your own role
+  out of reach live on the resource. A bulk delete would walk past both.
+- **Bouncer's multi-tenant scope.** The reads this package makes pass the configured scope
+  through, but nothing here is tested against a scoped installation, and
+  `assigned_roles.restricted_to_id` is a dead column in Bouncer 1.0.4 whatever the schema
+  suggests.
 
 ## Things about Bouncer worth knowing before you build on it
 
