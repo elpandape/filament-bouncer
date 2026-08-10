@@ -298,3 +298,9 @@
 }
 
 .fb-empty { padding: 1rem 0; }
+
+.fb-legend {
+    margin-block-start: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--fb-muted);
+}

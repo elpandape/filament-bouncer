@@ -25,6 +25,16 @@ return [
     ],
 
     /*
+     * How the abilities screen presents itself. It shares the navigation group with the
+     * roles resource, because they are the two sides of one thing.
+     */
+    'abilities' => [
+        'icon' => null,
+        'sort' => null,
+        'slug' => 'security/abilities',
+    ],
+
+    /*
      * Which actions weigh the same. The grid groups its columns by these and tints the
      * headings, so that "see a list" cannot sit next to "delete for good" looking like
      * the same decision. Anything not named here counts as a write.
