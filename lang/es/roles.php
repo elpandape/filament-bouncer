@@ -13,6 +13,13 @@ return [
         'empty' => 'No tienes ninguna habilidad propia, así que aquí no hay nada que ceder.',
     ],
 
+    'tabs' => [
+        'subjects' => 'Recursos y modelos',
+        'pages' => 'Páginas',
+        'widgets' => 'Widgets',
+        'custom' => 'Personalizadas',
+    ],
+
     'table' => [
         'abilities' => 'Habilidades',
     ],

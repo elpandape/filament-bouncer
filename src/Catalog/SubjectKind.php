@@ -17,6 +17,22 @@ enum SubjectKind: string
     case Custom = 'custom';
 
     /**
+     * The part of the screen the kind is read in.
+     *
+     * Resources and models share one, because both answer a policy and so both have
+     * columns to fill; the rest have a single action each and are read as lists.
+     */
+    public function tab(): CatalogTab
+    {
+        return match ($this) {
+            self::Resource, self::Model => CatalogTab::Subjects,
+            self::Page => CatalogTab::Pages,
+            self::Widget => CatalogTab::Widgets,
+            self::Custom => CatalogTab::Custom,
+        };
+    }
+
+    /**
      * Where the kind sits when rows are laid out top to bottom.
      */
     public function order(): int

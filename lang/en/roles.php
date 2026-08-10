@@ -13,6 +13,13 @@ return [
         'empty' => 'You hold no abilities of your own, so there is nothing here to hand on.',
     ],
 
+    'tabs' => [
+        'subjects' => 'Resources & models',
+        'pages' => 'Pages',
+        'widgets' => 'Widgets',
+        'custom' => 'Custom',
+    ],
+
     'table' => [
         'abilities' => 'Abilities',
     ],

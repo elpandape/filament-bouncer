@@ -37,6 +37,29 @@ final readonly class Catalog
         return $abilities;
     }
 
+    /**
+     * The subjects grouped the way the screen reads them, in tab order.
+     *
+     * Only the tabs that hold something come back, so a panel with no widgets never
+     * grows an empty tab for them.
+     *
+     * @return array<string, array<string, Subject>> keyed by tab value, then subject key
+     */
+    public function tabs(): array
+    {
+        $tabs = [];
+
+        foreach (CatalogTab::cases() as $tab) {
+            $tabs[$tab->value] = [];
+        }
+
+        foreach ($this->subjects as $key => $subject) {
+            $tabs[$subject->kind->tab()->value][$key] = $subject;
+        }
+
+        return array_filter($tabs, static fn (array $subjects): bool => $subjects !== []);
+    }
+
     public function subject(string $key): ?Subject
     {
         return $this->subjects[$key] ?? null;
