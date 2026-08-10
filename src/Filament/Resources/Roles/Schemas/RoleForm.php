@@ -288,8 +288,12 @@ final class RoleForm
             // hold it.
             ->hiddenButtonLabels()
             ->tooltips(app(Labels::class)->stances())
-            ->inline()
-            ->grouped()
+            // Stacked, because three of them side by side are 134 pixels wide and a
+            // column of a catalogue with eight actions is 103 — measured, after they
+            // were shipped overflowing into the neighbouring column. Marks stack far
+            // shorter than the words did, which is what the change bought; it did not
+            // buy room to lay them out in a row.
+            ->columns(1)
             ->default(Stance::Neutral->value)
             ->required();
     }
