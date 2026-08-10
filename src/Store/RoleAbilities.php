@@ -41,6 +41,24 @@ final readonly class RoleAbilities
     }
 
     /**
+     * Whether the role answers yes to an ability once every rule it holds is taken
+     * into account, and not merely the row that names the ability exactly.
+     *
+     * A role granted `everything()` holds no row for `view` on anything, and yet
+     * answers yes to all of them. The grid reads the exact rows, because those are
+     * what it writes back; this reads what Bouncer would actually answer, so the two
+     * together can say the one thing a grid alone cannot: that a role holds something
+     * nobody handed it.
+     *
+     * The clipboard is asked rather than the identifiers being matched here by hand,
+     * so that the answer on screen and the answer at the Gate come from the same code.
+     */
+    public function holds(Model $role, Ability $ability): bool
+    {
+        return $this->bouncer->getClipboard()->check($role, $ability->name, $ability->entityType);
+    }
+
+    /**
      * Bring the role's stances in line with what the form was saved holding.
      *
      * The incoming state is never walked. Everything is driven off the catalogue this
