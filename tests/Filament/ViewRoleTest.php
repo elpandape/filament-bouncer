@@ -7,6 +7,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Actions\Testing\TestAction;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
 
@@ -42,4 +43,19 @@ test('the detail screen shows a denial as a denial', function (): void {
 
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertFormSet(["abilities.{$post}.viewAny" => Stance::Forbidden->value]);
+});
+
+test('the detail screen of a role nobody may edit offers no way in', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $owner = Models::role()->newQuery()->create(['name' => 'owner']);
+    $editor = Models::role()->newQuery()->create(['name' => 'editor']);
+
+    livewire(ViewRole::class, ['record' => $owner->getKey()])
+        ->assertActionHidden(TestAction::make('edit'));
+
+    livewire(ViewRole::class, ['record' => $editor->getKey()])
+        ->assertActionVisible(TestAction::make('edit'));
 });

@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
@@ -139,4 +140,13 @@ test('a cell can be set to forbid, and the denial is what the role then carries'
 
     livewire(EditRole::class, ['record' => $role->getKey()])
         ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Forbidden->value]);
+});
+
+test('the edit screen of a role nobody may delete offers no way to', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $role = role();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertActionVisible(TestAction::make('delete'));
 });
