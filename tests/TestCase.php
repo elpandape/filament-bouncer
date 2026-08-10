@@ -7,6 +7,10 @@ namespace ElPandaPe\FilamentBouncer\Tests;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use ElPandaPe\FilamentBouncer\FilamentBouncerServiceProvider;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Comment;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Providers\TestPanelProvider;
 use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
@@ -19,8 +23,10 @@ use Filament\Tables\TablesServiceProvider;
 use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as ApplicationTestCase;
 use Silber\Bouncer\BouncerServiceProvider;
@@ -97,6 +103,7 @@ abstract class TestCase extends ApplicationTestCase
             WidgetsServiceProvider::class,
             LivewireServiceProvider::class,
             BouncerServiceProvider::class,
+            TestPanelProvider::class,
         ];
     }
 
@@ -125,6 +132,16 @@ abstract class TestCase extends ApplicationTestCase
 
         $config->set('auth.defaults.guard', 'web');
         $config->set('auth.guards.web', ['driver' => 'session', 'provider' => 'users']);
+
+        // Bouncer reads the user model out of this path when it boots. Left at
+        // testbench's default it points at a class that does not exist here, and the
+        // first query through `Models::user()` dies resolving it.
+        $config->set('auth.providers.users', ['driver' => 'eloquent', 'model' => User::class]);
+
+        // The fixture panel only carries resources, pages and widgets, so these two
+        // keys are the only way the suite reaches the other two kinds of subject.
+        $config->set('filament-bouncer.models', [Tag::class, Comment::class]);
+        $config->set('filament-bouncer.custom', ['impersonate-users' => 'write']);
 
         // `app_path()` se deja a propósito apuntando al esqueleto de testbench. Moverlo con
         // `useAppPath()` hace que `Application::getNamespace()` lance `Unable to detect
@@ -160,5 +177,12 @@ abstract class TestCase extends ApplicationTestCase
         $migration = require dirname(__DIR__).'/vendor/silber/bouncer/migrations/create_bouncer_tables.php';
 
         $migration->up(); // @phpstan-ignore method.notFound
+
+        // Only the abilities that are about one record need a record to be about, and
+        // this is the fixture model the suite hands to Bouncer for that.
+        Schema::create('posts', static function (Blueprint $table): void {
+            $table->id();
+            $table->timestamps();
+        });
     }
 }
