@@ -64,7 +64,7 @@ test('an ability carries the title the catalogue gave it', function (): void {
     /** @var string $title */
     $title = Models::ability()->newQuery()->where('name', 'forceDelete')->value('title');
 
-    expect($title)->toBe('Posts: Force Delete');
+    expect($title)->toBe('Posts: Delete for good');
 });
 
 test('running it again writes nothing', function (): void {
@@ -233,4 +233,20 @@ test('a resource named in the ignore list is not denounced', function (): void {
     Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
 
     expect(Artisan::output())->not->toContain('Open to everybody');
+});
+
+test('it counts in the plural, and in the singular when there is one', function (): void {
+    expect(reconcile())->toContain('Created 16 abilities.');
+
+    Bouncer::allow('editor')->to('sing-a-song');
+
+    expect(reconcile(['--prune' => true]))
+        ->toContain('Created 0 abilities.')
+        ->toContain('Deleted 1 ability, and every grant that pointed at it.');
+});
+
+test('it says the same in Spanish', function (): void {
+    app()->setLocale('es');
+
+    expect(reconcile())->toContain('Creadas 16 habilidades.');
 });

@@ -84,7 +84,7 @@ test('a model ability is stored against the model and a component ability agains
 
     expect($post?->attributes())->toBe([
         'name' => 'viewAny',
-        'title' => 'Posts: View Any',
+        'title' => 'Posts: See the list',
         'entity_id' => null,
         'entity_type' => Post::class,
         'only_owned' => false,
