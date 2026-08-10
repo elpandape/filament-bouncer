@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Concerns;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
-use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -121,7 +121,7 @@ trait FillsAbilityHolders
 
         $identity = Ability::identityFor($name, $entityType);
 
-        foreach (app(EditableCatalog::class)->current()->subjects as $subject) {
+        foreach (app(CatalogRegistry::class)->current()->subjects as $subject) {
             foreach ($subject->cells() as $action => $ability) {
                 if ($ability->identity() === $identity) {
                     return [$subject->key, $action];

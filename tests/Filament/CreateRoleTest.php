@@ -3,10 +3,16 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\CommentResource;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\PostResource;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Widgets\Activity;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Widgets\Stats;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
@@ -33,12 +39,12 @@ test('the grid offers the abilities the person filling it in holds', function ()
         ->and($state[$this->post]['create'])->toBe(Stance::Neutral->value);
 });
 
-test('the grid withholds the abilities they do not', function (): void {
+test('the grid offers everything the panel declares, held or not', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     expect(offeredCells(gridState(livewire(CreateRole::class))))
-        ->not->toContain("{$this->post}.forceDelete")
-        ->not->toContain("{$this->post}.delete");
+        ->toContain("{$this->post}.forceDelete")
+        ->toContain("{$this->post}.delete");
 });
 
 test('creating a role grants exactly the cells that were ticked', function (): void {
@@ -61,19 +67,20 @@ test('creating a role grants exactly the cells that were ticked', function (): v
         ->and(holds($role, 'create', Post::class))->toBeFalse();
 });
 
-test('the form drops a cell smuggled into the request', function (): void {
+test('the form drops a cell for something the panel does not declare', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(CreateRole::class)
         ->fillForm(['name' => 'editor'])
-        ->set("data.abilities.{$this->post}.forceDelete", Stance::Granted->value)
+        ->set("data.abilities.{$this->post}.inventedByHand", Stance::Granted->value)
+        ->set('data.abilities.no-such-subject.viewAny', Stance::Granted->value)
         ->call('create')
         ->assertHasNoFormErrors();
 
     $role = Models::role()->newQuery()->where('name', 'editor')->firstOrFail();
 
-    expect(holds($role, 'forceDelete', Post::class))->toBeFalse()
-        ->and($role->abilities()->count())->toBe(0);
+    expect(holds($role, 'inventedByHand', Post::class))->toBeFalse()
+        ->and(abilityCount($role))->toBe(0);
 });
 
 test('a role needs a name of its own', function (): void {
@@ -96,16 +103,14 @@ test('a name already taken is refused', function (): void {
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('somebody holding nothing is told so instead of shown an empty grid', function (): void {
+test('somebody who holds nothing at all still hands out everything', function (): void {
     Gate::policy(Models::classname(Role::class), OpenRolePolicy::class);
 
     signIn();
 
-    $component = livewire(CreateRole::class);
-
-    expect(offeredCells(gridState($component)))->not->toContain("{$this->post}.viewAny");
-
-    $component->assertSee('You hold no abilities of your own');
+    expect(offeredCells(gridState(livewire(CreateRole::class))))
+        ->toContain("{$this->post}.viewAny")
+        ->toContain("{$this->post}.forceDelete");
 });
 
 test('a subject that cannot be asked an action leaves that cell of its row empty', function (): void {
@@ -147,4 +152,24 @@ test('a page, a widget and a custom ability are offered as lists in tabs of thei
     expect(holds($role, $page))->toBeTrue()
         ->and(holds($role, $widget))->toBeFalse()
         ->and(holds($role, 'impersonate-users'))->toBeTrue();
+});
+
+test('a panel that declares nothing says so instead of drawing an empty grid', function (): void {
+    config()->set('filament-bouncer.models', []);
+    config()->set('filament-bouncer.custom', []);
+    config()->set('filament-bouncer.ignore', [
+        PostResource::class,
+        CommentResource::class,
+        Settings::class,
+        Stats::class,
+        Activity::class,
+        RoleResource::class,
+        AbilityResource::class,
+    ]);
+    app(CatalogRegistry::class)->forget();
+
+    Gate::policy(Models::classname(Role::class), OpenRolePolicy::class);
+    signIn();
+
+    livewire(CreateRole::class)->assertSee(__('filament-bouncer::roles.form.empty'));
 });

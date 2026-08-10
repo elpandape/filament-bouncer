@@ -52,6 +52,6 @@ return [
 
     'nobody_short' => 'nadie',
 
-    'withheld' => 'Esta habilidad no la posees, así que no es tuya para repartirla.',
+    'withheld' => 'El código ya no declara esta habilidad, así que aquí no hay nada que repartir.',
 
 ];

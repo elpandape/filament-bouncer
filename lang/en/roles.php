@@ -9,7 +9,7 @@ return [
         'name' => 'Name',
         'title' => 'Title',
         'abilities' => 'Abilities',
-        'description' => 'Only the abilities you hold yourself are shown, because those are the only ones you are able to hand on — or to take away.',
+        'description' => 'Everything the panel declares. Whoever may work this screen hands out any of it, including to themselves.',
         'empty' => 'You hold no abilities of your own, so there is nothing here to hand on.',
         'inherited' => 'Held through a broader rule, not granted here.',
         'overruled' => 'Granted here, but a broader rule forbids it.',

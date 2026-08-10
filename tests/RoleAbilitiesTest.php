@@ -47,48 +47,6 @@ function saveStances(Model $role, array $cells): void
     ]);
 }
 
-test('it ignores a cell for an ability the authority does not hold', function (): void {
-    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
-
-    $role = editor();
-
-    saveStances($role, ['viewAny' => Stance::Granted, 'forceDelete' => Stance::Granted]);
-
-    expect(holds($role, 'viewAny', Post::class))->toBeTrue()
-        ->and(holds($role, 'forceDelete', Post::class))->toBeFalse();
-});
-
-test('it refuses to forbid an ability the authority does not hold either', function (): void {
-    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
-
-    $role = editor();
-
-    saveStances($role, ['forceDelete' => Stance::Forbidden]);
-
-    expect(postState($role))->toBe(['viewAny' => Stance::Neutral->value]);
-});
-
-test('it ignores a whole subject the authority holds nothing of', function (): void {
-    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
-
-    $role = editor();
-
-    app(RoleAbilities::class)->save($role, ['impersonate-users' => ['use' => Stance::Granted->value]]);
-
-    expect(holds($role, 'impersonate-users'))->toBeFalse();
-});
-
-test('it leaves a stance the authority cannot see exactly where it was', function (): void {
-    $role = editor();
-    grant($role, [['forceDelete', Post::class]]);
-
-    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
-
-    saveStances($role, ['viewAny' => Stance::Granted]);
-
-    expect(holds($role, 'forceDelete', Post::class))->toBeTrue();
-});
-
 test('a forbidden ability beats a grant the same role was given', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
@@ -98,7 +56,7 @@ test('a forbidden ability beats a grant the same role was given', function (): v
     saveStances($role, ['viewAny' => Stance::Forbidden]);
 
     expect(holds($role, 'viewAny', Post::class))->toBeFalse()
-        ->and(postState($role))->toBe(['viewAny' => Stance::Forbidden->value]);
+        ->and(postState($role)['viewAny'])->toBe(Stance::Forbidden->value);
 });
 
 test('a forbidden ability beats a grant somebody holds from anywhere else', function (): void {
@@ -131,7 +89,7 @@ test('lifting a denial hands the ability back', function (): void {
     expect(holds($role, 'viewAny', Post::class))->toBeTrue();
 
     saveStances($role, ['viewAny' => Stance::Neutral]);
-    expect(postState($role))->toBe(['viewAny' => Stance::Neutral->value]);
+    expect(postState($role)['viewAny'])->toBe(Stance::Neutral->value);
 });
 
 test('a role holding both rows at once reads back as forbidden', function (): void {
@@ -143,7 +101,7 @@ test('a role holding both rows at once reads back as forbidden', function (): vo
     Bouncer::forbid($role)->to('viewAny', Post::class);
     Bouncer::refresh();
 
-    expect(postState($role))->toBe(['viewAny' => Stance::Forbidden->value]);
+    expect(postState($role)['viewAny'])->toBe(Stance::Forbidden->value);
 });
 
 test('it takes back a grant whose cell went neutral', function (): void {
@@ -164,7 +122,12 @@ test('reading a role back gives the grid the shape the form holds', function ():
     grant(signInAsRoleManager(), [['viewAny', Post::class], ['create', Post::class]]);
 
     expect(postState($role))->toBe([
+        'manage' => Stance::Neutral->value,
         'create' => Stance::Granted->value,
+        'delete' => Stance::Neutral->value,
+        'forceDelete' => Stance::Neutral->value,
+        'update' => Stance::Neutral->value,
+        'view' => Stance::Neutral->value,
         'viewAny' => Stance::Neutral->value,
     ]);
 });
@@ -218,12 +181,33 @@ function restrictedRows(Model $role): int
         ->count();
 }
 
-test('it ignores a whole-model grant smuggled in by somebody who cannot manage that model', function (): void {
-    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+test('the grid hands out what the person filling it in does not hold themselves', function (): void {
+    signInAsRoleManager();
 
     $role = editor();
-    saveStances($role, [Ability::MANAGE_ACTION => Stance::Granted]);
-    Bouncer::refresh();
 
-    expect(Bouncer::getClipboard()->check($role, 'delete', Post::class))->toBeFalse();
+    saveStances($role, ['forceDelete' => Stance::Granted]);
+
+    expect(holds($role, 'forceDelete', Post::class))->toBeTrue();
+});
+
+test('a cell for something the panel does not declare still changes nothing', function (): void {
+    signInAsRoleManager();
+
+    $role = editor();
+
+    app(RoleAbilities::class)->save($role, ['invented' => ['byHand' => Stance::Granted->value]]);
+
+    expect(abilityCount($role))->toBe(0);
+});
+
+test('an untouched cell is left exactly where it was', function (): void {
+    signInAsRoleManager();
+
+    $role = editor();
+    grant($role, [['forceDelete', Post::class]]);
+
+    saveStances($role, ['viewAny' => Stance::Granted]);
+
+    expect(holds($role, 'forceDelete', Post::class))->toBeTrue();
 });

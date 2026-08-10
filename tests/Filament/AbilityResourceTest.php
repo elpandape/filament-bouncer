@@ -109,30 +109,23 @@ test('a stance set from this end is the same row the roles screen writes', funct
     expect(holds($role, 'viewAny', Post::class))->toBeTrue();
 });
 
-test('it says so rather than offering an ability the reader does not hold', function (): void {
-    /** @var class-string $ability */
-    $ability = Models::classname(Ability::class);
+test('a row the code no longer declares carries no cells', function (): void {
+    signInAsAbilityReader();
 
-    grant(signIn(), [
-        ['viewAny', $ability],
-        ['view', $ability],
-        ['update', $ability],
-    ]);
-
-    $row = storedViewAny();
+    /** @var Model $huerfana */
+    $huerfana = Models::ability()->newQuery()->make();
+    $huerfana->forceFill(['name' => 'no-longer-declared', 'title' => 'No longer declared'])->save();
 
     /** @var Model $role */
     $role = Models::role()->newQuery()->create(['name' => 'editor']);
 
-    livewire(EditAbility::class, ['record' => $row->getKey()])
+    livewire(EditAbility::class, ['record' => $huerfana->getKey()])
         ->assertSee(__('filament-bouncer::abilities.withheld'))
-        ->fillForm(['title' => 'Renombrada igual'])
+        ->fillForm(['title' => 'Renamed all the same'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    Bouncer::refresh();
-
-    expect(holds($role, 'viewAny', Post::class))->toBeFalse();
+    expect(abilityCount($role))->toBe(0);
 });
 
 test('the screen takes its place in the panel from configuration', function (): void {

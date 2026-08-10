@@ -77,17 +77,17 @@ test('a grant the editor cannot see survives a save that never mentions it', fun
     expect(holds($role, 'forceDelete', Post::class))->toBeTrue();
 });
 
-test('the form drops a cell smuggled into the request', function (): void {
+test('the form drops a cell for something the panel does not declare', function (): void {
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     $role = role();
 
     livewire(EditRole::class, ['record' => $role->getKey()])
-        ->set("data.abilities.{$this->post}.forceDelete", Stance::Granted->value)
+        ->set("data.abilities.{$this->post}.inventedByHand", Stance::Granted->value)
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(holds($role, 'forceDelete', Post::class))->toBeFalse();
+    expect(abilityCount($role))->toBe(0);
 });
 
 test('it refuses to open a role the editor holds themselves', function (): void {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Forms;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
-use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -21,6 +21,9 @@ use Silber\Bouncer\Database\Models;
  * the same row of the same table — which is the point. Deciding who may do a thing is a
  * question people ask in both directions, and answering it in one of them only means
  * opening every role in turn to answer it in the other.
+ *
+ * Nothing is withheld from whoever the policy let in. A row the panel no longer declares
+ * still has no cells, because there is nothing to line them up against.
  */
 final class AbilityHolders extends Field
 {
@@ -114,9 +117,8 @@ final class AbilityHolders extends Field
     /**
      * Locates the catalogue entry a stored row stands for.
      *
-     * Nothing is offered for a row the narrowed catalogue does not carry: an ability the
-     * reader does not hold themselves is one they may not hand on, and one the code no
-     * longer declares is not theirs to move about either.
+     * A row the catalogue no longer declares carries no cells: there is nothing to line
+     * them up against, and the list says as much in its own column.
      */
     /**
      * Resolved on first use rather than while the schema is being built: a component has
@@ -136,7 +138,7 @@ final class AbilityHolders extends Field
         // matches nothing, which is the same answer as a row the catalogue dropped.
         $identity = $record instanceof Model ? Ability::identityFor($this->nameOf($record), $this->entityOf($record)) : '';
 
-        foreach (app(EditableCatalog::class)->current()->subjects as $subject) {
+        foreach (app(CatalogRegistry::class)->current()->subjects as $subject) {
             foreach ($subject->cells() as $action => $ability) {
                 if ($ability->identity() === $identity) {
                     $this->subject = $subject;

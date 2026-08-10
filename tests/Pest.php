@@ -122,3 +122,21 @@ function offeredCells(array $state): array
 
     return $paths;
 }
+
+/**
+ * How many abilities a role holds, counted through the pivot rather than a relation the
+ * analyser cannot see on whatever model the application configured.
+ */
+function abilityCount(Illuminate\Database\Eloquent\Model $role): int
+{
+    return Silber\Bouncer\Database\Models::ability()->newQuery()
+        ->join(
+            Silber\Bouncer\Database\Models::table('permissions'),
+            Silber\Bouncer\Database\Models::table('permissions').'.ability_id',
+            '=',
+            Silber\Bouncer\Database\Models::table('abilities').'.id',
+        )
+        ->where(Silber\Bouncer\Database\Models::table('permissions').'.entity_id', $role->getKey())
+        ->where(Silber\Bouncer\Database\Models::table('permissions').'.entity_type', $role->getMorphClass())
+        ->count();
+}

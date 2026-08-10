@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Tables;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
-use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -92,7 +92,7 @@ final class AbilitiesTable
         $abilities = app(RoleAbilities::class);
         $held = [];
 
-        foreach (app(EditableCatalog::class)->current()->subjects as $subject) {
+        foreach (app(CatalogRegistry::class)->current()->subjects as $subject) {
             foreach ($subject->cells() as $action => $ability) {
                 if ($ability->identity() !== $identity) {
                     continue;

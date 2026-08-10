@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Store;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
-use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Bouncer;
@@ -20,7 +20,7 @@ final readonly class RoleAbilities
 {
     public function __construct(
         private Bouncer $bouncer,
-        private EditableCatalog $editable,
+        private CatalogRegistry $catalogs,
     ) {}
 
     /**
@@ -33,7 +33,7 @@ final readonly class RoleAbilities
         $stances = $this->stances($role);
         $state = [];
 
-        foreach ($this->editable->current()->subjects as $key => $subject) {
+        foreach ($this->catalogs->current()->subjects as $key => $subject) {
             foreach ($subject->cells() as $action => $ability) {
                 $state[$key][$action] = ($stances[$ability->identity()] ?? Stance::Neutral)->value;
             }
@@ -107,15 +107,14 @@ final readonly class RoleAbilities
     /**
      * Bring the role's stances in line with what the form was saved holding.
      *
-     * The incoming state is never walked. Everything is driven off the catalogue this
-     * authority may decide about, so a cell smuggled into the request for an ability
-     * they do not hold has nothing to match against and changes nothing — and a stance
-     * they cannot see is never overwritten either.
+     * The incoming state is never walked. Everything is driven off the catalogue, so a
+     * cell smuggled into the request for something the panel does not declare has
+     * nothing to match against and changes nothing.
      *
-     * Forbidding is treated exactly like granting, and is offered on the same abilities
-     * and no others. Forbidding looks like a smaller power than granting, but a denial
-     * you are unable to lift afterwards is a way to lock somebody out of something you
-     * were never trusted with, so both go through the same gate.
+     * Who may be here at all is the policy's question, and the only one. Somebody the
+     * policy lets work this screen hands out every ability the panel declares, whether
+     * or not they hold it themselves — including the wildcard, and including to
+     * themselves.
      *
      * @param  array<string, array<string, string>>  $state
      */
@@ -123,8 +122,16 @@ final readonly class RoleAbilities
     {
         $stances = $this->stances($role);
 
-        foreach ($this->editable->current()->subjects as $key => $subject) {
+        foreach ($this->catalogs->current()->subjects as $key => $subject) {
             foreach ($subject->cells() as $action => $ability) {
+                // A cell the state does not mention is one nobody was asked about, and
+                // silence is not an instruction to clear it. This is what lets the
+                // abilities screen write a single cell without taking every other
+                // ability of that role down with it.
+                if (! array_key_exists($action, is_array($state[$key] ?? null) ? $state[$key] : [])) {
+                    continue;
+                }
+
                 $current = $stances[$ability->identity()] ?? Stance::Neutral;
                 $wanted = Stance::tryFrom((string) ($state[$key][$action] ?? '')) ?? Stance::Neutral;
 

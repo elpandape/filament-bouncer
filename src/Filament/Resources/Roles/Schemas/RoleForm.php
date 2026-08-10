@@ -6,7 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 
 use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
-use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
@@ -33,7 +33,7 @@ final class RoleForm
 
     public static function configure(Schema $schema): Schema
     {
-        $catalog = app(EditableCatalog::class)->current();
+        $catalog = app(CatalogRegistry::class)->current();
 
         return $schema->components([
             Section::make(__('filament-bouncer::roles.form.role'))

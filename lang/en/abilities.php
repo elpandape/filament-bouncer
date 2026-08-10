@@ -52,6 +52,6 @@ return [
 
     'nobody_short' => 'nobody',
 
-    'withheld' => 'This ability is not one you hold yourself, so it is not yours to hand on.',
+    'withheld' => 'The code no longer declares this ability, so there is nothing here to hand out.',
 
 ];
