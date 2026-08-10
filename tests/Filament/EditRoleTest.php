@@ -150,3 +150,28 @@ test('the edit screen of a role nobody may delete offers no way to', function ()
     livewire(EditRole::class, ['record' => $role->getKey()])
         ->assertActionVisible(TestAction::make('delete'));
 });
+
+test('a cell says so when the role holds the ability through a rule nobody set here', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $role = role();
+    Bouncer::allow($role)->everything();
+    Bouncer::refresh();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Neutral->value])
+        ->assertSee(__('filament-bouncer::roles.form.inherited'));
+});
+
+test('a cell says so when a broader denial beats the grant made in it', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $role = role();
+    grant($role, [['viewAny', Post::class]]);
+    Bouncer::forbid($role)->everything();
+    Bouncer::refresh();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Granted->value])
+        ->assertSee(__('filament-bouncer::roles.form.overruled'));
+});
