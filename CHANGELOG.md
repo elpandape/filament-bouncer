@@ -7,6 +7,33 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [1.3.0] - 2026-08-10
+
+### Fixed
+
+- **A grant over only what a role owns read as a grant over everything.** Bouncer keeps a
+  grant over a whole model, a grant over one record and a grant over what the holder owns
+  in three separate rows, and `allow()->to($name, Post::class)` matches exactly the first
+  of them. The grid read all three and reported them as the plain stance, so a role that
+  could delete only its own posts read as one that could delete anybody's.
+- **That cell could not be turned off.** Clearing it removed a row that was never there,
+  and the screen repainted the stance it had just cleared. The stances now read the row
+  the grid writes, and nothing else.
+
+### Added
+
+- The store counts the rules the grid never offers, and the cell names them: the ones
+  covering only what the role owns, and the ones about single records. Skipping them was
+  necessary; staying silent about them would have been its own lie.
+- The three notices on a cell now compose, so a stance can be reached through a broader
+  rule and still be restricted elsewhere without either fact hiding the other.
+
+### Guaranteed
+
+- **A save never destroys what the grid never offered.** Pinned by a test, because the
+  grid clearing a cell must leave a role's owned and per-record rules exactly where they
+  were.
+
 ## [1.2.0] - 2026-08-10
 
 ### Fixed
@@ -268,6 +295,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[1.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.3.0
 [1.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.2.0
 [1.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.1.0
 [1.0.3]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.0.3
