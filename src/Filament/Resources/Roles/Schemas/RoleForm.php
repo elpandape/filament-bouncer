@@ -9,8 +9,9 @@ use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\EditableCatalog;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
-use Filament\Forms\Components\Checkbox;
+use ElPandaPe\FilamentBouncer\Store\Stance;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -47,7 +48,7 @@ final class RoleForm
                 ])
                 ->columns(2),
             Section::make('Abilities')
-                ->description('Only the abilities you hold yourself are shown, because those are the only ones you are able to hand on.')
+                ->description('Only the abilities you hold yourself are shown, because those are the only ones you are able to hand on — or to take away.')
                 ->schema(self::matrix(app(EditableCatalog::class)->current())),
         ]);
     }
@@ -128,9 +129,14 @@ final class RoleForm
             $ability = $subject->ability($action);
 
             $cells[] = $ability instanceof Ability
-                ? Checkbox::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
+                ? ToggleButtons::make(self::ABILITIES.'.'.$subject->key.'.'.$action)
                     ->label($ability->title)
                     ->hiddenLabel()
+                    ->options(Stance::labels())
+                    ->colors(Stance::colors())
+                    ->default(Stance::Neutral->value)
+                    ->required()
+                    ->grouped()
                 : Text::make('');
         }
 

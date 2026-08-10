@@ -24,11 +24,11 @@ trait SavesRoleAbilities
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, array<string, bool>>
+     * @return array<string, array<string, string>>
      */
     protected function abilitiesFrom(array $data): array
     {
-        /** @var array<string, array<string, bool>> $abilities */
+        /** @var array<string, array<string, string>> $abilities */
         $abilities = $data[RoleForm::ABILITIES] ?? [];
 
         return $abilities;
