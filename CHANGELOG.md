@@ -7,6 +7,42 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [2.0.0] - 2026-08-10
+
+The grid is a table now, and the package draws it itself.
+
+### Changed
+
+- **A cell is one button that walks the three stances**, filled when this row is the
+  rule, outlined when a broader rule reaches it or a rule it cannot write restricts it,
+  pale when nothing says anything. Three buttons never fitted a column and stacking them
+  made the grid as tall as the catalogue is wide.
+- **The header and the first column stay put.** A row is unreadable once its name has
+  scrolled off, and a column is unreadable once its heading has.
+- Each subject carries the policy that answers for it, each column the method it asks,
+  and each band its weight — read before any of it is read in detail.
+- Tabs are the package's own, because Filament's live outside a field.
+
+### Removed
+
+- `Stance::color()`, `Stance::colors()`, `Stance::icon()`, `Stance::icons()` and
+  `AbilityScope::color()`. Nothing draws from them any more: the colours are in the
+  stylesheet, keyed by scope, and the marks are in the view. This is the whole reason
+  for the major.
+
+### Added
+
+- A view, a stylesheet and a form field of the package's own. The stylesheet is
+  registered with Filament, so `filament:assets` publishes it beside the panel's own and
+  no build step is asked of the application; it reads from the panel's colour tokens and
+  defines no utility class, so nothing depends on the consuming application's Tailwind.
+- The view is publishable with `--tag=filament-bouncer-views`.
+
+### Upgrading
+
+Run `php artisan filament:assets` after updating. Nothing else changes: the stored
+ability names, the configuration and the shape of the form state are all as they were.
+
 ## [1.5.1] - 2026-08-10
 
 ### Fixed
@@ -341,6 +377,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[2.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.0
 [1.5.1]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.1
 [1.5.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.5.0
 [1.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v1.4.0
