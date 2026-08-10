@@ -6,6 +6,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Catalog\SubjectKind;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
@@ -126,4 +127,28 @@ test('the catalogue is built once per panel', function (): void {
 test('a catalogue with nothing in it knows so', function (): void {
     expect(new Catalog([], [])->isEmpty())->toBeTrue()
         ->and(catalog()->isEmpty())->toBeFalse();
+});
+
+test('the catalogue divides into tabs, and each kind knows which one it is read in', function (): void {
+    $tabs = catalog()->tabs();
+
+    expect(array_keys($tabs))->toBe([
+        CatalogTab::Subjects->value,
+        CatalogTab::Pages->value,
+        CatalogTab::Widgets->value,
+        CatalogTab::Custom->value,
+    ])
+        ->and($tabs[CatalogTab::Subjects->value])->toHaveKey(Subject::keyFor(Post::class))
+        ->and($tabs[CatalogTab::Pages->value])->toHaveKey(Subject::keyFor(Settings::class))
+        ->and($tabs[CatalogTab::Widgets->value])->toHaveKey(Subject::keyFor(Stats::class))
+        ->and($tabs[CatalogTab::Custom->value])->toHaveKey('impersonate-users')
+        ->and(CatalogTab::Subjects->isGrid())->toBeTrue()
+        ->and(CatalogTab::Pages->isGrid())->toBeFalse();
+});
+
+test('a tab with nothing to show never appears', function (): void {
+    $subject = new Subject('post', 'Post', SubjectKind::Resource, null, []);
+    $catalog = new Catalog([$subject->key => $subject], []);
+
+    expect(array_keys($catalog->tabs()))->toBe([CatalogTab::Subjects->value]);
 });

@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Widgets\Stats;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Policies\OpenRolePolicy;
@@ -113,4 +116,32 @@ test('a subject that cannot be asked an action leaves that cell of its row empty
         ->assertFormFieldExists("abilities.{$tag}.viewAny")
         ->assertFormFieldDoesNotExist("abilities.{$tag}.delete")
         ->assertSee('Withdraw');
+});
+
+test('a page, a widget and a custom ability are offered as lists in tabs of their own', function (): void {
+    $page = 'page:'.Subject::keyFor(Settings::class);
+    $widget = 'widget:'.Subject::keyFor(Stats::class);
+
+    grant(signInAsRoleManager(), [
+        ['viewAny', Post::class],
+        [$page, null],
+        [$widget, null],
+        ['impersonate-users', null],
+    ]);
+
+    livewire(CreateRole::class)
+        ->fillForm([
+            'name' => 'editor',
+            'abilities.'.Subject::keyFor(Settings::class).'.'.Ability::ACCESS_ACTION => Stance::Granted->value,
+            'abilities.'.Subject::keyFor(Stats::class).'.'.Ability::ACCESS_ACTION => Stance::Forbidden->value,
+            'abilities.impersonate-users.'.Ability::CUSTOM_ACTION => Stance::Granted->value,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $role = Models::role()->newQuery()->where('name', 'editor')->firstOrFail();
+
+    expect(holds($role, $page))->toBeTrue()
+        ->and(holds($role, $widget))->toBeFalse()
+        ->and(holds($role, 'impersonate-users'))->toBeTrue();
 });
