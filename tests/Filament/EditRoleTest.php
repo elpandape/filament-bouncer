@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
@@ -197,4 +198,21 @@ test('a cell is read as a mark, and the word survives as its accessible name', f
     livewire(EditRole::class, ['record' => role()->getKey()])
         ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.granted').'"')
         ->assertSeeHtml('aria-label="'.__('filament-bouncer::stances.forbidden').'"');
+});
+
+test('the grid offers a grant covering a whole model, and writes it as the wildcard', function (): void {
+    grant(signInAsRoleManager(), [[Ability::MANAGE_NAME, Post::class]]);
+
+    $role = role();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertFormSet(["abilities.{$this->post}.".Ability::MANAGE_ACTION => Stance::Neutral->value])
+        ->fillForm(["abilities.{$this->post}.".Ability::MANAGE_ACTION => Stance::Granted->value])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Bouncer::refresh();
+
+    expect(Bouncer::getClipboard()->check($role, 'delete', Post::class))->toBeTrue()
+        ->and(Bouncer::getClipboard()->check($role, 'anything-invented-later', Post::class))->toBeTrue();
 });

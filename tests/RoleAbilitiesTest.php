@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -216,3 +217,13 @@ function restrictedRows(Model $role): int
         })
         ->count();
 }
+
+test('it ignores a whole-model grant smuggled in by somebody who cannot manage that model', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $role = editor();
+    saveStances($role, [Ability::MANAGE_ACTION => Stance::Granted]);
+    Bouncer::refresh();
+
+    expect(Bouncer::getClipboard()->check($role, 'delete', Post::class))->toBeFalse();
+});
