@@ -5,6 +5,7 @@ declare(strict_types=1);
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
@@ -35,8 +36,8 @@ test('the grid arrives holding what the role was granted', function (): void {
 
     livewire(EditRole::class, ['record' => $role->getKey()])
         ->assertFormSet([
-            "abilities.{$this->post}.viewAny" => true,
-            "abilities.{$this->post}.create" => false,
+            "abilities.{$this->post}.viewAny" => Stance::Granted->value,
+            "abilities.{$this->post}.create" => Stance::Neutral->value,
         ]);
 });
 
@@ -48,7 +49,10 @@ test('saving grants what was ticked and takes back what was cleared', function (
 
     livewire(EditRole::class, ['record' => $role->getKey()])
         ->fillForm([
-            'abilities' => [$this->post => ['viewAny' => false, 'create' => true]],
+            'abilities' => [$this->post => [
+                'viewAny' => Stance::Neutral->value,
+                'create' => Stance::Granted->value,
+            ]],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -64,7 +68,7 @@ test('a grant the editor cannot see survives a save that never mentions it', fun
     grant($role, [['viewAny', Post::class], ['forceDelete', Post::class]]);
 
     livewire(EditRole::class, ['record' => $role->getKey()])
-        ->fillForm(['abilities' => [$this->post => ['viewAny' => false]]])
+        ->fillForm(['abilities' => [$this->post => ['viewAny' => Stance::Neutral->value]]])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -77,7 +81,7 @@ test('the form drops a cell smuggled into the request', function (): void {
     $role = role();
 
     livewire(EditRole::class, ['record' => $role->getKey()])
-        ->set("data.abilities.{$this->post}.forceDelete", true)
+        ->set("data.abilities.{$this->post}.forceDelete", Stance::Granted->value)
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -118,4 +122,21 @@ test('an ordinary role stays open', function (): void {
     livewire(EditRole::class, ['record' => $role->getKey()])->assertOk();
 
     expect(RoleResource::canEdit($role))->toBeTrue();
+});
+
+test('a cell can be set to forbid, and the denial is what the role then carries', function (): void {
+    grant(signIn(), [['viewAny', Post::class]]);
+
+    $role = role();
+    grant($role, [['viewAny', Post::class]]);
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->fillForm(['abilities' => [$this->post => ['viewAny' => Stance::Forbidden->value]]])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(holds($role, 'viewAny', Post::class))->toBeFalse();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Forbidden->value]);
 });

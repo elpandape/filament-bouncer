@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
+use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
@@ -40,7 +41,10 @@ test('creating a role grants exactly the cells that were ticked', function (): v
     livewire(CreateRole::class)
         ->fillForm([
             'name' => 'editor',
-            'abilities' => [$this->post => ['viewAny' => true, 'create' => false]],
+            'abilities' => [$this->post => [
+                'viewAny' => Stance::Granted->value,
+                'create' => Stance::Neutral->value,
+            ]],
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -56,7 +60,7 @@ test('the form drops a cell smuggled into the request', function (): void {
 
     livewire(CreateRole::class)
         ->fillForm(['name' => 'editor'])
-        ->set("data.abilities.{$this->post}.forceDelete", true)
+        ->set("data.abilities.{$this->post}.forceDelete", Stance::Granted->value)
         ->call('create')
         ->assertHasNoFormErrors();
 
