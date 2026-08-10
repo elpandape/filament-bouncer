@@ -12,7 +12,7 @@ use Silber\Bouncer\Contracts\Scope;
 use Silber\Bouncer\Database\Models;
 
 /**
- * What a role has been granted, and how the roles screen changes it.
+ * What a role says about each ability, and how the roles screen changes it.
  */
 final readonly class RoleAbilities
 {
@@ -22,18 +22,18 @@ final readonly class RoleAbilities
     ) {}
 
     /**
-     * The role's grants, shaped the way the form holds them.
+     * The role's stances, shaped the way the form holds them.
      *
-     * @return array<string, array<string, bool>>
+     * @return array<string, array<string, string>>
      */
     public function toFormState(Model $role): array
     {
-        $granted = $this->granted($role);
+        $stances = $this->stances($role);
         $state = [];
 
         foreach ($this->editable->current()->subjects as $key => $subject) {
             foreach ($subject->abilities as $action => $ability) {
-                $state[$key][$action] = isset($granted[$ability->identity()]);
+                $state[$key][$action] = ($stances[$ability->identity()] ?? Stance::Neutral)->value;
             }
         }
 
@@ -41,30 +41,35 @@ final readonly class RoleAbilities
     }
 
     /**
-     * Bring the role's grants in line with what the form was saved holding.
+     * Bring the role's stances in line with what the form was saved holding.
      *
      * The incoming state is never walked. Everything is driven off the catalogue this
      * authority may decide about, so a cell smuggled into the request for an ability
-     * they do not hold has nothing to match against and changes nothing — and a grant
-     * they cannot see is never taken away either.
+     * they do not hold has nothing to match against and changes nothing — and a stance
+     * they cannot see is never overwritten either.
      *
-     * @param  array<string, array<string, bool>>  $state
+     * Forbidding is treated exactly like granting, and is offered on the same abilities
+     * and no others. Forbidding looks like a smaller power than granting, but a denial
+     * you are unable to lift afterwards is a way to lock somebody out of something you
+     * were never trusted with, so both go through the same gate.
+     *
+     * @param  array<string, array<string, string>>  $state
      */
     public function save(Model $role, array $state): void
     {
-        $granted = $this->granted($role);
+        $stances = $this->stances($role);
 
         foreach ($this->editable->current()->subjects as $key => $subject) {
             foreach ($subject->abilities as $action => $ability) {
-                $wanted = (bool) ($state[$key][$action] ?? false);
+                $current = $stances[$ability->identity()] ?? Stance::Neutral;
+                $wanted = Stance::tryFrom((string) ($state[$key][$action] ?? '')) ?? Stance::Neutral;
 
-                if ($wanted === isset($granted[$ability->identity()])) {
+                if ($wanted === $current) {
                     continue;
                 }
 
-                $wanted
-                    ? $this->bouncer->allow($role)->to($ability->name, $ability->entityType)
-                    : $this->bouncer->disallow($role)->to($ability->name, $ability->entityType);
+                $this->clear($role, $ability);
+                $this->apply($role, $ability, $wanted);
             }
         }
 
@@ -74,15 +79,39 @@ final readonly class RoleAbilities
     }
 
     /**
-     * The identities of the abilities granted straight to the role.
+     * Takes both kinds of row away before the new stance is written.
+     *
+     * Bouncer keeps granting and forbidding in separate rows and lets a role hold both
+     * at once, so clearing only the one that was read back would leave the other behind
+     * and the next read would disagree with the screen that wrote it.
+     */
+    private function clear(Model $role, Ability $ability): void
+    {
+        $this->bouncer->disallow($role)->to($ability->name, $ability->entityType);
+        $this->bouncer->unforbid($role)->to($ability->name, $ability->entityType);
+    }
+
+    private function apply(Model $role, Ability $ability, Stance $stance): void
+    {
+        if ($stance === Stance::Granted) {
+            $this->bouncer->allow($role)->to($ability->name, $ability->entityType);
+        }
+
+        if ($stance === Stance::Forbidden) {
+            $this->bouncer->forbid($role)->to($ability->name, $ability->entityType);
+        }
+    }
+
+    /**
+     * What the role says about each ability it has a row for.
      *
      * The pivot is joined by hand rather than read through the role's own relation,
      * because the role model is whatever the application configured and nothing
      * promises the analyser that it carries Bouncer's traits.
      *
-     * @return array<string, true>
+     * @return array<string, Stance>
      */
-    private function granted(Model $role): array
+    private function stances(Model $role): array
     {
         $abilities = Models::table('abilities');
         $permissions = Models::table('permissions');
@@ -90,8 +119,7 @@ final readonly class RoleAbilities
         $query = Models::ability()->newQuery()
             ->join($permissions, $permissions.'.ability_id', '=', $abilities.'.id')
             ->where($permissions.'.entity_id', $role->getKey())
-            ->where($permissions.'.entity_type', $role->getMorphClass())
-            ->where($permissions.'.forbidden', false);
+            ->where($permissions.'.entity_type', $role->getMorphClass());
 
         /** @var Scope $scope */
         $scope = Models::scope();
@@ -100,9 +128,10 @@ final readonly class RoleAbilities
         $rows = $query->get([
             $abilities.'.name as name',
             $abilities.'.entity_type as entity_type',
+            $permissions.'.forbidden as forbidden',
         ]);
 
-        $granted = [];
+        $stances = [];
 
         foreach ($rows as $row) {
             /** @var string $name */
@@ -111,9 +140,17 @@ final readonly class RoleAbilities
             /** @var string|null $entityType */
             $entityType = $row->getAttribute('entity_type');
 
-            $granted[Ability::identityFor($name, $entityType)] = true;
+            $stance = $row->getAttribute('forbidden') ? Stance::Forbidden : Stance::Granted;
+
+            $identity = Ability::identityFor($name, $entityType);
+
+            // A role is allowed to hold both rows at once, and Bouncer answers no when it
+            // does, so the screen has to say the same.
+            if (($stances[$identity] ?? null) !== Stance::Forbidden) {
+                $stances[$identity] = $stance;
+            }
         }
 
-        return $granted;
+        return $stances;
     }
 }
