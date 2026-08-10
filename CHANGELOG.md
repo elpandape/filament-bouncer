@@ -7,6 +7,37 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [4.0.0] - 2026-08-10
+
+Whoever may work the screen hands out anything.
+
+### Changed
+
+- **The grid is no longer narrowed to what the person filling it in holds.** The policy
+  decides who may be on the screen, and that is the only question asked: somebody who may
+  edit roles hands out every ability the panel declares — including the wildcard, and
+  including to themselves. This is how `yadahan/nova-bouncer` does it, whose abilities
+  field carries no `relatableQuery`, no `authorize` and no `canSee`.
+- The abilities screen offers every row the catalogue still declares, to anyone the policy
+  let in.
+
+### Fixed
+
+- **A partial save cleared every cell it did not mention.** Harmless while the catalogue
+  was narrowed and every form sent all of it; fatal once it was not, because the abilities
+  screen sends exactly one cell — writing from that side would have taken every other
+  ability of the role with it. Silence is not an instruction: a cell the state does not
+  carry is left where it was.
+
+### Removed
+
+- `EditableCatalog`. `RoleAbilities` takes the catalogue registry instead.
+
+### Kept
+
+- A cell for something the panel does not declare still changes nothing: the save is
+  driven off the catalogue, not off the request.
+
 ## [3.0.0] - 2026-08-10
 
 The abilities screen is a resource, like roles.
@@ -463,6 +494,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[4.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.0.0
 [3.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v3.0.0
 [2.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.1.0
 [2.0.2]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.0.2
