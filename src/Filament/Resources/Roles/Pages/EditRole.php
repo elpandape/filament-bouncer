@@ -27,7 +27,8 @@ final class EditRole extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => RoleResource::canDelete($this->getRecord())),
         ];
     }
 

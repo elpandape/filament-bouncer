@@ -51,6 +51,10 @@ final class RoleForm
                 ->columns(2),
             Section::make(__('filament-bouncer::roles.form.abilities'))
                 ->description(__('filament-bouncer::roles.form.description'))
+                // The whole width, always. A resource form lays its sections out in two
+                // columns by default, and half a page divided by as many actions as the
+                // catalogue holds leaves each cell too narrow to read.
+                ->columnSpanFull()
                 ->schema(self::matrix(app(EditableCatalog::class)->current())),
         ]);
     }
@@ -138,7 +142,12 @@ final class RoleForm
                     ->colors(Stance::colors())
                     ->default(Stance::Neutral->value)
                     ->required()
-                    ->grouped()
+                    // Stacked, not side by side. A cell is one of as many columns as the
+                    // catalogue has actions, so on any real panel it is a hundred pixels
+                    // wide, and three buttons carrying words do not fit in that: they
+                    // overlap into an unreadable smear. Height is cheap here and width is
+                    // not.
+                    ->columns(1)
                 : Text::make('');
         }
 

@@ -25,7 +25,11 @@ final class ViewRole extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            // Hidden rather than left to fail, because Filament does not ask the resource
+            // before drawing it: on the role you hold yourself, and on the one that holds
+            // everything, the button would lead straight to a refusal.
+            EditAction::make()
+                ->visible(fn (): bool => RoleResource::canEdit($this->getRecord())),
         ];
     }
 }
