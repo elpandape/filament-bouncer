@@ -16,7 +16,7 @@
             x-data="{
                 state: $wire.$entangle('{{ $getStatePath() }}'),
                 tab: @js($first),
-                order: @js(array_keys($stances)),
+                order: @js($getOrder()),
                 words: @js($stances),
                 cycle(subject, action) {
                     if (@js($disabled)) {

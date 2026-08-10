@@ -12,7 +12,7 @@
     x-on:click="cycle(@js($subject), @js($action))"
     x-bind:class="'fb-cell fb-cell-' + at(@js($subject), @js($action)) + @js(filled($note) ? ' fb-noted' : '')"
     x-bind:aria-label="words[at(@js($subject), @js($action))]"
-    class="fb-cell fb-cell-neutral"
+    class="fb-cell"
     @if (filled($note)) title="{{ $note }}" @endif
 >
     <template x-if="at(@js($subject), @js($action)) === 'granted'">

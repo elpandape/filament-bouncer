@@ -166,12 +166,17 @@
 
 /*
  * Outlined, not filled: the stance is reached through a rule this cell does not hold,
- * so turning it off here would remove nothing. The title says which rule.
+ * or restricted by one it cannot write. Either way turning it off here would remove
+ * nothing, and the title says which rule.
  */
-.fb-cell.fb-inherited.fb-cell-neutral {
-    background: transparent;
-    color: var(--success-600);
-    box-shadow: inset 0 0 0 1.5px var(--success-600);
+.fb-cell.fb-noted.fb-cell-neutral {
+    color: var(--warning-600);
+    box-shadow: inset 0 0 0 1.5px var(--warning-600);
+}
+
+.fb-cell.fb-noted.fb-cell-granted,
+.fb-cell.fb-noted.fb-cell-forbidden {
+    box-shadow: 0 0 0 2px var(--warning-400);
 }
 
 .fb-none {
@@ -187,3 +192,75 @@
 :where(.dark) .fb-grid-ctn {
     --fb-surface: var(--gray-900);
 }
+
+/* Tabs. Filament's own live outside a field, so the grid brings its own. */
+.fb-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-block-end: 1rem;
+    background: var(--gray-100);
+    border-radius: var(--radius-lg, 0.5rem);
+    overflow-x: auto;
+}
+
+.fb-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    border: 0;
+    border-radius: var(--radius-md, 0.375rem);
+    background: transparent;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.fb-tab:hover { color: var(--gray-950); }
+
+.fb-tab-on {
+    background: var(--fb-surface, #fff);
+    color: var(--gray-950);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.fb-tab-count {
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: 1.25rem;
+    padding-inline: 0.35rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--gray-950) 6%, transparent);
+    font-size: 0.6875rem;
+}
+
+/* A door, not a grid: one ability each. */
+.fb-list { display: flex; flex-direction: column; }
+
+.fb-line {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    padding: 0.7rem 0.25rem;
+}
+
+.fb-line + .fb-line {
+    border-block-start: 1px solid color-mix(in oklab, var(--gray-950) 5%, transparent);
+}
+
+.fb-line-body { min-inline-size: 0; }
+
+.fb-line-note,
+.fb-empty {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    line-height: 1.5;
+}
+
+.fb-empty { padding: 1rem 0; }
+
+.fb-tabs, .fb-tab-count { background-color: var(--gray-100); }

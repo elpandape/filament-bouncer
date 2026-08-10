@@ -140,6 +140,24 @@ final class AbilityGrid extends Field
     }
 
     /**
+     * The order a cell walks when it is clicked.
+     *
+     * Not the order the cases are declared in: from saying nothing the next thing
+     * somebody means is to grant, and forbidding is the step past that. Landing on a
+     * denial by pressing once would be a trap.
+     *
+     * @return array<int, string>
+     */
+    public function getOrder(): array
+    {
+        return [
+            Stance::Neutral->value,
+            Stance::Granted->value,
+            Stance::Forbidden->value,
+        ];
+    }
+
+    /**
      * @return array<string, array<string, string>>
      */
     public function getNotes(): array

@@ -196,7 +196,7 @@ test('a cell is read as a mark, and the word survives as its accessible name', f
     grant(signInAsRoleManager(), [['viewAny', Post::class]]);
 
     livewire(EditRole::class, ['record' => role()->getKey()])
-        ->assertSeeHtml('class="fb-cell fb-cell-neutral"')
+        ->assertSeeHtml('class="fb-cell"')
         ->assertSeeHtml(__('filament-bouncer::stances.granted'))
         ->assertSeeHtml(__('filament-bouncer::stances.forbidden'));
 });
