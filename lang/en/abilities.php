@@ -4,84 +4,78 @@ declare(strict_types=1);
 
 return [
 
-    'title' => 'Abilities',
-
-    'ability' => 'Ability',
-
-    'direct' => 'granted on this role',
-
-    'broader' => 'Outlined: the role answers yes without a rule of its own naming the ability — it holds it through a broader one.',
-
-    'nobody' => 'no rule of theirs reaches it',
-
-    'empty' => 'There is nothing to report on yet: either you hold no abilities of your own, or no role has been created.',
-
-    'retitle' => 'Rename',
-
-    'retitle_note' => 'The title is read by people and by nothing else. The name the code asks the Gate, and the model it asks about, are declared in code and cannot be changed here.',
-
-    'title_field' => 'Title',
-
-    'retitled' => 'Renamed.',
-
-    'unreconciled' => 'This ability has no row yet. Run filament-bouncer:reconcile first.',
-
-    'declared' => 'The name the code asks the Gate, and the model it asks about, are declared by the code that asks — a policy method, a page, a widget, or the «custom» key of the configuration — and written by filament-bouncer:reconcile. Neither is rewritten here.',
+    'resource' => [
+        'label' => 'Ability',
+        'plural' => 'Abilities',
+    ],
 
     'narrow' => 'Narrow an ability',
 
-    'narrow_note' => 'The plain rule — «may change posts» — is declared by the code that asks about it and written by filament-bouncer:reconcile, so it is not composed here. What the code has no way to say is how far the rule reaches: that is what this screen makes. A row narrowed to one record, or to what its holder owns, is one the reconciliation never speaks for, so --check does not fail on it and --prune does not take it away.',
+    'saved' => 'What each role says about this rule has been written.',
 
-    'narrow_required' => 'An ability that narrows nothing is the plain one, which the code declares and filament-bouncer:reconcile writes. Hold it down to what its holder owns, to one record, or to both.',
+    'form' => [
+        'rule' => 'The rule',
+        'name' => 'Name',
+        'entity' => 'Model',
+        'no_entity' => '— none —',
+        'reach' => 'Reach',
+        'title' => 'Title',
+        'title_note' => 'Read by people and by nothing else.',
+        'declared_note' => 'The name the code hands the Gate, and the model it hands along with it, are declared by the code that asks — a policy method, a page, a widget, or the «custom» key of the configuration — and written by filament-bouncer:reconcile. Neither is rewritten here.',
+        'holders' => 'Who holds it',
+        'holders_note' => 'The same rows the roles screen writes, seen from the other end. A cell here and a cell there are the same row of the same table.',
+        'holders_empty' => 'No role has been composed yet.',
+        'withheld' => 'The code no longer declares this ability, so there is nothing here to hand out. The next filament-bouncer:reconcile --prune takes the row away, and every grant pointing at it.',
+    ],
 
-    'duplicate' => 'That row already exists. Open it rather than writing a second one: two rows saying the same thing are handed out and cleared separately, and the screen would only ever show you one of them.',
+    'reach' => [
+        'all' => 'All of them',
+        'owned' => 'Only what its holder owns',
+        'record' => 'One record',
+        'record_reading' => 'Record :id',
+    ],
 
-    'action_field' => 'Action',
+    'declared' => [
+        'label' => 'Declared',
+        'declared' => 'by the code',
+        'drifted' => 'by nothing',
+        'apart' => 'outside the catalogue',
+        'declared_note' => 'The code declares this ability, so the reconciliation keeps it.',
+        'drifted_note' => 'Nothing declares this ability any more. The next filament-bouncer:reconcile --prune takes it away, and every grant pointing at it with it.',
+        'apart_note' => 'This rule was never the reconciliation\'s to declare, so --check does not fail on it and --prune does not take it away.',
+    ],
 
-    'only_owned_note' => 'The rule holds only for the records its holder owns.',
+    'wizard' => [
+        'ability' => 'The ability',
+        'ability_hint' => 'What may be done, and to what.',
+        'reach' => 'Reach',
+        'reach_hint' => 'How far the rule goes.',
+        'review' => 'Review',
+        'review_hint' => 'What is about to be written.',
+        'subject' => 'Model',
+        'action' => 'Action',
+        'reach_field' => 'The rule holds for',
+        'record' => 'Record',
+        'record_note' => 'The key of the single record the rule holds for.',
+        'title' => 'Title',
+        'reading' => 'About to be written: :rule, reaching :reach.',
+        'nothing' => 'nothing chosen yet',
+    ],
 
-    'record_field' => 'One record',
+    'refusals' => [
+        'narrow' => 'A rule that narrows nothing is the plain one, which the code declares and filament-bouncer:reconcile writes. Hold it down to what its holder owns, or to a single record.',
+        'duplicate' => 'That row already exists. Open it rather than writing a second one: two rows saying the same thing are handed out and cleared apart, and this screen would only ever show you one of them.',
+        'unknown' => 'The catalogue declares no such pair, and Bouncer never complains about a name nobody declared — it answers no, for ever, to everybody.',
+        'record_needs_model' => 'A rule about a single record needs a model to look the record up in, and this ability is about none.',
+    ],
 
-    'record_note' => 'The key of the single record the rule holds for. Leave it empty to reach all of them.',
-
-    'compose_note' => 'Written out as the choices are made, and yours to change. The title is read by people and by nothing else.',
-
-    'owned_suffix' => 'only what they own',
-
-    'record_suffix' => 'record :id',
-
-    'reach' => 'Reach',
-
-    'reach_all' => 'all of them',
-
-    'narrowed_legend' => 'This rule reaches less far than the one the grid holds, so it has no cell there. Handing it out here writes exactly this row and leaves the plain one alone.',
-
-    'name_field' => 'Name',
-
-    'entity_field' => 'Model',
-
-    'no_entity' => '— none —',
-
-    'holders' => 'Roles',
-
-    'declared_column' => 'Declared',
-
-    'declared_yes' => 'by the code',
-
-    'declared_no' => 'by nothing',
-
-    'declared_apart' => 'outside the catalogue',
-
-    'only_owned' => 'Only what its holder owns',
-
-    'holders_section' => 'Who holds it',
-
-    'holders_note' => 'The same rows the roles screen writes, seen from the other end. A cell here and the cell there are the same row of the same table.',
-
-    'broader_short' => 'through a broader rule',
-
-    'nobody_short' => 'nobody',
-
-    'withheld' => 'The code no longer declares this ability, so there is nothing here to hand out.',
+    'table' => [
+        'name' => 'Ability',
+        'entity' => 'Model',
+        'reach' => 'Reach',
+        'holders' => 'Held by',
+        'holder' => ':role — :stance',
+        'empty' => 'Nothing has been reconciled yet. Run filament-bouncer:reconcile.',
+    ],
 
 ];

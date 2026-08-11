@@ -298,6 +298,23 @@
     border-block-start: 1px solid var(--fb-hairline);
 }
 
+/* ── One rule, read from the other end: a role per line ────────────────────── */
+
+.fb-holder {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.55rem 0.35rem;
+}
+
+.fb-holder + .fb-holder {
+    border-block-start: 1px solid var(--fb-hairline);
+}
+
+.fb-holder:hover {
+    background: var(--fb-raised);
+}
+
 /* ── What it all adds up to, kept in sight ─────────────────────────────────── */
 
 .fb-summary {

@@ -41,6 +41,7 @@ test('it writes down every ability the catalogue declares', function (): void {
     expect(storedNames())->toBe([
         'create',
         'create',
+        'create',
         'delete',
         'delete',
         'forceDelete',
@@ -48,8 +49,11 @@ test('it writes down every ability the catalogue declares', function (): void {
         'page:elpandape-filamentbouncer-tests-fixtures-filament-pages-settings',
         'update',
         'update',
+        'update',
         'view',
         'view',
+        'view',
+        'viewAny',
         'viewAny',
         'viewAny',
         'viewAny',
@@ -71,7 +75,7 @@ test('running it again writes nothing', function (): void {
     reconcile();
 
     expect(reconcile())->toContain('Created 0 abilities.')
-        ->and(Models::ability()->newQuery()->count())->toBe(16);
+        ->and(Models::ability()->newQuery()->count())->toBe(20);
 });
 
 test('it leaves an ability the catalogue no longer declares in place', function (): void {
@@ -131,7 +135,7 @@ test('checking passes once the store matches the catalogue', function (): void {
 test('it accepts the panel to walk on the command line', function (): void {
     reconcile(['--panel' => 'test']);
 
-    expect(Models::ability()->newQuery()->count())->toBe(16);
+    expect(Models::ability()->newQuery()->count())->toBe(20);
 });
 
 test('it refuses a panel that does not exist', function (): void {
@@ -156,7 +160,7 @@ test('a catalogue of a hundred abilities is written in a single insert', functio
     reconcile();
 
     expect($inserts)->toBe(1)
-        ->and(Models::ability()->newQuery()->count())->toBe(115);
+        ->and(Models::ability()->newQuery()->count())->toBe(119);
 });
 
 test('a stored row and its declaration answer to the same identity', function (): void {
@@ -236,7 +240,7 @@ test('a resource named in the ignore list is not denounced', function (): void {
 });
 
 test('it counts in the plural, and in the singular when there is one', function (): void {
-    expect(reconcile())->toContain('Created 16 abilities.');
+    expect(reconcile())->toContain('Created 20 abilities.');
 
     Bouncer::allow('editor')->to('sing-a-song');
 
@@ -248,5 +252,5 @@ test('it counts in the plural, and in the singular when there is one', function 
 test('it says the same in Spanish', function (): void {
     app()->setLocale('es');
 
-    expect(reconcile())->toContain('Creadas 16 habilidades.');
+    expect(reconcile())->toContain('Creadas 20 habilidades.');
 });
