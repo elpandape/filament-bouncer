@@ -10,6 +10,7 @@ use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Comment;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -222,6 +223,20 @@ test('a role deleted while the screen sat open is passed over and not brought ba
 
     expect(Models::role()->newQuery()->where('name', 'editor')->exists())->toBeFalse()
         ->and(rolePermissionCount())->toBe(0);
+});
+
+test('a delete armed by hand on the changing screen leaves the row standing', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $row = changedRow('update', Post::class);
+
+    livewire(EditAbility::class, ['record' => $row->getKey()])
+        ->assertActionDoesNotExist(TestAction::make('delete'))
+        ->call('mountAction', 'delete')
+        ->call('callMountedAction');
+
+    expect(Models::ability()->newQuery()->whereKey($row->getKey())->exists())->toBeTrue();
 });
 
 test('the heading says what the reconciliation has to say about the row', function (): void {

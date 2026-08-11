@@ -180,6 +180,17 @@ test('no row offers being taken away', function (): void {
         ->assertActionDoesNotExist(TestAction::make('delete')->table(listedAbility('update', Post::class)));
 });
 
+test('no selection offers being taken away either', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    expect(AbilityResource::table(Filament\Tables\Table::make(new ListAbilities))->getToolbarActions())->toBeEmpty();
+
+    livewire(ListAbilities::class)
+        ->assertActionVisible(TestAction::make('create'))
+        ->assertActionDoesNotExist(TestAction::make('delete')->table()->bulk());
+});
+
 test('a rule about a model the catalogue never keyed reads as the row itself', function (): void {
     signInAsAbilityManager();
 
