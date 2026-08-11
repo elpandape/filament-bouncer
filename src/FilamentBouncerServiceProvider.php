@@ -12,6 +12,8 @@ use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Support\Ownership;
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -36,6 +38,20 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'filament-bouncer');
+
+        // The catalogue is drawn by a view of the package's own, because Filament's
+        // components cannot express it: three stances have to sit side by side and be
+        // written without a round trip, which a field per cell cannot do.
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-bouncer');
+
+        // Registered with Filament rather than linked from the view, so `filament:assets`
+        // publishes it beside the panel's own and no build step is asked of the
+        // application. The stylesheet reads from the panel's colour tokens and defines no
+        // utility class of its own, so nothing depends on the consuming application's
+        // Tailwind build.
+        FilamentAsset::register([
+            Css::make('filament-bouncer', __DIR__.'/../resources/css/filament-bouncer.css'),
+        ], 'elpandape/filament-bouncer');
 
         // Without this the roles resource has no policy and Filament falls open: anybody
         // reaching the panel at all could rewrite every role in it. An application
