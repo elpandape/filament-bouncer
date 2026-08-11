@@ -8,12 +8,14 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables\RolesTable;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Database\Models;
@@ -96,6 +98,16 @@ final class RoleResource extends Resource
         $sort = config('filament-bouncer.navigation.sort');
 
         return $sort;
+    }
+
+    /**
+     * One schema for both screens, which is what keeps reading a role and changing it
+     * the same picture: the record page draws this disabled rather than a shape of its
+     * own.
+     */
+    public static function form(Schema $schema): Schema
+    {
+        return RoleForm::configure($schema);
     }
 
     public static function table(Table $table): Table

@@ -140,6 +140,13 @@ test('a role says how many accounts hold it', function (): void {
         ->assertSee('1');
 });
 
+test('the screen offers composing a role of its own', function (): void {
+    signInAsRoleManager();
+
+    livewire(ListRoles::class)
+        ->assertActionVisible(TestAction::make('create'));
+});
+
 test('the screen carries the figures its rows cannot show', function (): void {
     signInAsRoleManager();
 

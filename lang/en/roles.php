@@ -22,6 +22,16 @@ return [
         'scope' => 'Weight',
     ],
 
+    'wizard' => [
+        'identity' => 'The role',
+        'identity_hint' => 'What it is called, and what it is called by.',
+        'abilities' => 'Abilities',
+        'abilities_hint' => 'What whoever holds it will be able to do.',
+        'review' => 'Review',
+        'review_hint' => 'What is about to be written.',
+        'reading' => ':name is about to be created granting :granted of the :total abilities the panel declares, and forbidding :forbidden.',
+    ],
+
     'presets' => [
         'label' => 'Set every action',
         'read' => 'Reading only',

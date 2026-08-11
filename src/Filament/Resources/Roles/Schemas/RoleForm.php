@@ -1,0 +1,188 @@
+<?php
+
+declare(strict_types=1);
+
+namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
+
+use Closure;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
+use ElPandaPe\FilamentBouncer\Store\Restriction;
+use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
+use ElPandaPe\FilamentBouncer\Store\Stance;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * What a role is called, and everything it is allowed to say.
+ *
+ * The grid is a single field rather than a column of the role, and that is the one thing
+ * to know before touching either end of this screen: nothing named here exists on the
+ * roles table, so the pages have to take the key out of the data before the record is
+ * written and hand it to the store afterwards. The concerns beside this file do that.
+ */
+final class RoleForm
+{
+    /**
+     * Where the whole grid lives in the form state.
+     *
+     * Named here and read from here by the two concerns, because a string repeated in
+     * three files is a rename waiting to lose a screen's worth of grants in silence.
+     */
+    public const string ABILITIES = 'abilities';
+
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make(__('filament-bouncer::roles.form.role'))
+                ->schema(self::identity())
+                ->columns(2),
+            Section::make(__('filament-bouncer::roles.form.abilities'))
+                ->description(__('filament-bouncer::roles.form.description'))
+                ->schema([self::grid()])
+                ->columnSpanFull(),
+        ]);
+    }
+
+    /**
+     * @return array<int, TextInput>
+     */
+    public static function identity(): array
+    {
+        return [
+            TextInput::make('name')
+                ->label(__('filament-bouncer::roles.form.name'))
+                ->required()
+                ->maxLength(150)
+                ->unique(ignoreRecord: true),
+            TextInput::make('title')
+                ->label(__('filament-bouncer::roles.form.title'))
+                ->maxLength(150),
+        ];
+    }
+
+    /**
+     * The catalogue, offered whole.
+     *
+     * Everything the panel declares is on it, whether or not the person filling it in
+     * holds any of it. Narrowing the grid to what the editor already has would be a
+     * second answer to a question the policy has already answered: whoever may work
+     * this screen hands out all of it, including to themselves.
+     */
+    public static function grid(): AbilityGrid
+    {
+        return AbilityGrid::make(self::ABILITIES)
+            ->hiddenLabel()
+            ->catalog(app(CatalogRegistry::class)->current())
+            ->notes(self::notes(...));
+    }
+
+    /**
+     * What is about to be written, in one sentence.
+     */
+    public static function review(): Closure
+    {
+        return static function (Get $get): string {
+            $name = $get('name');
+            $state = $get(self::ABILITIES);
+
+            $granted = 0;
+            $forbidden = 0;
+            $total = 0;
+
+            foreach (is_array($state) ? $state : [] as $actions) {
+                foreach (is_array($actions) ? $actions : [] as $stance) {
+                    $total++;
+                    $granted += $stance === Stance::Granted->value ? 1 : 0;
+                    $forbidden += $stance === Stance::Forbidden->value ? 1 : 0;
+                }
+            }
+
+            return __('filament-bouncer::roles.wizard.reading', [
+                'name' => is_string($name) ? $name : '',
+                'granted' => $granted,
+                'forbidden' => $forbidden,
+                'total' => $total,
+            ]);
+        };
+    }
+
+    /**
+     * What a cell says once its stance has said all it can.
+     *
+     * Three things a stance cannot express on its own, and each of them is a way for a
+     * grid read at face value to be wrong about the role in front of it:
+     *
+     * - the role answers yes to an ability it holds no rule for, because something
+     *   broader reaches it — the wildcard being the obvious one;
+     * - the role was granted the ability right here and still answers no, because a
+     *   denial beats every grant reaching the same ability;
+     * - the role holds rules the grid neither writes nor removes: the ones about a
+     *   single record and the ones covering only what their holder owns. Saying
+     *   nothing about those would leave the cell reading "not granted" about a role
+     *   that can plainly delete its own posts.
+     *
+     * @return array<string, array<string, string>>
+     */
+    private static function notes(Model $role): array
+    {
+        $abilities = app(RoleAbilities::class);
+        $state = $abilities->toFormState($role);
+        $restrictions = $abilities->restrictions($role);
+        $notes = [];
+
+        foreach (app(CatalogRegistry::class)->current()->subjects as $key => $subject) {
+            foreach ($subject->cells() as $action => $ability) {
+                $stance = $state[$key][$action] ?? Stance::Neutral->value;
+                $holds = $abilities->holds($role, $ability);
+
+                $lines = [];
+
+                if ($stance === Stance::Neutral->value && $holds) {
+                    $lines[] = __('filament-bouncer::roles.form.inherited');
+                }
+
+                if ($stance === Stance::Granted->value && ! $holds) {
+                    $lines[] = __('filament-bouncer::roles.form.overruled');
+                }
+
+                $restriction = $restrictions[$ability->identity()] ?? null;
+
+                if ($restriction instanceof Restriction) {
+                    $lines = [...$lines, ...self::narrowed($restriction)];
+                }
+
+                if ($lines !== []) {
+                    $notes[$key][$action] = implode(' ', $lines);
+                }
+            }
+        }
+
+        return $notes;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function narrowed(Restriction $restriction): array
+    {
+        $lines = [];
+
+        if ($restriction->owned) {
+            $lines[] = __('filament-bouncer::roles.form.restricted_owned');
+        }
+
+        if ($restriction->records > 0) {
+            $lines[] = trans_choice(
+                'filament-bouncer::roles.form.restricted_records',
+                $restriction->records,
+                ['count' => $restriction->records],
+            );
+        }
+
+        return $lines;
+    }
+}

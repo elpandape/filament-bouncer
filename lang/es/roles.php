@@ -22,6 +22,16 @@ return [
         'scope' => 'Peso',
     ],
 
+    'wizard' => [
+        'identity' => 'El rol',
+        'identity_hint' => 'Cómo se llama, y cómo se le nombra.',
+        'abilities' => 'Habilidades',
+        'abilities_hint' => 'Lo que podrá hacer quien lo tenga.',
+        'review' => 'Revisión',
+        'review_hint' => 'Lo que está a punto de escribirse.',
+        'reading' => ':name se va a crear concediendo :granted de las :total habilidades que el panel declara, y prohibiendo :forbidden.',
+    ],
+
     'presets' => [
         'label' => 'Poner todas las acciones en',
         'read' => 'Solo lectura',
