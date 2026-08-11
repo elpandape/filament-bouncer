@@ -15,9 +15,24 @@ return [
         'overruled' => 'Concedida aquí, pero una regla más amplia la prohíbe.',
         'restricted_owned' => 'También tiene aquí una regla para solo lo suyo, que la rejilla no toca.',
         'restricted_records' => 'También tiene aquí una regla sobre un registro, que la rejilla no toca.|También tiene aquí reglas sobre :count registros, que la rejilla no toca.',
-        'manage' => 'Todo',
-        'subject' => 'Sujeto',
+        'manage' => 'Todo sobre esto',
         'undeclared' => 'La Policy de este sujeto no declara esta acción.',
+        'collapse' => 'Mostrar u ocultar las acciones de este sujeto',
+        'model_count' => ':granted de :total',
+        'scope' => 'Peso',
+    ],
+
+    'presets' => [
+        'label' => 'Poner todas las acciones en',
+        'read' => 'Solo lectura',
+        'all' => 'Todo',
+        'none' => 'Nada',
+    ],
+
+    'summary' => [
+        'granted' => '{1} 1 concedida|[2,*] :count concedidas',
+        'forbidden' => '{1} 1 prohibida|[2,*] :count prohibidas',
+        'neutral' => '{1} 1 sin definir|[2,*] :count sin definir',
     ],
 
     'tabs' => [
