@@ -7,6 +7,27 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [4.2.0] - 2026-08-11
+
+A role holding the wildcard no longer reads as a role that can do nothing.
+
+### Changed
+
+- **A cell reached by a broader rule draws the tick, not the dash.** The dash was true of
+  the row and false of the reader's question: a role holding nothing but the wildcard has
+  no rule of its own for any cell in the grid, so every cell drew a dash and the screen
+  said the role could do nothing at all. The tick is outlined rather than filled — the
+  answer is yes, and the rule behind it is not this row's — and pressing it fills it in,
+  which is the row taking that answer on itself.
+- The label a screen reader hears says when a cell is answered by something broader.
+- The roles form no longer describes a catalogue narrowed to what the person filling it in
+  holds, which stopped being true in `4.0.0`.
+
+### Added
+
+- `AbilityGrid::getBroader()`, the cells a role answers yes to without a rule of its own
+  naming the ability.
+
 ## [4.1.0] - 2026-08-10
 
 The abilities screen makes the one row the code cannot write.
@@ -533,6 +554,8 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[4.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.2.0
+[4.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.1.0
 [4.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.0.0
 [3.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v3.0.0
 [2.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v2.1.0
