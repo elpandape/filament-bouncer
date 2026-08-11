@@ -7,6 +7,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
+use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -57,7 +58,17 @@ final class RoleForm
                 ->label(__('filament-bouncer::roles.form.name'))
                 ->required()
                 ->maxLength(150)
-                ->unique(ignoreRecord: true),
+                ->unique(ignoreRecord: true)
+                // The privileged role is the way back in, and this screen refuses to edit
+                // it. Left alone, that refusal is also a way to take the name hostage:
+                // creating or renaming a role to it grants nobody anything and leaves a
+                // role nobody can ever edit or delete from here. The reconciliation is
+                // what creates that role, so the screen has no business writing its name.
+                ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+                    if (app(PrivilegedRole::class)->isNamed(is_string($value) ? $value : '')) {
+                        $fail(__('filament-bouncer::roles.form.reserved'));
+                    }
+                }),
             TextInput::make('title')
                 ->label(__('filament-bouncer::roles.form.title'))
                 ->maxLength(150),

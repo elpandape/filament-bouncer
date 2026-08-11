@@ -19,6 +19,7 @@ return [
         'undeclared' => 'La Policy de este sujeto no declara esta acción.',
         'collapse' => 'Mostrar u ocultar las acciones de este sujeto',
         'model_count' => ':granted de :total',
+        'reserved' => 'Ese nombre es el del rol que lo tiene todo, que escribe la reconciliación y no esta pantalla.',
         'scope' => 'Peso',
     ],
 

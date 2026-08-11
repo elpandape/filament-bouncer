@@ -139,3 +139,29 @@ test('the last step reads back what the first two chose', function (): void {
             'total' => $cells,
         ]));
 });
+
+test('the name of the role that holds everything cannot be taken from this screen', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->fillForm(['name' => 'owner'])
+        ->call('create')
+        ->assertHasFormErrors(['name']);
+
+    expect(Models::role()->newQuery()->where('name', 'owner')->exists())->toBeFalse();
+});
+
+test('any other name is still free', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'owner');
+
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->fillForm(['name' => 'editor'])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Models::role()->newQuery()->where('name', 'editor')->exists())->toBeTrue();
+});
