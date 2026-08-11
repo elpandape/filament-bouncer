@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities;
 
+use BackedEnum;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\CreateAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\EditAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ListAbilities;
@@ -15,9 +16,11 @@ use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Models;
+use UnitEnum;
 
 /**
  * The other end of the roles screen: not what a role may do, but what may be done.
@@ -81,17 +84,26 @@ final class AbilityResource extends Resource
         return $slug;
     }
 
-    public static function getNavigationIcon(): ?string
+    /**
+     * The icon, whatever shape the application named it in.
+     *
+     * Deliberately as wide as Filament's own signature rather than narrowed to a string:
+     * an icon set shipped as a backed enum is the ordinary way to name one, and an
+     * application handing one through configuration would otherwise meet a type error
+     * from inside the sidebar, with the whole panel down and nothing on this screen to
+     * explain why.
+     */
+    public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
     {
-        /** @var string|null $icon */
+        /** @var string|BackedEnum|Htmlable|null $icon */
         $icon = config('filament-bouncer.abilities.icon');
 
         return $icon;
     }
 
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        /** @var string|null $group */
+        /** @var string|UnitEnum|null $group */
         $group = config('filament-bouncer.navigation.group');
 
         return $group;

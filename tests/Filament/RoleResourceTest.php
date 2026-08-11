@@ -10,6 +10,8 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\ResourceGroup;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\ResourceIcon;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -130,4 +132,12 @@ test('a refusal of the abilities still refuses, whoever holds no role', function
 
     expect(RoleResource::canEdit(resourceRole()))->toBeFalse()
         ->and(RoleResource::canDelete(resourceRole('reviewer')))->toBeFalse();
+});
+
+test('an icon named as an enum reaches the sidebar instead of a type error', function (): void {
+    config()->set('filament-bouncer.navigation.icon', ResourceIcon::Shield);
+    config()->set('filament-bouncer.navigation.group', ResourceGroup::Security);
+
+    expect(RoleResource::getNavigationIcon())->toBe(ResourceIcon::Shield)
+        ->and(RoleResource::getNavigationGroup())->toBe(ResourceGroup::Security);
 });
