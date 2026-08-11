@@ -10,6 +10,7 @@ use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\Field;
@@ -182,6 +183,43 @@ final class AbilityGrid extends Field
         $notes = ($this->notes)($record);
 
         return $notes;
+    }
+
+    /**
+     * The cells the role answers yes to without a rule of its own naming the ability.
+     *
+     * Computed here rather than taken from the notes, because it is not a phrasing but a
+     * fact, and the cell needs it to decide which glyph it draws. A role holding nothing
+     * but the wildcard has no row for any of these cells: reading its own rows alone, the
+     * grid would draw a dash everywhere and say the role can do nothing at all.
+     *
+     * @return array<string, array<string, bool>>
+     */
+    public function getBroader(): array
+    {
+        $record = $this->getRecord();
+
+        if (! $record instanceof Model) {
+            return [];
+        }
+
+        $abilities = app(RoleAbilities::class);
+        $state = $abilities->toFormState($record);
+        $broader = [];
+
+        foreach ($this->catalog->subjects as $key => $subject) {
+            foreach ($subject->cells() as $action => $ability) {
+                $broader[$key][$action] = ($state[$key][$action] ?? '') === Stance::Neutral->value
+                    && $abilities->holds($record, $ability);
+            }
+        }
+
+        return $broader;
+    }
+
+    public function getInheritedLabel(): string
+    {
+        return __('filament-bouncer::roles.form.inherited');
     }
 
     public function getSubjectHeading(): string

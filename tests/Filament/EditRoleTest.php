@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
@@ -28,6 +30,17 @@ function role(string $name = 'editor'): Model
     $role = Models::role()->newQuery()->create(['name' => $name]);
 
     return $role;
+}
+
+function gridOf(Model $role): AbilityGrid
+{
+    /** @var EditRole $page */
+    $page = livewire(EditRole::class, ['record' => $role->getKey()])->instance();
+
+    /** @var AbilityGrid $grid */
+    $grid = $page->getSchemaComponent('form.'.RoleForm::ABILITIES);
+
+    return $grid;
 }
 
 test('the grid arrives holding what the role was granted', function (): void {
@@ -162,6 +175,26 @@ test('a cell says so when the role holds the ability through a rule nobody set h
     livewire(EditRole::class, ['record' => $role->getKey()])
         ->assertFormSet(["abilities.{$this->post}.viewAny" => Stance::Neutral->value])
         ->assertSee(__('filament-bouncer::roles.form.inherited'));
+});
+
+test('a cell reached by a broader rule draws the answer, not the dash', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    $role = role();
+    Bouncer::allow($role)->everything();
+    Bouncer::refresh();
+
+    $broader = gridOf($role)->getBroader();
+    $post = Subject::keyFor(Post::class);
+
+    expect($broader[$post]['viewAny'] ?? null)->toBeTrue()
+        ->and($broader[$post][Ability::MANAGE_ACTION] ?? null)->toBeTrue();
+});
+
+test('a cell nothing reaches draws the dash', function (): void {
+    grant(signInAsRoleManager(), [['viewAny', Post::class]]);
+
+    expect(gridOf(role())->getBroader()[Subject::keyFor(Post::class)]['viewAny'] ?? null)->toBeFalse();
 });
 
 test('a cell says so when a broader denial beats the grant made in it', function (): void {

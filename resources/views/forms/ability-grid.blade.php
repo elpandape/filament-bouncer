@@ -4,6 +4,8 @@
     $bands = $getBands();
     $stances = $getStances();
     $notes = $getNotes();
+    $broader = $getBroader();
+    $inherited = $getInheritedLabel();
     $disabled = $isDisabled();
     $first = array_key_first($tabs);
 @endphp
@@ -99,6 +101,8 @@
                                                         'subject' => $subjectKey,
                                                         'action' => $subject['manage'],
                                                         'note' => $notes[$subjectKey][$subject['manage']] ?? null,
+                                                        'broader' => $broader[$subjectKey][$subject['manage']] ?? false,
+                                                        'inherited' => $inherited,
                                                         'disabled' => $disabled,
                                                     ])
                                                 @else
@@ -113,6 +117,8 @@
                                                             'subject' => $subjectKey,
                                                             'action' => $action,
                                                             'note' => $notes[$subjectKey][$action] ?? null,
+                                                            'broader' => $broader[$subjectKey][$action] ?? false,
+                                                            'inherited' => $inherited,
                                                             'disabled' => $disabled,
                                                         ])
                                                     @else
@@ -135,6 +141,8 @@
                                         'subject' => $subjectKey,
                                         'action' => $action,
                                         'note' => $notes[$subjectKey][$action] ?? null,
+                                        'broader' => $broader[$subjectKey][$action] ?? false,
+                                        'inherited' => $inherited,
                                         'disabled' => $disabled,
                                     ])
                                     <div class="fb-line-body">
