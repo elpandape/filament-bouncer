@@ -25,6 +25,21 @@ function listedRole(string $name = 'editor'): Model
     return $role;
 }
 
+function deleteArmedByHand(Model $role): void
+{
+    /** @var int|string $key */
+    $key = $role->getKey();
+
+    livewire(ListRoles::class)
+        ->call('mountAction', 'delete', [], ['table' => true, 'recordKey' => (string) $key])
+        ->call('callMountedAction');
+}
+
+function stillStanding(Model $role): bool
+{
+    return Models::role()->newQuery()->whereKey($role->getKey())->exists();
+}
+
 test('the screen lists the roles that exist', function (): void {
     signInAsRoleManager();
 
@@ -151,6 +166,40 @@ test('the screen carries the figures its rows cannot show', function (): void {
     signInAsRoleManager();
 
     livewire(ListRoles::class)->assertSeeHtml('filament.widgets.role-stats');
+});
+
+test('a delete armed by hand takes away the role whose row offers one', function (): void {
+    signInAsRoleManager();
+
+    $ordinary = listedRole();
+
+    deleteArmedByHand($ordinary);
+
+    expect(stillStanding($ordinary))->toBeFalse();
+});
+
+test('a delete armed by hand leaves a role the reader holds standing', function (): void {
+    $reader = signInAsRoleManager();
+
+    $mine = listedRole();
+    Bouncer::assign('editor')->to($reader);
+    Bouncer::refresh();
+
+    deleteArmedByHand($mine);
+
+    expect(stillStanding($mine))->toBeTrue();
+});
+
+test('a delete armed by hand leaves the way back in standing', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    signInAsRoleManager();
+
+    $privileged = listedRole('super-admin');
+
+    deleteArmedByHand($privileged);
+
+    expect(stillStanding($privileged))->toBeTrue();
 });
 
 test('the table offers nothing to a selection', function (): void {
