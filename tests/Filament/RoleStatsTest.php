@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Widgets\RoleStats;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
@@ -20,6 +22,13 @@ function countedRole(string $name = 'editor'): Model
     $role = Models::role()->newQuery()->create(['name' => $name]);
 
     return $role;
+}
+
+function declaresRoleStats(): void
+{
+    Filament::getPanel('test')->widgets([RoleStats::class]);
+
+    app(CatalogRegistry::class)->forget();
 }
 
 test('it counts the roles that have been composed', function (): void {
@@ -77,8 +86,16 @@ test('it counts the accounts that hold no role at all', function (): void {
         ->assertSee('1');
 });
 
-test('the widget decides who may see it, like every other one', function (): void {
+test('the figures are out of sight for somebody never granted them', function (): void {
+    declaresRoleStats();
     signIn();
+
+    expect(RoleStats::canView())->toBeFalse();
+});
+
+test('the figures appear for somebody holding the ability that names them', function (): void {
+    declaresRoleStats();
+    grant(signIn(), [['widget:'.Subject::keyFor(RoleStats::class), null]]);
 
     expect(RoleStats::canView())->toBeTrue();
 });
