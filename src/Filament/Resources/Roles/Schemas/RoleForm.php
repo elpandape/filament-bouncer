@@ -19,9 +19,9 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * The roles form: a name, and the grid.
  *
- * The grid only ever offers the catalogue narrowed to what the person filling it in
- * holds themselves, which is half of the rule that nobody hands out what they do not
- * have. The other half is applied again when the form is saved.
+ * The grid offers the whole catalogue to whoever the policy let onto the screen. Being
+ * trusted to edit roles is the whole of the trust: there is no second, smaller set of
+ * abilities somebody may hold but not hand on.
  */
 final class RoleForm
 {
