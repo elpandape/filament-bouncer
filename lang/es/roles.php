@@ -42,8 +42,31 @@ return [
         'custom' => 'Personalizadas',
     ],
 
+    'resource' => [
+        'label' => 'Rol',
+        'plural' => 'Roles',
+    ],
+
     'table' => [
         'abilities' => 'Habilidades',
+        'name' => 'Rol',
+        'coverage' => 'Alcance',
+        'reading' => ':granted de :total',
+        'reaches_all' => 'Todo, por el comodín',
+        'holders' => 'Cuentas',
+        'updated' => 'Cambiado',
+        'empty' => 'Todavía no hay ningún rol compuesto.',
+    ],
+
+    'stats' => [
+        'roles' => 'Roles',
+        'roles_note' => 'Compuestos en esta pantalla.',
+        'abilities' => 'Habilidades declaradas',
+        'abilities_note' => 'Sobre lo que el panel sabe preguntar.',
+        'forbidden' => 'Prohibiciones vigentes',
+        'forbidden_note' => 'Una prohibición vence a cualquier concesión que llegue a la misma habilidad.',
+        'unassigned' => 'Cuentas sin ningún rol',
+        'unassigned_note' => 'Llegan al panel y no pueden hacer nada en él.',
     ],
 
     'relation' => [

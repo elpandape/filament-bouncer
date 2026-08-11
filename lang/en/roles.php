@@ -42,8 +42,31 @@ return [
         'custom' => 'Custom',
     ],
 
+    'resource' => [
+        'label' => 'Role',
+        'plural' => 'Roles',
+    ],
+
     'table' => [
         'abilities' => 'Abilities',
+        'name' => 'Role',
+        'coverage' => 'Reach',
+        'reading' => ':granted of :total',
+        'reaches_all' => 'Everything, through the wildcard',
+        'holders' => 'Accounts',
+        'updated' => 'Changed',
+        'empty' => 'No role has been composed yet.',
+    ],
+
+    'stats' => [
+        'roles' => 'Roles',
+        'roles_note' => 'Composed on this screen.',
+        'abilities' => 'Abilities declared',
+        'abilities_note' => 'What the panel is able to ask about.',
+        'forbidden' => 'Denials in force',
+        'forbidden_note' => 'A denial beats any grant reaching the same ability.',
+        'unassigned' => 'Accounts without a role',
+        'unassigned_note' => 'They reach the panel and can do nothing in it.',
     ],
 
     'relation' => [

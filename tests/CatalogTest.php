@@ -108,7 +108,7 @@ test('rows run resources first and pages before widgets', function (): void {
     expect(array_column(array_map(
         static fn (Subject $subject): array => ['kind' => $subject->kind->value],
         array_values(catalog()->subjects),
-    ), 'kind'))->toBe(['resource', 'model', 'page', 'widget', 'widget', 'custom']);
+    ), 'kind'))->toBe(['resource', 'resource', 'model', 'page', 'widget', 'widget', 'custom']);
 });
 
 test('an ignored component leaves the catalogue', function (): void {

@@ -324,3 +324,53 @@
     color: var(--fb-muted);
     line-height: 1.5;
 }
+
+/* ── How far a role reaches, drawn to scale ────────────────────────────────── */
+
+/*
+ * A table cell is nowhere near the grid, so this carries its own tokens rather than
+ * inheriting the ones declared on `.fb`.
+ */
+.fb-cov {
+    --fb-cov-yes: var(--success-600);
+    --fb-cov-no: var(--danger-600);
+    --fb-cov-rest: color-mix(in oklab, var(--gray-950) 10%, transparent);
+    --fb-cov-text: var(--gray-500);
+
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-inline-size: 9rem;
+}
+
+:is(.dark) .fb-cov {
+    --fb-cov-yes: var(--success-500);
+    --fb-cov-no: var(--danger-500);
+    --fb-cov-rest: color-mix(in oklab, #fff 14%, transparent);
+    --fb-cov-text: var(--gray-400);
+}
+
+.fb-cov-bar {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    block-size: 0.4rem;
+    border-radius: 9999px;
+    background: var(--fb-cov-rest);
+}
+
+.fb-cov-part {
+    display: block;
+    block-size: 100%;
+}
+
+.fb-cov-granted { background: var(--fb-cov-yes); }
+.fb-cov-forbidden { background: var(--fb-cov-no); }
+.fb-cov-neutral { background: transparent; }
+
+.fb-cov-reading {
+    flex: none;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--fb-cov-text);
+}
