@@ -11,6 +11,7 @@ use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
 use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
+use ElPandaPe\FilamentBouncer\Support\Ownership;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Gate;
@@ -36,12 +37,6 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // The screen that hands out abilities is governed by an ability like everything
-        // else. Without this the roles resource has no policy, and Filament falls open:
-        // anybody who reaches the panel at all could rewrite every role in it.
-        //
-        // An application registering its own policy for the role model does so from a
-        // provider that boots after this one, and wins.
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'filament-bouncer');
 
         // The grid is a table of the package's own, because Filament's components cannot
@@ -58,6 +53,9 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
             Css::make('filament-bouncer', __DIR__.'/../resources/css/filament-bouncer.css'),
         ], 'elpandape/filament-bouncer');
 
+        // Without this the roles resource has no policy and Filament falls open: anybody
+        // reaching the panel at all could rewrite every role in it. An application
+        // registering its own does so from a provider that boots after this one, and wins.
         Gate::policy(Models::classname(Role::class), RolePolicy::class);
 
         // And the abilities screen is governed the same way. Without a policy Filament
@@ -84,6 +82,8 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         // ability rows themselves and reaches for `abilities.user_id`. The screen dies
         // inside a Filament view with a message naming a column nobody ever wrote.
         Bouncer::ownedVia(Models::classname(Ability::class), static fn (): bool => false);
+
+        Ownership::register();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([

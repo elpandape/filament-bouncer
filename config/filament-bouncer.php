@@ -46,6 +46,23 @@ return [
     ],
 
     /*
+     * Which column says a record belongs to somebody, model by model.
+     *
+     * Bouncer asks about ownership on every check it answers about a record, whether or
+     * not a single ability was ever held down to what its holder owns. Told nothing about
+     * a model it guesses a column named after whoever is asking — `user_id` — and under
+     * `Model::shouldBeStrict()` reading a column that is not there throws, from inside a
+     * view, naming a column nobody ever wrote.
+     *
+     * Left empty nobody owns anything, and the guess is out of reach. Name a model here
+     * and its column is read only when the record carries it, so one loaded without it
+     * answers no rather than throwing. Column names, never closures: this file is cached.
+     */
+    'ownership' => [
+        // \App\Models\Post::class => 'author_id',
+    ],
+
+    /*
      * Models that have a policy but no resource in the panel, and would otherwise never
      * reach the catalogue. A model that lives in a vendor package is the usual case.
      */

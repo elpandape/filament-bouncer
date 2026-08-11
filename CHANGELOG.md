@@ -7,6 +7,28 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [4.3.0] - 2026-08-11
+
+Who owns what is a decision the application makes, and now it can say so.
+
+### Added
+
+- **An `ownership` key**, a map of model to column. Bouncer asks who owns a record on
+  every check it answers about one, whether or not a single ability was ever held down to
+  what its holder owns; told nothing it guesses a column named after whoever is asking and
+  reads it through the model, which under `Model::shouldBeStrict()` throws from inside a
+  view. Left empty nobody owns anything and the guess is out of reach. A named model reads
+  its column out of the attributes the record actually carries, so one loaded without it
+  answers no rather than throwing.
+- `Support\Ownership`, which registers it, and `Exceptions\InvalidOwnership`, thrown while
+  the application boots for a mangled entry — that one fails towards letting people
+  through, so it is not left to be discovered.
+
+### Fixed
+
+- The comment describing the roles policy sat above the call that loads the translations,
+  four statements away from what it described.
+
 ## [4.2.0] - 2026-08-11
 
 A role holding the wildcard no longer reads as a role that can do nothing.
@@ -554,6 +576,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[4.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.3.0
 [4.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.2.0
 [4.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.1.0
 [4.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.0.0

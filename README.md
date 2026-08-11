@@ -347,10 +347,35 @@ The title Bouncer stores alongside each ability follows the locale in force when
 | `custom` | Abilities no component declares, as a map of name to scope |
 | `ignore` | Resources, pages and widgets the catalogue leaves out |
 | `privileged_role` | The role that holds everything, and that the screen refuses to edit |
+| `ownership` | Which column says a record belongs to somebody, model by model |
 | `labels` | Your own words for the actions, scopes and stances |
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.
+
+### Ownership
+
+Bouncer asks who owns a record on **every check it answers about one**, whether or not a
+single ability was ever held down to what its holder owns. Told nothing about a model it
+guesses a column named after whoever is asking — `user_id` — and reads it through the
+model. Under `Model::shouldBeStrict()` that read throws, from inside a view, naming a
+column nobody ever wrote.
+
+So this package answers for every model: nothing is owned unless you say otherwise.
+
+```php
+'ownership' => [
+    \App\Models\Post::class => 'author_id',
+],
+```
+
+A named model reads its column out of the attributes the record actually carries, so one
+loaded without it answers no rather than throwing. Column names, never closures — this
+file is cached, and `config:cache` throws on anything it cannot serialise.
+
+> [!WARNING]
+> An application that relied on Bouncer's `user_id` guess loses it here, silently and
+> towards denying. Name the models whose records have owners.
 
 ## What this deliberately does not do
 
