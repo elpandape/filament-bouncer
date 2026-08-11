@@ -73,7 +73,7 @@ final class AbilityHolders extends Field
     {
         $record = $this->recordOrNull();
 
-        return $record instanceof Model && Declaration::of($record) === Declaration::Drifted;
+        return $record instanceof Model && Declaration::of($record)->isDoomed();
     }
 
     /**

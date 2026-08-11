@@ -46,6 +46,20 @@ enum Declaration: string
         return isset($declared[$store->identity($ability)]) ? self::Declared : self::Drifted;
     }
 
+    /**
+     * Whether the row is on its way out.
+     *
+     * This is the one state in which the abilities screen neither draws a row's cells nor
+     * writes them, and it is asked here so that the drawing and the writing cannot come
+     * to disagree. They did: the cells were withheld and the write was not, so a request
+     * that named them anyway made grants the next `--prune` would take away along with
+     * the row — silently, which is the loss the whole screen exists to make visible.
+     */
+    public function isDoomed(): bool
+    {
+        return $this === self::Drifted;
+    }
+
     public function label(): string
     {
         return __('filament-bouncer::abilities.declared.'.$this->value);

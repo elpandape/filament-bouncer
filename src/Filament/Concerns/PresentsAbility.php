@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Concerns;
 
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
+use ElPandaPe\FilamentBouncer\Store\Declaration;
 use ElPandaPe\FilamentBouncer\Store\Reach;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -58,6 +59,12 @@ trait PresentsAbility
     /**
      * Writes each role's stance through the store, one row at a time.
      *
+     * A row nobody declares any more takes none. The field withholds its cells, and this
+     * is what makes that refusal more than a drawing: a request naming them anyway would
+     * make grants the next `--prune` takes away along with the row, and take them away
+     * without saying so. Asked of the same answer the field asks, so the two cannot come
+     * to disagree about which rows are doomed.
+     *
      * A role named in the state that is no longer there is passed over rather than
      * created. Somebody else may well have deleted it while this screen sat open, and
      * bringing it back — empty, and holding whatever this form was about to grant it —
@@ -65,6 +72,10 @@ trait PresentsAbility
      */
     protected function writeHolders(Model $ability): void
     {
+        if (Declaration::of($ability)->isDoomed()) {
+            return;
+        }
+
         $abilities = app(RoleAbilities::class);
 
         foreach ($this->holders as $key => $stance) {

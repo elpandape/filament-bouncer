@@ -207,6 +207,25 @@ test('a row the code still declares carries them', function (): void {
         ->assertSeeHtml('class="fb-seg"');
 });
 
+test('a row nobody declares any more takes no stance from a request that arms one', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $role = changedRole();
+
+    Bouncer::allow('reviewer')->to('sing-a-song');
+
+    $row = changedRow('sing-a-song');
+
+    livewire(EditAbility::class, ['record' => $row->getKey()])
+        ->set(holderPath($role), Stance::Granted->value)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(RoleAbilities::class)->stanceOnRow($role, $row))->toBe(Stance::Neutral)
+        ->and(holds($role, 'sing-a-song'))->toBeFalse();
+});
+
 test('a role deleted while the screen sat open is passed over and not brought back', function (): void {
     signInAsAbilityManager();
     reconcileStore();
