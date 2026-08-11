@@ -7,6 +7,35 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [4.4.0] - 2026-08-11
+
+Roles are handed to a person from that person's screen, which until now only the console
+could do.
+
+### Added
+
+- **A roles relation manager**, for the tab on an account's own screen: what it holds, and
+  the two buttons that change it. The writes go through Bouncer's `assign()` and
+  `retract()` rather than through the relation, because an assignment is a row of its own
+  and not a column, and both are followed by a refresh — nothing in Bouncer invalidates
+  its cache on a write, and one Livewire request reads after it writes.
+- **A roles field**, for the screen where an account is created and a relation manager has
+  no record to hang off. The privileged role is offered **disabled** rather than hidden to
+  whoever may not hand it on, so its holders stay legible instead of being a gap, and the
+  write is taken over here rather than left to the form, so a request naming that role by
+  hand is refused the same way the screen refuses it.
+- `PrivilegedRole::mayBeHandedOutBy()` and `PrivilegedRole::isLastHolder()`. The privileged
+  role is handed on only by somebody who already holds it, and is never taken off its last
+  holder: a way back in that nobody holds is not one.
+- `Contracts\HoldsRoles`, which writes down what Bouncer's own trait already provides.
+  Typed for the analyser and not at runtime, so no application has to implement it.
+
+### Note
+
+Nothing is narrowed to what the person filling the screen in holds. Being trusted with the
+roles screen is the whole of the trust, as of `4.0.0`; the privileged role is the single
+exception, and it is about the way back in rather than about privilege.
+
 ## [4.3.0] - 2026-08-11
 
 Who owns what is a decision the application makes, and now it can say so.
@@ -576,6 +605,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[4.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.4.0
 [4.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.3.0
 [4.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.2.0
 [4.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.1.0

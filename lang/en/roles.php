@@ -31,4 +31,18 @@ return [
         'abilities' => 'Abilities',
     ],
 
+    'relation' => [
+        'title' => 'Roles',
+        'assign' => 'Assign a role',
+        'assign_submit' => 'Assign',
+        'retract' => 'Take away',
+        'role' => 'Role',
+        'empty' => 'This account holds no role.',
+    ],
+
+    'field' => [
+        'label' => 'Roles',
+        'note' => 'What this account will be able to do. A role it may not be handed is shown but cannot be ticked.',
+    ],
+
 ];

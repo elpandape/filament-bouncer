@@ -31,4 +31,18 @@ return [
         'abilities' => 'Habilidades',
     ],
 
+    'relation' => [
+        'title' => 'Roles',
+        'assign' => 'Asignar un rol',
+        'assign_submit' => 'Asignar',
+        'retract' => 'Quitar',
+        'role' => 'Rol',
+        'empty' => 'Esta cuenta no tiene ningún rol.',
+    ],
+
+    'field' => [
+        'label' => 'Roles',
+        'note' => 'Lo que esta cuenta podrá hacer. Un rol que no se le puede entregar se muestra, pero no se puede marcar.',
+    ],
+
 ];

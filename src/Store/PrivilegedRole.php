@@ -6,6 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Store;
 
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\Bouncer;
 use Silber\Bouncer\Database\Models;
 
@@ -34,6 +35,58 @@ final readonly class PrivilegedRole
     public function isNamed(string $name): bool
     {
         return $this->name() === $name;
+    }
+
+    /**
+     * Whether the person at the keyboard may hand this role on.
+     *
+     * Only somebody who already holds it. Refusing it to everybody would protect nothing
+     * — whoever may work the roles screen can compose a role holding everything and hand
+     * that out instead — but it keeps the way back in from being one careless click away
+     * for somebody who never held it. Asked of the role and not of its abilities, so the
+     * answer does not change with what the catalogue happens to declare today.
+     */
+    public function mayBeHandedOutBy(?Model $editor): bool
+    {
+        $name = $this->name();
+
+        if ($name === null) {
+            return true;
+        }
+
+        return $editor instanceof Model
+            && method_exists($editor, 'isAn')
+            && $editor->isAn($name) === true;
+    }
+
+    /**
+     * Whether taking this role off that holder would leave nobody holding it.
+     *
+     * A way back in that nobody holds is not one, and the screen is the only place it can
+     * be lost by accident: the command that hands it out is deliberate by definition.
+     */
+    public function isLastHolder(Model $holder): bool
+    {
+        $name = $this->name();
+
+        if ($name === null) {
+            return false;
+        }
+
+        $role = Models::role()->newQuery()->where('name', $name)->first();
+
+        if (! $role instanceof Model) {
+            return false;
+        }
+
+        $holders = Models::table('assigned_roles');
+
+        return DB::table($holders)->where('role_id', $role->getKey())->count() === 1
+            && DB::table($holders)
+                ->where('role_id', $role->getKey())
+                ->where('entity_id', $holder->getKey())
+                ->where('entity_type', $holder->getMorphClass())
+                ->exists();
     }
 
     /**
