@@ -7,6 +7,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.4.0] - 2026-08-12
+
+### Changed
+
+- **The last step of the wizard reads the choice back subject by subject**, the way the
+  approved design does: a line per subject, what it grants in green and what it forbids
+  in red beside it, and the counting left for the foot. A subject nobody decided anything
+  about still gets its line and says so — a review that lists only what was chosen is a
+  list, not a reading of the catalogue about to be written. The sentence that carried
+  three numbers in it is gone: it was true and unreadable, on the last screen before
+  abilities are handed out.
+
 ## [5.3.1] - 2026-08-12
 
 ### Added
