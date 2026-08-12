@@ -31,14 +31,34 @@ function gridField(): AbilityGrid
 }
 
 /**
- * @return array<int, array{action: string, label: string, scope: string, note: string|null, broader: bool}>
+ * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
  */
 function gridRowsFor(string $key): array
 {
-    /** @var array<int, array{action: string, label: string, scope: string, note: string|null, broader: bool}> $rows */
+    /** @var array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}> $rows */
     $rows = gridField()->getSections()['subjects']['subjects'][$key]['rows'] ?? [];
 
     return $rows;
+}
+
+/**
+ * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
+ */
+function gridRowsOn(Model $role, string $key): array
+{
+    /** @var GridHost $host */
+    $host = livewire(GridHost::class, ['role' => $role->getKey()])->instance();
+
+    foreach ($host->getSchema('form')?->getComponents() ?? [] as $component) {
+        if ($component instanceof AbilityGrid) {
+            /** @var array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}> $rows */
+            $rows = $component->getSections()['subjects']['subjects'][$key]['rows'] ?? [];
+
+            return $rows;
+        }
+    }
+
+    return [];
 }
 
 test('a subject is laid out as rows, and every action it declares gets one', function (): void {
@@ -95,11 +115,104 @@ test('reading only is not everything', function (): void {
         ->and($presets['read'])->not->toContain('forceDelete');
 });
 
-test('a subject says which policy answers for it', function (): void {
+test('a subject names the class of its model, and no longer its policy', function (): void {
     signIn();
 
-    expect(gridField()->getSections()['subjects']['subjects'][Subject::keyFor(Post::class)]['policy'])
-        ->toBe('PostPolicy');
+    expect(gridField()->getSections()['subjects']['subjects'][Subject::keyFor(Post::class)]['class'])
+        ->toBe(Post::class);
+
+    livewire(GridHost::class)
+        ->assertSeeHtml('fb-subject-class')
+        ->assertSee(Post::class)
+        ->assertDontSee('PostPolicy');
+});
+
+test('a subject with no model behind it draws no class chip and no icon', function (): void {
+    signIn();
+
+    config()->set('filament-bouncer.icons', [Post::class => 'heroicon-o-users']);
+
+    $pages = gridField()->getSections()['pages']['subjects'];
+
+    expect($pages)->not->toBeEmpty();
+
+    foreach ($pages as $page) {
+        expect($page['class'])->toBeNull()
+            ->and($page['icon'])->toBeNull();
+    }
+});
+
+test('a subject configured an icon draws it', function (): void {
+    signIn();
+
+    config()->set('filament-bouncer.icons', [Post::class => 'heroicon-o-users']);
+
+    expect(gridField()->getSections()['subjects']['subjects'][Subject::keyFor(Post::class)]['icon'])
+        ->toBe('heroicon-o-users');
+
+    livewire(GridHost::class)->assertSeeHtml('fb-subject-icon');
+});
+
+test('a subject nobody configured an icon for draws none', function (): void {
+    signIn();
+
+    livewire(GridHost::class)->assertDontSeeHtml('fb-subject-icon');
+});
+
+test('a denial marks its row and a grant does not', function (): void {
+    signIn();
+
+    $role = gridRole();
+    Bouncer::forbid($role)->to('delete', Post::class);
+    Bouncer::allow($role)->to('view', Post::class);
+    Bouncer::refresh();
+
+    $rows = collect(gridRowsOn($role, Subject::keyFor(Post::class)));
+
+    expect($rows->firstWhere('action', 'delete')['kind'] ?? null)->toBe('forbidden')
+        ->and($rows->firstWhere('action', 'view')['kind'] ?? null)->toBeNull();
+});
+
+test('the note of a denial is painted in red, on its row', function (): void {
+    signIn();
+
+    $role = gridRole();
+    Bouncer::forbid($role)->to('delete', Post::class);
+    Bouncer::refresh();
+
+    livewire(GridHost::class, ['role' => $role->getKey()])
+        ->assertSeeHtml('fb-row-note fb-row-note-forbidden');
+});
+
+test('the note of anything but a denial keeps its amber', function (): void {
+    signIn();
+
+    livewire(GridHost::class, ['role' => gridRole()->getKey()])
+        ->assertSeeHtml('fb-row-note')
+        ->assertDontSeeHtml('fb-row-note-forbidden');
+});
+
+test('the presets arrive as a closed menu', function (): void {
+    signIn();
+
+    livewire(GridHost::class)
+        ->assertSeeHtml('<details class="fb-presets">')
+        ->assertSeeHtml('fb-presets-toggle');
+});
+
+test('the footer wraps its three figures in chips', function (): void {
+    signIn();
+
+    livewire(GridHost::class)
+        ->assertSeeHtml('fb-summary-chip fb-summary-chip-granted')
+        ->assertSeeHtml('fb-summary-chip fb-summary-chip-forbidden')
+        ->assertSeeHtml('fb-summary-chip fb-summary-chip-neutral');
+});
+
+test('the badge of denials is in the markup for alpine to count', function (): void {
+    signIn();
+
+    livewire(GridHost::class)->assertSeeHtml('fb-subject-forbidden');
 });
 
 test('a role holding nothing has no row reached by anything broader', function (): void {

@@ -103,6 +103,15 @@ return [
     ],
 
     /*
+     * An icon for each subject on the roles screen, keyed by model class. A subject
+     * named here is drawn with it; anything else is drawn without one. Names only —
+     * this file is cached, and `config:cache` throws on a closure.
+     */
+    'icons' => [
+        // \App\Models\User::class => 'heroicon-o-users',
+    ],
+
+    /*
      * The role that holds everything. The roles screen refuses to edit it, and the
      * reconcile command makes sure it exists and is granted the wildcard. That is what
      * makes it the way back in when a mistake leaves nobody able to hand out abilities.

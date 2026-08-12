@@ -6,8 +6,10 @@ namespace ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament;
 
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
@@ -48,7 +50,7 @@ final class GridHost extends Component implements HasSchemas
     {
         $grid = AbilityGrid::make('abilities')
             ->catalog($this->catalog())
-            ->notes(static fn (Model $record): array => [$record->getMorphClass() => ['an-action' => 'A note this fixture puts there']]);
+            ->notes(static fn (Model $record): array => [Subject::keyFor(Post::class) => ['delete' => 'A note this fixture puts there']]);
 
         $schema = $schema->components([$grid])->statePath('data');
 

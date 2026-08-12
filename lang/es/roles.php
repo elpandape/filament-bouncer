@@ -18,6 +18,7 @@ return [
         'manage' => 'Todo sobre esto',
         'undeclared' => 'La Policy de este sujeto no declara esta acción.',
         'collapse' => 'Mostrar u ocultar las acciones de este sujeto',
+        'forbidden_count' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'model_count' => ':granted de :total',
         'reserved' => 'Ese nombre es el del rol que lo tiene todo, que escribe la reconciliación y no esta pantalla.',
         'scope' => 'Peso',

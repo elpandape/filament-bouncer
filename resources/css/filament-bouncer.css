@@ -19,6 +19,7 @@
     --fb-text: var(--gray-950);
     --fb-muted: var(--gray-500);
     --fb-faint: var(--gray-400);
+    --fb-ghost: var(--gray-300);
     --fb-line: color-mix(in oklab, var(--gray-950) 8%, transparent);
     --fb-hairline: color-mix(in oklab, var(--gray-950) 5%, transparent);
 
@@ -39,6 +40,7 @@
     --fb-text: var(--gray-100);
     --fb-muted: var(--gray-400);
     --fb-faint: var(--gray-500);
+    --fb-ghost: var(--gray-600);
     --fb-line: color-mix(in oklab, #fff 12%, transparent);
     --fb-hairline: color-mix(in oklab, #fff 7%, transparent);
 
@@ -77,7 +79,21 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    inline-size: 100%;
+    padding-inline-end: 0.35rem;
+}
+
+.fb-subject-head:hover {
+    background: var(--fb-raised);
+}
+
+/* The fold's button, holding everything up to the elastic middle: a head that carries
+   a menu cannot be a button itself, so the reachable target lives here. */
+.fb-subject-toggle {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.6rem;
+    min-inline-size: 0;
     padding: 0.65rem 0.35rem;
     border: 0;
     background: transparent;
@@ -86,11 +102,7 @@
     cursor: pointer;
 }
 
-.fb-subject-head:hover {
-    background: var(--fb-raised);
-}
-
-.fb-subject-head:focus-visible {
+.fb-subject-toggle:focus-visible {
     outline: 2px solid var(--primary-500);
     outline-offset: -2px;
 }
@@ -112,14 +124,30 @@
     color: var(--fb-text);
 }
 
-.fb-subject-policy {
+.fb-subject-icon {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    flex: none;
+    color: var(--fb-muted);
+}
+
+.fb-subject-class {
     font-family: ui-monospace, monospace;
     font-size: 0.6875rem;
     color: var(--fb-faint);
 }
 
+.fb-subject-forbidden {
+    flex: none;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-md, 0.375rem);
+    font-size: 0.6875rem;
+    color: var(--fb-no);
+    box-shadow: inset 0 0 0 1px var(--fb-no);
+}
+
 .fb-subject-count {
-    margin-inline-start: auto;
+    flex: none;
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
     color: var(--fb-muted);
@@ -185,6 +213,14 @@
     line-height: 1.4;
 }
 
+/* A denial's note sits on its row and in its colour, not below in amber like one more
+   warning. */
+.fb-row-note-forbidden {
+    display: inline;
+    margin-inline-start: 0.4rem;
+    color: var(--fb-no);
+}
+
 /* ── One action, three words ───────────────────────────────────────────────── */
 
 .fb-seg {
@@ -193,6 +229,7 @@
     padding: 0.125rem;
     border-radius: var(--radius-lg, 0.5rem);
     background: var(--fb-sunken);
+    box-shadow: inset 0 0 0 1px var(--fb-line);
     flex: none;
 }
 
@@ -204,7 +241,7 @@
     border: 0;
     border-radius: var(--radius-md, 0.375rem);
     background: transparent;
-    color: var(--fb-faint);
+    color: var(--fb-ghost);
     cursor: pointer;
     transition: background 0.1s ease, color 0.1s ease;
 }
@@ -231,17 +268,20 @@
 .fb-seg-granted.fb-seg-on {
     background: var(--fb-yes);
     color: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
 }
 
 .fb-seg-forbidden.fb-seg-on {
     background: var(--fb-no);
     color: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
 }
 
+/* Undefined is the lightest word of the three, so it wears a hairline and no fill:
+   drawn heavier than a grant, it would mean the opposite of what it says. */
 .fb-seg-neutral.fb-seg-on {
-    background: var(--fb-surface);
     color: var(--fb-muted);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+    box-shadow: inset 0 0 0 1px var(--fb-line);
 }
 
 /* Reached by a rule this row does not hold: the tick is drawn, but hollow. Turning it
@@ -250,13 +290,49 @@
     color: var(--fb-noted);
 }
 
-/* ── The presets ───────────────────────────────────────────────────────────── */
+/* ── The presets, folded behind a menu ─────────────────────────────────────── */
 
 .fb-presets {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-inline-start: 0.5rem;
+    position: relative;
+    margin-inline-start: 0.25rem;
+}
+
+.fb-presets-toggle {
+    display: grid;
+    place-items: center;
+    padding: 0.25rem;
+    list-style: none;
+    cursor: pointer;
+    color: var(--fb-faint);
+}
+
+.fb-presets-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.fb-presets-toggle:hover {
+    color: var(--fb-text);
+}
+
+.fb-presets-toggle svg {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.fb-presets[open] > div {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    min-inline-size: max-content;
+    padding: 0.375rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    background: var(--fb-surface);
+    box-shadow: 0 0 0 1px var(--fb-line), 0 4px 12px rgb(0 0 0 / 0.12);
 }
 
 .fb-preset {
@@ -331,9 +407,23 @@
     font-variant-numeric: tabular-nums;
 }
 
-.fb-summary-granted { color: var(--fb-yes); }
-.fb-summary-forbidden { color: var(--fb-no); }
-.fb-summary-neutral { color: var(--fb-muted); }
+.fb-summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-md, 0.375rem);
+}
+
+.fb-summary-chip svg {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+    flex: none;
+}
+
+.fb-summary-chip-granted { color: var(--fb-yes); }
+.fb-summary-chip-forbidden { color: var(--fb-no); }
+.fb-summary-chip-neutral { color: var(--fb-muted); }
 
 .fb-empty {
     padding: 1rem 0;

@@ -18,6 +18,7 @@ return [
         'manage' => 'Everything about it',
         'undeclared' => 'The policy behind this subject does not declare this action.',
         'collapse' => 'Show or hide the actions of this subject',
+        'forbidden_count' => '{1} 1 forbidden|[2,*] :count forbidden',
         'model_count' => ':granted of :total',
         'reserved' => 'That name belongs to the role that holds everything, which the reconciliation writes and this screen does not.',
         'scope' => 'Weight',

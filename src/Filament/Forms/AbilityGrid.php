@@ -15,7 +15,6 @@ use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\Field;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Gate;
 
 /**
  * The whole catalogue as one field, laid out as sections of rows.
@@ -80,13 +79,18 @@ final class AbilityGrid extends Field
      * The catalogue, ready to draw: a section per tab, a subject per section, a row per
      * action.
      *
-     * @return array<string, array{label: string, doors: bool, subjects: array<string, array{label: string, policy: string|null, rows: array<int, array{action: string, label: string, scope: string, note: string|null, broader: bool}>}>}>
+     * @return array<string, array{label: string, doors: bool, subjects: array<string, array{label: string, class: string|null, icon: string|null, rows: array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>}>}>
      */
     public function getSections(): array
     {
         $labels = app(Labels::class);
         $notes = $this->getNotes();
         $broader = $this->getBroader();
+        $stances = $this->savedStances();
+
+        /** @var array<string, string> $icons */
+        $icons = config('filament-bouncer.icons', []);
+
         $sections = [];
 
         foreach ($this->catalog->tabs() as $value => $subjects) {
@@ -96,8 +100,9 @@ final class AbilityGrid extends Field
             foreach ($subjects as $key => $subject) {
                 $described[$key] = [
                     'label' => $subject->label,
-                    'policy' => $this->policyFor($subject),
-                    'rows' => $this->rowsFor($key, $subject, $labels, $notes, $broader),
+                    'class' => $subject->entityType,
+                    'icon' => $subject->entityType === null ? null : ($icons[$subject->entityType] ?? null),
+                    'rows' => $this->rowsFor($key, $subject, $labels, $notes, $broader, $stances),
                 ];
             }
 
@@ -231,9 +236,10 @@ final class AbilityGrid extends Field
     /**
      * @param  array<string, array<string, string>>  $notes
      * @param  array<string, array<string, bool>>  $broader
-     * @return array<int, array{action: string, label: string, scope: string, note: string|null, broader: bool}>
+     * @param  array<string, array<string, string>>  $stances
+     * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
      */
-    private function rowsFor(string $key, Subject $subject, Labels $labels, array $notes, array $broader): array
+    private function rowsFor(string $key, Subject $subject, Labels $labels, array $notes, array $broader, array $stances): array
     {
         $rows = [];
 
@@ -245,11 +251,28 @@ final class AbilityGrid extends Field
                     : $labels->action($action),
                 'scope' => ($this->catalog->actions[$action] ?? AbilityScope::Write)->value,
                 'note' => $notes[$key][$action] ?? null,
+                'kind' => ($stances[$key][$action] ?? null) === Stance::Forbidden->value ? 'forbidden' : null,
                 'broader' => $broader[$key][$action] ?? false,
             ];
         }
 
         return $rows;
+    }
+
+    /**
+     * The stances the role already holds, read to mark the row a denial sits on.
+     *
+     * A denial's note belongs in red and on its row, not in amber below like one more
+     * warning, and telling the two apart takes knowing what was saved — which is the
+     * same reading `getBroader()` already does.
+     *
+     * @return array<string, array<string, string>>
+     */
+    private function savedStances(): array
+    {
+        $record = $this->recordOrNull();
+
+        return $record instanceof Model ? app(RoleAbilities::class)->toFormState($record) : [];
     }
 
     /**
@@ -281,16 +304,5 @@ final class AbilityGrid extends Field
         $record = isset($this->container) ? $this->getRecord() : null;
 
         return $record instanceof Model ? $record : null;
-    }
-
-    private function policyFor(Subject $subject): ?string
-    {
-        if ($subject->entityType === null) {
-            return null;
-        }
-
-        $policy = Gate::getPolicyFor($subject->entityType);
-
-        return is_object($policy) ? class_basename($policy) : null;
     }
 }
