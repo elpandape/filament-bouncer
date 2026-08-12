@@ -40,9 +40,12 @@ final class RoleForm
         return $schema->components([
             Section::make(__('filament-bouncer::roles.form.role'))
                 ->schema(self::identity())
-                ->columns(2),
-            Section::make(__('filament-bouncer::roles.form.abilities'))
-                ->description(__('filament-bouncer::roles.form.description'))
+                ->columns(2)
+                ->columnSpanFull(),
+            // Headless on purpose. The catalogue names itself on every line of it, so a
+            // heading and a sentence above would push the first subject a screenful
+            // down to say what the rows underneath already say.
+            Section::make()
                 ->schema([self::grid()])
                 ->columnSpanFull(),
         ]);

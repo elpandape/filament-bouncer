@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages;
 
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\FillsRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\SavesRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 /**
  * Changing what a role says.
@@ -34,6 +38,24 @@ final class EditRole extends EditRecord
     /**
      * @return array<int, Action>
      */
+    /**
+     * The same reach bar the record page carries, above the form that changes it.
+     *
+     * Reading how far a role already goes is the first thing anybody does before moving
+     * a single stance, and the approved design put it here for that reason.
+     */
+    public function getSubheading(): Htmlable
+    {
+        // The analyser works out `view-string` by looking for the file among the paths the
+        // application renders from, and a package's namespaced view is never among them.
+        /** @var view-string $view */
+        $view = 'filament-bouncer::roles.coverage';
+
+        return new HtmlString(view($view, [
+            'coverage' => RoleCoverage::for($this->getRecord(), app(CatalogRegistry::class)->current()),
+        ])->render());
+    }
+
     protected function getHeaderActions(): array
     {
         return [
