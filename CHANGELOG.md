@@ -7,6 +7,21 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.3.1] - 2026-08-12
+
+### Added
+
+- **The abilities step of the wizard heads itself**, the way the approved design does:
+  what the step is, where the catalogue comes from, and how to read a row — grant, say
+  nothing, or forbid — before the first subject.
+
+### Fixed
+
+- **A role that says nothing about anything is refused at that step.** Every cell left
+  neutral grants nothing, forbids nothing and answers no question, and the wizard used to
+  carry it all the way to the review and write it anyway. Editing is untouched on
+  purpose: clearing every cell back to neutral is how what a role holds is taken away.
+
 ## [5.3.0] - 2026-08-12
 
 The screens matched against the approved design pair by pair, with custom Blade wherever
