@@ -86,6 +86,12 @@ test('it counts the accounts that hold no role at all', function (): void {
         ->assertSee('1');
 });
 
+test('every figure carries an icon', function (): void {
+    signInAsRoleManager();
+
+    expect(mb_substr_count(livewire(RoleStats::class)->html(), 'fi-icon'))->toBe(4);
+});
+
 test('the figures are out of sight for somebody never granted them', function (): void {
     declaresRoleStats();
     signIn();
