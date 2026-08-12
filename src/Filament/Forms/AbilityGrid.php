@@ -70,6 +70,31 @@ final class AbilityGrid extends Field
     }
 
     /**
+     * Refuse a state that says nothing about anything.
+     *
+     * Only the screen that composes a role asks for this. A role with every cell on
+     * neutral grants nothing, forbids nothing and answers no question — there is nothing
+     * about it worth writing down. Editing is different on purpose: clearing everything
+     * back to neutral is how what a role holds is taken away.
+     */
+    public function requiresAStance(): static
+    {
+        $this->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+            foreach (is_array($value) ? $value : [] as $actions) {
+                foreach (is_array($actions) ? $actions : [] as $stance) {
+                    if ($stance === Stance::Granted->value || $stance === Stance::Forbidden->value) {
+                        return;
+                    }
+                }
+            }
+
+            $fail(__('filament-bouncer::roles.form.requires_stance'));
+        });
+
+        return $this;
+    }
+
+    /**
      * What each row says beyond its stance, worked out from the record being edited.
      */
     public function notes(Closure $notes): static

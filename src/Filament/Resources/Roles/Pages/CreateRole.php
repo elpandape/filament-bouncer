@@ -65,7 +65,11 @@ final class CreateRole extends CreateRecord
                 ]),
             Step::make(__('filament-bouncer::roles.wizard.abilities'))
                 ->description(__('filament-bouncer::roles.wizard.abilities_hint'))
-                ->schema([RoleForm::grid()]),
+                ->schema([
+                    Section::make(__('filament-bouncer::roles.wizard.abilities_heading'))
+                        ->description(__('filament-bouncer::roles.wizard.abilities_note'))
+                        ->schema([RoleForm::grid(requiresAStance: true)]),
+                ]),
             Step::make(__('filament-bouncer::roles.wizard.review'))
                 ->description(__('filament-bouncer::roles.wizard.review_hint'))
                 ->schema([Text::make(RoleForm::review())]),

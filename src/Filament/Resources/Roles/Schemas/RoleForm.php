@@ -110,7 +110,7 @@ final class RoleForm
      * second answer to a question the policy has already answered: whoever may work
      * this screen hands out all of it, including to themselves.
      */
-    public static function grid(bool $submitsFromSummary = false): AbilityGrid
+    public static function grid(bool $submitsFromSummary = false, bool $requiresAStance = false): AbilityGrid
     {
         $grid = AbilityGrid::make(self::ABILITIES)
             ->hiddenLabel()
@@ -119,6 +119,10 @@ final class RoleForm
 
         if ($submitsFromSummary) {
             $grid->submitsFromSummary(RoleResource::getUrl('index'));
+        }
+
+        if ($requiresAStance) {
+            $grid->requiresAStance();
         }
 
         return $grid;

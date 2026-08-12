@@ -197,9 +197,51 @@ test('any other name is still free', function (): void {
     signInAsRoleManager();
 
     livewire(CreateRole::class)
-        ->fillForm(['name' => 'editor'])
+        ->fillForm([
+            'name' => 'editor',
+            'abilities' => [Subject::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
+        ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     expect(Models::role()->newQuery()->where('name', 'editor')->exists())->toBeTrue();
+});
+
+test('a role saying nothing about anything is refused', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->fillForm(['name' => 'mudo'])
+        ->call('create')
+        ->assertHasFormErrors([RoleForm::ABILITIES]);
+
+    expect(Models::role()->newQuery()->where('name', 'mudo')->exists())->toBeFalse();
+});
+
+test('one stance is enough to get past the refusal', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->fillForm([
+            'name' => 'lector',
+            'abilities' => [Subject::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Models::role()->newQuery()->where('name', 'lector')->exists())->toBeTrue();
+});
+
+test('a denial also counts as saying something', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->fillForm([
+            'name' => 'vetado',
+            'abilities' => [Subject::keyFor(Post::class) => ['delete' => Stance::Forbidden->value]],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Models::role()->newQuery()->where('name', 'vetado')->exists())->toBeTrue();
 });
