@@ -120,7 +120,7 @@ test('an ordinary role opens', function (): void {
     signInAsRoleManager();
 
     livewire(EditRole::class, ['record' => editedRole()->getKey()])
-        ->assertSee(__('filament-bouncer::roles.form.abilities'))
+        ->assertSeeHtml('class="fb-seg"')
         ->assertOk();
 });
 

@@ -8,15 +8,12 @@ return [
         'role' => 'Rol',
         'name' => 'Nombre',
         'title' => 'Título',
-        'abilities' => 'Habilidades',
-        'description' => 'Todo lo que el panel declara. Quien pueda trabajar esta pantalla reparte cualquiera de ellas, también a sí mismo.',
         'empty' => 'No tienes ninguna habilidad propia, así que aquí no hay nada que ceder.',
         'inherited' => 'La tiene por una regla más amplia, no concedida aquí.',
         'overruled' => 'Concedida aquí, pero una regla más amplia la prohíbe.',
         'restricted_owned' => 'También tiene aquí una regla para solo lo suyo, que la rejilla no toca.',
         'restricted_records' => 'También tiene aquí una regla sobre un registro, que la rejilla no toca.|También tiene aquí reglas sobre :count registros, que la rejilla no toca.',
         'manage' => 'Todo sobre esto',
-        'undeclared' => 'La Policy de este sujeto no declara esta acción.',
         'collapse' => 'Mostrar u ocultar las acciones de este sujeto',
         'forbidden_count' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'model_count' => ':granted de :total',
@@ -73,7 +70,6 @@ return [
     ],
 
     'table' => [
-        'abilities' => 'Habilidades',
         'name' => 'Rol',
         'coverage' => 'Alcance',
         'reaches_all' => 'Todo, por el comodín',

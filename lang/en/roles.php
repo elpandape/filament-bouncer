@@ -8,15 +8,12 @@ return [
         'role' => 'Role',
         'name' => 'Name',
         'title' => 'Title',
-        'abilities' => 'Abilities',
-        'description' => 'Everything the panel declares. Whoever may work this screen hands out any of it, including to themselves.',
         'empty' => 'You hold no abilities of your own, so there is nothing here to hand on.',
         'inherited' => 'Held through a broader rule, not granted here.',
         'overruled' => 'Granted here, but a broader rule forbids it.',
         'restricted_owned' => 'It also holds a rule here for only what it owns, which the grid leaves untouched.',
         'restricted_records' => 'It also holds a rule here about one record, which the grid leaves untouched.|It also holds rules here about :count records, which the grid leaves untouched.',
         'manage' => 'Everything about it',
-        'undeclared' => 'The policy behind this subject does not declare this action.',
         'collapse' => 'Show or hide the actions of this subject',
         'forbidden_count' => '{1} 1 forbidden|[2,*] :count forbidden',
         'model_count' => ':granted of :total',
@@ -73,7 +70,6 @@ return [
     ],
 
     'table' => [
-        'abilities' => 'Abilities',
         'name' => 'Role',
         'coverage' => 'Reach',
         'reaches_all' => 'Everything, through the wildcard',

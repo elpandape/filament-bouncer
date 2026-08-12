@@ -15,7 +15,6 @@ return [
 
     'form' => [
         'rule' => 'Definition',
-        'name' => 'Name',
         'entity' => 'Model',
         'no_entity' => '— none —',
         'reach' => 'Reach',
