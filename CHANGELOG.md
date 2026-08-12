@@ -7,6 +7,113 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.0.0] - 2026-08-11
+
+The screen layer, cut out and drawn again from nothing. A stance is now chosen rather
+than cycled to, and the classes that drew the old matrix went with it — which is the
+whole of why this is a major.
+
+### Changed
+
+- **The roles grid is sections of rows, not a matrix.** A subject is a collapsible
+  section, an action is a row, and each row carries one control with three positions —
+  granted, not granted, forbidden — chosen directly. In a column three buttons never
+  fitted, so the stance was a shape the reader decoded; and cycling a single cell meant
+  reaching a denial by passing through a grant, a rule that existed on screen for a
+  moment and never on purpose.
+- **The weight of an action moved from a tinted column band to a mark on its own row**,
+  there being no columns left to band. It exists for the reason it always did: "see a
+  list" and "delete for good" must not look like the same decision.
+- **The catalogue opens whole only when it is short.** Sixty rows or fewer and every
+  section is open, because a screen showing only headings reads as broken and the fold
+  costs a click on every subject somebody came to change; past that it arrives folded,
+  because three buttons a row would otherwise draw five hundred at once.
+- **Composing a role is a wizard of three steps** — identity, abilities, review — ending
+  on a plain sentence of what is about to be written, because handing out abilities
+  deserves reading once before it is done. Narrowing an ability takes the same three
+  steps, and refuses one thing it did not before: a second row saying what one already
+  says, because the screen only ever shows one of them.
+- **The roles list draws how far each role reaches**: a bar of granted, forbidden and
+  left alone against the whole catalogue, beside the accounts holding the role. A role
+  reaching everything through the wildcard is drawn full and says why in words, because
+  it holds no rule of its own for any cell and a bar from its grants alone would read as
+  nothing at all.
+- **The abilities list gathers its rows under the model they decide about**, because the
+  name is the least distinguishing part of a rule — a dozen models all have a `view`.
+  The reconciliation column keeps its three answers.
+- **An ability's record page no longer calls the row a grant or a denial**, because that
+  was false: the row is the thing itself, and granting and forbidding live in the pivot
+  and belong to a holder — the same row is quite properly granted to one role and
+  forbidden to another. The mark now goes beside each holder, on the record page and in
+  the list.
+
+### Added
+
+- **A summary at the foot of the grid** — granted, forbidden, not granted — counted
+  where the change happens, while it happens.
+- **Presets per subject**: reading, everything, nothing. Only reading carries a list of
+  its own; a shortcut for withdrawing or for the irreversible is a shortcut nobody
+  should have.
+- **Four figures above the roles list**: the roles, the abilities the panel declares,
+  the denials in force, and the accounts that reach the panel holding no role at all.
+  The last two are there precisely because no row below can show them.
+- `Store\RoleCoverage`, how a role stands against the whole catalogue counted once —
+  `granted`, `forbidden`, `neutral`, `total`, `reachesAll` — because four screens ask
+  the same question and each counting it again would walk the catalogue four times over
+  for a single row.
+- The deletes the screens hide are armed, not just drawn: tests drive one by hand
+  through every door a request could reach it by — the row, the selection, the record
+  page, the edit page — and assert the row still standing.
+- The domain is proven through its own API. The policies, the store and the privileged
+  role were only ever exercised by mounting a screen, which proves a rule of
+  authorisation sideways: the day the screen changes, the guarantee goes without
+  anything turning red.
+
+### Fixed
+
+- **The navigation icon and group take the shapes Filament declares again**
+  (`string|BackedEnum|Htmlable|null` and `string|UnitEnum|null`). Narrowed to strings,
+  an application naming its icons with a backed enum met a type error raised from inside
+  the sidebar, with the whole panel down and nothing on screen to say why. Both are
+  pinned with an enum, which a string signature cannot carry.
+- **A doomed rule refuses a stance at the write, not only on the screen.** A row the
+  catalogue no longer declares withheld its cells and wrote them anyway, so a request
+  that armed one made grants the next `--prune` would take away along with the row,
+  silently. The drawing and the writing now ask one question about which rows are on
+  their way out, so the two cannot come to disagree.
+- **The privileged role's name cannot be claimed.** The screen refuses to edit that
+  role, and without this the same refusal was a way to take its name hostage: composing
+  a role under it granted nobody anything and left behind a role nobody could edit or
+  delete from here. The reconciliation is what writes that role, so this screen never
+  had business naming it.
+
+### Removed
+
+- `Filament\Concerns\FillsAbilityHolders`. Its work is done by
+  `Filament\Concerns\PresentsAbility`, which also carries the reach onto the form.
+- `Filament\Resources\Abilities\Schemas\AbilityComposer`. Its work is done by
+  `Filament\Resources\Abilities\Schemas\NarrowAbility`.
+- The view-facing methods that described the old matrix — `AbilityGrid::getTabs()`,
+  `getActionColumns()`, `getBands()` and their siblings, and all six readers on
+  `AbilityHolders`. Both fields keep their names, their place in the schemas and the
+  shape of their form state; what changed is what a view may ask them, because there is
+  no matrix left to describe.
+
+### Kept
+
+- `RolesField` and `RolesRelationManager`, by name and namespace: an application already
+  using either changes nothing. So are the stored ability names, the configuration keys
+  and the shape of the grid's form state — subject, action, stance — which is the shape
+  the store reads and writes.
+
+### Upgrading
+
+Run `php artisan filament:assets` after updating: the stylesheet was rewritten with the
+screens. A view published from 4.x with `--tag=filament-bouncer-views` no longer matches
+what the fields provide — republish it and carry your edits over. Anything consuming the
+two removed classes moves to the replacements named above; anything else — configuration,
+stored abilities, the plugin registration — is as it was.
+
 ## [4.4.0] - 2026-08-11
 
 Roles are handed to a person from that person's screen, which until now only the console
@@ -605,6 +712,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[5.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v5.0.0
 [4.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.4.0
 [4.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.3.0
 [4.2.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.2.0

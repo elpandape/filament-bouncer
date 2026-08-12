@@ -155,42 +155,81 @@ two of them.
 
 ## The abilities screen
 
-The other axis of the same table: not what a role may do, but who may do a thing. It lists
-every stored row with its title, the name the code asks the Gate, the model, **how far it
-reaches**, who holds it **and how**, and where it stands with the reconciliation — declared
-by the code, declared by nothing (which is drift, and `--prune` will take it), or outside
-the catalogue altogether, which is no danger at all.
+The other axis of the same table: not what a role may do, but who may do a thing. The list
+gathers every stored row under the model it decides about, because the name is the least
+distinguishing part of a rule — a dozen models all have a `view`, and "what may be decided
+about a post" is the question somebody arriving here actually has. Each row carries its
+title, the name the code asks the Gate, **how far it reaches**, who holds it — with what
+each holder says — and where it stands with the reconciliation: declared by the code,
+declared by nothing (which is drift, and `--prune` will take it), or outside the catalogue
+altogether, which is no danger at all.
 
-Opening a row gives the roles grid read the other way round: one ability, every role, each
-a cell walking the same three stances. It writes the same rows the roles screen writes.
+The mark goes beside each holder and never on the rule, because a stored ability is
+neither a grant nor a denial. Granting and forbidding live in the pivot and belong to a
+holder, so the same row is quite properly granted to one role and forbidden to another —
+a label calling the row either one would be false about half of them.
+
+Opening a row gives the roles screen read the other way round: one rule, every role — the
+ones that say nothing about it too, since the question is who may be given this — each
+with the same three-way choice, writing the same rows of the same table through the same
+store. The exception is a row the catalogue no longer declares: it still shows, because
+seeing that it is doomed is the point, but its cells are withheld, on the screen and at
+the write. A grant made against it would be swept by the next `--prune` along with the
+row, silently.
 
 ### Narrowing a rule
 
 The plain rule — "may change posts" — comes from the code that asks about it, so the screen
 does not invent one. What the code has no way to say is how far a rule reaches, and that is
-what the composer makes:
+what the composer makes, in three steps: the ability, the reach, and a review that reads
+the sentence they add up to — "change, on posts, for whatever its holder owns" — before it
+is written. The title is asked last, beside that sentence, because the title is read by
+people and by nothing else.
 
 | Narrowed to | What Bouncer stores | What it means |
 |---|---|---|
 | What its holder owns | `only_owned = true` | The rule holds for the records that belong to whoever has it |
 | One record | `entity_id = 7` | The rule holds for that record and no other |
 
-Pick the model, pick the action, say how far it reaches, and the title writes itself as you
-go — yours to change, because the title is read by people and by nothing else. The name and
-the model are taken from the catalogue entry the first two choices land on, never from the
-request, so a narrowed rule is always spelled the way the code spells the rule it narrows.
-A rule that narrows nothing is refused: that one is the reconciliation's to write.
+The name and the model are taken from the catalogue entry the choices land on, never from
+the request, so a narrowed rule is always spelled the way the code spells the rule it
+narrows. Three things are refused, each where the write happens and not only on the
+screen: a rule that narrows nothing, because the plain row is the reconciliation's to
+write; a rule about one record of something that is not a model, because there is no
+record to point at; and a second row saying what one already says, because this screen
+only ever shows one of them — whoever cleared the one they were shown would walk away
+believing they had taken the rule back.
 
 A narrowed row has no cell on the roles grid, because the grid matches the plain row and
 only the plain row. Handing it out therefore happens here, and writes exactly that row.
 
 ## The roles screen
 
-Subjects down the side, actions across the top. The columns are grouped by scope and the
-group headings are tinted, so that "see a list" and "delete for good" cannot look like the
-same decision.
+The list answers what a list of names cannot: how far each role reaches. Every row draws
+the catalogue to scale — a bar of what the role grants, what it forbids and what it leaves
+alone — beside the accounts that hold it. A role reaching everything through the wildcard
+holds no rule of its own for any cell, so a bar drawn from its grants alone would say it
+can do nothing at all; it is drawn full instead, and says why in words. Above the table
+stand four figures — the roles, the abilities the panel declares, the denials in force,
+and the accounts that reach the panel holding no role at all — and the last two are there
+precisely because no row below can show them: a denial explains a role that looks generous
+and is not, and an account holding nothing reaches the panel and finds it empty, which is
+a support ticket waiting to be filed.
 
-Each cell holds one of three stances, and the middle one is not a quieter way of saying no:
+Composing a role takes three steps — the name, the abilities, and one plain sentence of
+what is about to be written — because handing out abilities deserves reading once before
+it is done.
+
+The catalogue is laid out as a section per subject and a row per action, and each row
+carries one control with three positions, chosen rather than cycled to: with a single cell
+that walked the three states, three buttons never fitted a column — so the stance was a
+shape the reader decoded — and reaching a denial meant passing through a grant, a rule
+that existed on screen for a moment and never on purpose. Beside each action sits the mark
+of its weight — read, write, withdraw, irreversible — which is what keeps "see a list" and
+"delete for good" from looking like the same decision. Pages, widgets and custom abilities
+answer exactly one question each, so they read as flat lists with the same control.
+
+Each row holds one of three stances, and the middle one is not a quieter way of saying no:
 
 | Stance | What the role is saying |
 |---|---|
@@ -203,6 +242,24 @@ thing Bouncer can express and `spatie/laravel-permission` cannot, and it is why 
 except deleting for good" survives the catalogue growing later instead of quietly picking up
 whatever gets added.
 
+A catalogue of sixty rows or fewer opens whole, because below that the fold buys nothing
+and costs a click on every subject somebody came to change — and a screen that opens
+showing only headings reads as broken. Past sixty it arrives folded, because three buttons
+a row would otherwise draw five hundred at once. Each subject offers three shortcuts —
+reading, everything, nothing — and only reading carries a list of its own: a shortcut for
+withdrawing or for the irreversible is a shortcut nobody should have. A summary at the
+foot counts what the role adds up to — granted, forbidden, not granted — while it is being
+changed, not after it is saved.
+
+Beside a stance goes what the stance cannot say, each of them a way for a grid read at
+face value to be wrong about the role in front of it: reached through a broader rule,
+where the neutral position draws a hollow tick — the answer is yes, and the rule behind it
+is not this row's; granted here and still refused, because a denial beats it from
+elsewhere; or narrowed to one record or to what the holder owns, by rules this grid
+neither writes nor removes. The record page reads a role in the same shape it is written in — the same grid,
+disabled, under the reach bar at full size — so that learning where a cell is on one
+screen is learning it on both.
+
 **Forbidding is offered on exactly the abilities granting is offered on, and no others.** It
 would be arguable that restricting is a smaller power than granting, and the decision here
 went the other way: a denial you cannot lift afterwards is a way to lock people out of
@@ -214,13 +271,17 @@ themselves. That is a deliberate choice, and the same one `yadahan/nova-bouncer`
 being trusted to edit roles is the whole of the trust. If that is more than you want to
 give somebody, the answer is not to let them onto the screen.
 
-Two things it still refuses, and neither is only a hidden button — each is checked again
+Three things it still refuses, and none is only a hidden button — each is checked again
 where the write happens, so a request built by hand meets the same refusal:
 
 - **Nobody edits a role they hold themselves.** Otherwise raising your own reach is one save
   away.
 - **Nobody edits the role that holds everything.** It is the way back in, and a way back in
   that can be edited is not one.
+- **Nobody names a role after it either.** Left alone, the refusal above was a way to take
+  the name hostage: a role created or renamed to it granted nobody anything and could never
+  again be edited or deleted from here. The reconciliation is what writes that role, so
+  this screen has no business writing its name.
 
 ### The way back in
 
@@ -264,7 +325,7 @@ for something that has no resource. Publish the stub with
 
 The generated methods are the declaration: the catalogue reads them straight back, so what
 an administrator is offered for a model is exactly what its policy is prepared to answer.
-Delete a method you do not want and its column goes with it.
+Delete a method you do not want and its row goes with it.
 
 The roles screen is governed the same way, by a policy this package registers for the role
 model. Nothing about it is special-cased. Register your own policy for that model from a
@@ -385,15 +446,18 @@ person to want one finds the reasoning rather than the silence.
 - **Deleting an ability from a screen.** A row goes away when the reconciliation stops
   declaring it, and `--prune` says how many it took. Offering a button would be offering
   to take every grant pointing at the row with it, on one click and no second question.
-- **Narrowing anything but a model.** A page or a widget is reached or it is not: there is
-  no record to point at and nothing to own, so the composer only offers subjects that
-  stand for a model.
+  This one is armed, not just drawn: tests drive a delete by hand through every door a
+  request could reach one by, and assert the row still standing.
+- **Pointing a narrowed rule at one record of something that is not a model.** A page or
+  a widget is reached or it is not: there is no record to point at, so the composer
+  refuses that reach for them.
 - **Bouncer's Constraints.** They are persisted and never evaluated: an ability with an
   impossible constraint still passes. Offering them would be writing decorative JSON.
   Making them real means a clipboard of our own, which is a component and not an adapter.
-- **Bulk actions on the roles table.** Filament authorises a bulk delete once for the
-  whole selection, and the two refusals that keep the privileged role and your own role
-  out of reach live on the resource. A bulk delete would walk past both.
+- **Bulk actions, on either table.** Filament authorises a bulk delete once for the whole
+  selection, and the two refusals that keep the privileged role and your own role out of
+  reach live on the resource — a bulk delete would walk past both. The abilities table
+  offers a selection nothing for the same reason it offers no delete at all.
 - **Bouncer's multi-tenant scope.** The reads this package makes pass the configured scope
   through, but nothing here is tested against a scoped installation, and
   `assigned_roles.restricted_to_id` is a dead column in Bouncer 1.0.4 whatever the schema
