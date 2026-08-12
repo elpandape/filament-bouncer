@@ -7,6 +7,55 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.3.0] - 2026-08-12
+
+The screens matched against the approved design pair by pair, with custom Blade wherever
+Filament's own components could not draw it.
+
+### Added
+
+- **The list of roles opens with four figures drawn as the design drew them** — the icon
+  in a tinted box, the count beside it, red when it counts denials — and closes with the
+  catalogue legend: how many abilities the bars measure against, and the three marks.
+- **The reach column reads like the design**: a bar filling the column with the three
+  counts coloured beneath it, and the wildcard saying so in words.
+- **A locked row shows a padlock** where its menu would be — the privileged role and the
+  one the reader holds — with the reason a hover away. Deleting lives in the row's own
+  menu now, not spread across the row.
+- **The identity step of the wizard says what it is doing**: a heading, a sentence, one
+  field under the other with an example each, and an amber notice naming the protected
+  role that no new role may be called after.
+- **Saving lives inside the summary bar** on the edit screen, beside the counts it
+  confirms, wired straight to the form. The bar is the one thing pinned to the screen
+  while stances change, so the button that writes them belongs on it.
+- **The record page of a role reads as a record**: identity as entries with the reach bar
+  and its full legend, a card for what the role forbids — empty state and all — and the
+  accounts holding it, each with the way to take the role back. The grid stays below,
+  out of reach, so what a role holds is still read in the shape it is changed in.
+- **The abilities list opens with its own four counts** — all, narrowed, wildcard,
+  denials in use — and groups its rows under the model they decide about, the class
+  under the heading, without offering the grouping controls: there is nothing else to
+  group by.
+- **How far a rule reaches is a badge**, and who holds it says in colour whether it is
+  granted or forbidden to them.
+- **Narrowing an ability starts from cards, not a dropdown**: one card per action the
+  catalogue declares, and a sentence above the wizard that composes itself as the three
+  choices are made — the same sentence the record page opens with once the rule exists.
+
+### Removed
+
+- **The weight mark beside each action.** The approved design never drew it; it was
+  carried over from the matrix this grid replaced.
+- **The delete button on the edit screen's header.** The design keeps everything
+  destructive in the list row's menu, and both refusals still hold at the write.
+
+### Upgrading
+
+Run `php artisan filament:assets`. The four stat cards are drawn by the package now, so
+an application that had restyled the old stats widget restyles `.fb-stat` instead.
+Nothing else changes: no key renamed, no ability name moved, the form state keeps its
+shape.
+
 ## [5.2.0] - 2026-08-11
 
 5.1.0 gave the screens back their pieces. This gives them the measurements, taken from
