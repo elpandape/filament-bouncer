@@ -6,6 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Forms;
 
 use ElPandaPe\FilamentBouncer\Store\Declaration;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Initials;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\Field;
 use Illuminate\Database\Eloquent\Model;
@@ -74,6 +75,70 @@ final class AbilityHolders extends Field
         $record = $this->recordOrNull();
 
         return $record instanceof Model && Declaration::of($record)->isDoomed();
+    }
+
+    /**
+     * The accounts holding this rule directly, without any role in between.
+     *
+     * The screens write no such grant — they hand rules to roles — but a grant made
+     * straight to an account is exactly what a narrowed rule tends to end up as, and a
+     * card called "who holds it" that stayed silent about them would answer wrong. Read
+     * through the pivot because the account model is whatever the application
+     * configured, and off the raw attributes so an account without a name or an email
+     * answers null instead of throwing under `Model::shouldBeStrict()`. The pivot keeps
+     * no timestamps, so there is no "since when" to read.
+     *
+     * @return array<int, array{name: string, email: string|null, initials: string, forbidden: bool}>
+     */
+    public function getDirectUsers(): array
+    {
+        $record = $this->recordOrNull();
+
+        if (! $record instanceof Model) {
+            return [];
+        }
+
+        $accounts = Models::user();
+        $permissions = Models::table('permissions');
+
+        $rows = $accounts->newQuery()
+            ->join($permissions, $permissions.'.entity_id', '=', $accounts->getQualifiedKeyName())
+            ->where($permissions.'.entity_type', $accounts->getMorphClass())
+            ->where($permissions.'.ability_id', $record->getKey())
+            ->get([$accounts->getTable().'.*', $permissions.'.forbidden as direct_forbidden']);
+
+        $users = [];
+
+        foreach ($rows as $row) {
+            $attributes = $row->getAttributes();
+
+            $name = $attributes['name'] ?? null;
+            $email = $attributes['email'] ?? null;
+
+            /** @var int|string $key */
+            $key = $row->getKey();
+
+            $shown = is_string($name) && $name !== '' ? $name : (is_string($email) ? $email : (string) $key);
+
+            $users[] = [
+                'name' => $shown,
+                'email' => is_string($email) ? $email : null,
+                'initials' => Initials::of($shown),
+                'forbidden' => (bool) $row->getAttribute('direct_forbidden'),
+            ];
+        }
+
+        return $users;
+    }
+
+    public function getDirectHeading(): string
+    {
+        return __('filament-bouncer::abilities.form.direct_heading');
+    }
+
+    public function getDirectNote(): string
+    {
+        return __('filament-bouncer::abilities.form.direct_note');
     }
 
     /**

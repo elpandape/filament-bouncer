@@ -832,3 +832,321 @@
     inline-size: 1rem;
     block-size: 1rem;
 }
+
+/* ── The badges of the abilities screens, one colour per kind ──────────────── */
+
+/* Self-contained on purpose: some of them are drawn outside the `.fb` wrapper — a
+   table group's description, an infolist entry — where the wrapper's tokens are out
+   of reach. */
+.fb-badge-gray,
+.fb-badge-info,
+.fb-badge-pri,
+.fb-badge-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-md, 0.375rem);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fb-badge-gray svg,
+.fb-badge-info svg,
+.fb-badge-pri svg,
+.fb-badge-ok svg {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    flex: none;
+}
+
+.fb-badge-gray {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gray-950) 12%, transparent);
+}
+
+.fb-badge-info {
+    background: color-mix(in oklab, var(--info-500) 12%, #fff);
+    color: var(--info-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--info-600) 25%, transparent);
+}
+
+.fb-badge-pri {
+    background: color-mix(in oklab, var(--primary-500) 12%, #fff);
+    color: var(--primary-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary-600) 25%, transparent);
+}
+
+.fb-badge-ok {
+    background: color-mix(in oklab, var(--success-500) 12%, #fff);
+    color: var(--success-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--success-600) 25%, transparent);
+}
+
+:is(.dark) .fb-badge-gray {
+    background: color-mix(in oklab, #fff 6%, transparent);
+    color: var(--gray-300);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, #fff 20%, transparent);
+}
+
+:is(.dark) .fb-badge-info {
+    background: color-mix(in oklab, var(--info-500) 14%, var(--gray-900));
+    color: var(--info-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--info-400) 30%, transparent);
+}
+
+:is(.dark) .fb-badge-pri {
+    background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900));
+    color: var(--primary-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary-400) 30%, transparent);
+}
+
+:is(.dark) .fb-badge-ok {
+    background: color-mix(in oklab, var(--success-500) 14%, var(--gray-900));
+    color: var(--success-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--success-400) 30%, transparent);
+}
+
+/* ── The listing's figures, worn as chips above the table ──────────────────── */
+
+.fb-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.fb-chips b {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── A stored name, worn as a chip of monospace ────────────────────────────── */
+
+/* Self-contained for the same reason as the badges: it also appears in a group's
+   description, outside the `.fb` wrapper. */
+.fb-code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    border-radius: var(--radius-sm, 0.25rem);
+    padding: 0.0625rem 0.3125rem;
+}
+
+:is(.dark) .fb-code {
+    color: var(--gray-400);
+    background: color-mix(in oklab, #fff 6%, transparent);
+}
+
+/* ── The sentence the rule adds up to, above the record pages ──────────────── */
+
+.fb-phrase-card {
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-xl, 0.75rem);
+    background: #fff;
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-950) 6%, transparent), 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:is(.dark) .fb-phrase-card {
+    background: var(--gray-900);
+    box-shadow: 0 0 0 1px color-mix(in oklab, #fff 10%, transparent), 0 1px 2px 0 rgb(0 0 0 / 0.3);
+}
+
+.fb-phrase {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--gray-950);
+}
+
+:is(.dark) .fb-phrase {
+    color: var(--gray-100);
+}
+
+.fb-phrase-slot {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    background: var(--gray-100);
+    color: var(--gray-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gray-950) 12%, transparent);
+    font-size: 1.125rem;
+}
+
+:is(.dark) .fb-phrase-slot {
+    background: color-mix(in oklab, #fff 6%, transparent);
+    color: var(--gray-500);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, #fff 20%, transparent);
+}
+
+.fb-phrase-slot-filled {
+    background: color-mix(in oklab, var(--primary-500) 12%, #fff);
+    color: var(--primary-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary-600) 25%, transparent);
+}
+
+:is(.dark) .fb-phrase-slot-filled {
+    background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900));
+    color: var(--primary-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary-400) 30%, transparent);
+}
+
+.fb-phrase-note {
+    margin-block-start: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+:is(.dark) .fb-phrase-note {
+    color: var(--gray-400);
+}
+
+/* ── The action step's cards, a choice to be read at a glance ──────────────── */
+
+.fb-rc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+    .fb-rc-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .fb-rc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fb-rc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.625rem;
+    background: var(--fb-surface, #fff);
+    box-shadow: inset 0 0 0 1px var(--fb-line, color-mix(in oklab, var(--gray-950) 12%, transparent)), 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.fb-rc:hover {
+    background: var(--fb-raised, var(--gray-50));
+}
+
+.fb-rc input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fb-rc-t {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--fb-text, var(--gray-950));
+}
+
+.fb-rc-d {
+    font-size: 0.8125rem;
+    color: var(--fb-muted, var(--gray-500));
+}
+
+.fb-rc:has(input:checked) {
+    background: color-mix(in oklab, var(--primary-500) 12%, #fff);
+    box-shadow: inset 0 0 0 2px var(--primary-600);
+}
+
+:is(.dark) .fb-rc:has(input:checked) {
+    background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900));
+    box-shadow: inset 0 0 0 2px var(--primary-400);
+}
+
+.fb-rc:has(input:focus-visible) {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* ── The definition, read as entries and not as disabled inputs ────────────── */
+
+.fb-entries {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .fb-entries {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.fb-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.fb-entry-lbl {
+    font-size: 0.875rem;
+    color: var(--fb-muted, var(--gray-500));
+}
+
+.fb-entry-val {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fb-text, var(--gray-950));
+}
+
+/* ── The accounts holding a rule directly, under the roles that hold it ────── */
+
+.fb-direct-heading {
+    margin-block-start: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--fb-text, var(--gray-950));
+}
+
+.fb-notice-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    margin-block-start: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    font-size: 0.875rem;
+    background: color-mix(in oklab, var(--info-500) 12%, #fff);
+    color: var(--info-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--info-600) 25%, transparent);
+}
+
+:is(.dark) .fb-notice-info {
+    background: color-mix(in oklab, var(--info-500) 14%, var(--gray-900));
+    color: var(--info-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--info-400) 30%, transparent);
+}
+
+.fb-notice-info svg {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    flex: none;
+    margin-block-start: 0.0625rem;
+}

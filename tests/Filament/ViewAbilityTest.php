@@ -59,7 +59,7 @@ test('a rule is read in the shape it is changed in, filled and out of reach', fu
 
     expect($state[(string) $key] ?? null)->toBe(Stance::Granted->value);
 
-    $page->assertSeeHtml('class="fb-seg"')->assertSeeHtml('disabled="disabled"');
+    $page->assertSeeHtml('class="fb-seg"')->assertSeeHtml('disabled: true');
 });
 
 test("the heading is the reconciliation's answer about the row", function (): void {
@@ -102,17 +102,98 @@ test('how far the rule reaches is read out of the row', function (): void {
     /** @var Model $owned */
     $owned = Models::ability()->newQuery()->where('only_owned', true)->firstOrFail();
 
-    expect(livewire(ViewAbility::class, ['record' => $owned->getKey()])->get('data.'.AbilityForm::REACH))
-        ->toBe(Reach::Owned->label());
+    livewire(ViewAbility::class, ['record' => $owned->getKey()])
+        ->assertSee(Reach::Owned->label());
 });
 
 test('a rule about no model at all says so where the model would be', function (): void {
     signInAsAbilityManager();
     reconcileStore();
 
-    $page = livewire(ViewAbility::class, ['record' => readAbilityRow('page:'.Subject::keyFor(Settings::class))->getKey()]);
+    livewire(ViewAbility::class, ['record' => readAbilityRow('page:'.Subject::keyFor(Settings::class))->getKey()])
+        ->assertSee(__('filament-bouncer::abilities.form.no_entity'));
+});
 
-    expect($page->get('data.entity_type'))->toBe(__('filament-bouncer::abilities.form.no_entity'));
+test('the sentence stands above the page, filled from the stored row', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    livewire(ViewAbility::class, ['record' => readAbilityRow('update', Post::class)->getKey()])
+        ->assertSeeHtml('class="fb-phrase"')
+        ->assertSeeHtml('fb-phrase-slot fb-phrase-slot-filled')
+        ->assertSee(__('filament-bouncer::abilities.phrase.can'))
+        ->assertSee(Reach::All->label());
+});
+
+test('the definition is entries carrying the stored name in monospace', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    livewire(ViewAbility::class, ['record' => readAbilityRow('update', Post::class)->getKey()])
+        ->assertSee(__('filament-bouncer::abilities.form.rule'))
+        ->assertSeeHtml('<code class="fb-code">update</code>')
+        ->assertSeeHtml('<code class="fb-code">'.e(Post::class).'</code>')
+        ->assertSee(__('filament-bouncer::abilities.form.created'));
+});
+
+test('a rule about one record names the record key beside its reach', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $post = Post::query()->create();
+
+    Bouncer::allow('reviewer')->to('delete', $post);
+
+    /** @var Model $narrowed */
+    $narrowed = Models::ability()->newQuery()->whereNotNull('entity_id')->firstOrFail();
+
+    /** @var int|string $key */
+    $key = $post->getKey();
+
+    livewire(ViewAbility::class, ['record' => $narrowed->getKey()])
+        ->assertSee(__('filament-bouncer::abilities.reach.record_reading', ['id' => (string) $key]))
+        ->assertSee('entity_id = '.$key);
+});
+
+test('an account granted the rule directly is on the page with a green chip', function (): void {
+    $manager = signInAsAbilityManager();
+    reconcileStore();
+
+    $row = readAbilityRow('update', Post::class);
+
+    grant($manager, [['update', Post::class]]);
+
+    /** @var string $shown */
+    $shown = $manager->getAttribute('name');
+
+    livewire(ViewAbility::class, ['record' => $row->getKey()])
+        ->assertSee(__('filament-bouncer::abilities.form.direct_heading'))
+        ->assertSee($shown)
+        ->assertSeeHtml('class="fb-badge-ok"')
+        ->assertSee(__('filament-bouncer::abilities.form.direct_granted'))
+        ->assertSee(__('filament-bouncer::abilities.form.direct_note'));
+});
+
+test('an account forbidden the rule directly wears the red chip instead', function (): void {
+    $manager = signInAsAbilityManager();
+    reconcileStore();
+
+    $row = readAbilityRow('update', Post::class);
+
+    Bouncer::forbid($manager)->to('update', Post::class);
+    Bouncer::refresh();
+
+    livewire(ViewAbility::class, ['record' => $row->getKey()])
+        ->assertSee(__('filament-bouncer::abilities.form.direct_forbidden'));
+});
+
+test('a rule nobody holds directly carries neither chips nor the note', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    livewire(ViewAbility::class, ['record' => readAbilityRow('update', Post::class)->getKey()])
+        ->assertDontSee(__('filament-bouncer::abilities.form.direct_heading'))
+        ->assertDontSee(__('filament-bouncer::abilities.form.direct_note'));
 });
 
 test('there is nowhere on the record to ask for the row to be deleted', function (): void {

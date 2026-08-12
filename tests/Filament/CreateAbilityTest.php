@@ -218,6 +218,43 @@ test('it is composed one question at a time, ending on what is about to be writt
         ->assertSee(__('filament-bouncer::abilities.wizard.review'));
 });
 
+test('the page says the sentence is what is being composed', function (): void {
+    signInAsAbilityManager();
+
+    livewire(CreateAbility::class)
+        ->assertSee(__('filament-bouncer::abilities.wizard.subtitle'))
+        ->assertSee(__('filament-bouncer::abilities.wizard.actions_note'));
+});
+
+test('the live sentence hangs above the wizard with its three empty chips', function (): void {
+    signInAsAbilityManager();
+
+    livewire(CreateAbility::class)
+        ->assertSeeHtml('class="fb-phrase"')
+        ->assertSee(__('filament-bouncer::abilities.phrase.can'))
+        ->assertSee(__('filament-bouncer::abilities.phrase.action'))
+        ->assertSee(__('filament-bouncer::abilities.phrase.subject'))
+        ->assertSee(__('filament-bouncer::abilities.phrase.note'));
+});
+
+test("the wizard walks its footer under the design's own class", function (): void {
+    signInAsAbilityManager();
+
+    livewire(CreateAbility::class)->assertSeeHtml('fb-wizard');
+});
+
+test('the action step offers cards until a model is chosen, and cards after', function (): void {
+    signInAsAbilityManager();
+
+    livewire(CreateAbility::class)
+        ->assertSee(__('filament-bouncer::abilities.wizard.actions_empty'))
+        ->fillForm([NarrowAbility::SUBJECT => Subject::keyFor(Post::class)])
+        ->assertSeeHtml('class="fb-rc"')
+        ->assertSeeHtml('x-bind:aria-pressed')
+        ->assertSeeHtml('<code class="fb-code">update</code>')
+        ->assertDontSee(__('filament-bouncer::abilities.wizard.actions_empty'));
+});
+
 test('the sentence says nothing has been chosen until something has', function (): void {
     signInAsAbilityManager();
 

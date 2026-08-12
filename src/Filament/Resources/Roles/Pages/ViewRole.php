@@ -13,6 +13,7 @@ use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Initials;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -294,23 +295,11 @@ final class ViewRole extends ViewRecord
                 'key' => $key,
                 'name' => $shown,
                 'email' => is_string($email) ? $email : null,
-                'initials' => $this->initials($shown),
+                'initials' => Initials::of($shown),
                 'removable' => ! $guarded || ! $privileged->isLastHolder($record),
             ];
         }
 
         return $holders;
-    }
-
-    private function initials(string $name): string
-    {
-        $words = preg_split('/\s+/', mb_trim($name)) ?: [];
-        $initials = '';
-
-        foreach (array_slice($words, 0, 2) as $word) {
-            $initials .= mb_strtoupper(mb_substr($word, 0, 1));
-        }
-
-        return $initials === '' ? '#' : $initials;
     }
 }

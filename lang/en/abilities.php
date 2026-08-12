@@ -14,18 +14,38 @@ return [
     'saved' => 'What each role says about this rule has been written.',
 
     'form' => [
-        'rule' => 'The rule',
+        'rule' => 'Definition',
         'name' => 'Name',
         'entity' => 'Model',
         'no_entity' => '— none —',
         'reach' => 'Reach',
         'title' => 'Title',
         'title_note' => 'Read by people and by nothing else.',
+        'created' => 'Created',
         'declared_note' => 'The name the code hands the Gate, and the model it hands along with it, are declared by the code that asks — a policy method, a page, a widget, or the «custom» key of the configuration — and written by filament-bouncer:reconcile. Neither is rewritten here.',
-        'holders' => 'Who holds it',
-        'holders_note' => 'The same rows the roles screen writes, seen from the other end. A cell here and a cell there are the same row of the same table.',
+        'holders' => 'Current impact',
+        'holders_note' => 'Who holds this ability today. The same rows the roles screen writes, seen from the other end.',
         'holders_empty' => 'No role has been composed yet.',
         'withheld' => 'The code no longer declares this ability, so there is nothing here to hand out. The next filament-bouncer:reconcile --prune takes the row away, and every grant pointing at it.',
+        'direct_heading' => 'Direct users',
+        'direct_granted' => 'Granted directly',
+        'direct_forbidden' => 'Forbidden directly',
+        'direct_note' => 'A direct grant: it arrives through no role. Taking it away affects only that account. Were it a denial, it would beat any grant arriving through a role.',
+    ],
+
+    'phrase' => [
+        'can' => 'May',
+        'action' => 'action…',
+        'subject' => 'model…',
+        'reach' => 'reach…',
+        'note' => 'The sentence recomposes live with what you choose at each step.',
+    ],
+
+    'chips' => [
+        'all' => 'All',
+        'narrowed' => 'Narrowed',
+        'wildcard' => 'Wildcard',
+        'forbidden' => 'Denials in use',
     ],
 
     'reach' => [
@@ -46,8 +66,11 @@ return [
     ],
 
     'wizard' => [
+        'subtitle' => 'Compose the sentence: an action, a model and a reach.',
         'ability' => 'The ability',
         'ability_hint' => 'What may be done, and to what.',
+        'actions_note' => 'The catalogue\'s actions come from the Policies; they are not written by hand.',
+        'actions_empty' => 'Choose the model first.',
         'reach' => 'Reach',
         'reach_hint' => 'How far the rule goes.',
         'review' => 'Review',
@@ -75,6 +98,7 @@ return [
         'reach' => 'Reach',
         'holders' => 'Held by',
         'holder' => ':role — :stance',
+        'group_count' => '{1} :count ability|[2,*] :count abilities',
         'empty' => 'Nothing has been reconciled yet. Run filament-bouncer:reconcile.',
     ],
 

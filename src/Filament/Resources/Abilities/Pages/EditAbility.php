@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Filament\Concerns\PresentsAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
 /**
  * Changing what a rule says, which is the title and who holds it — and nothing else.
@@ -31,6 +32,18 @@ final class EditAbility extends EditRecord
     public function getSubheading(): string
     {
         return Declaration::of($this->getRecord())->note();
+    }
+
+    /**
+     * The parent's content with the rule's sentence standing above the form.
+     */
+    public function content(Schema $schema): Schema
+    {
+        return $schema->components([
+            $this->phraseHero(),
+            $this->getFormContentComponent(),
+            $this->getRelationManagersContentComponent(),
+        ]);
     }
 
     /**

@@ -8,6 +8,7 @@ use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Forms\ActionCards;
 use ElPandaPe\FilamentBouncer\Store\Reach;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\Radio;
@@ -26,11 +27,11 @@ use Silber\Bouncer\Database\Models;
  * Those two are exactly the rows `--check` does not fail on and `--prune` does not sweep,
  * which is why composing them here is safe and composing a plain one would not be.
  *
- * The name and the model are taken from the catalogue and never from the request. Two
- * pull-downs choose which cell of the catalogue is meant; what gets written is whatever
- * that cell says it is. So a rule about a whole model is stored as Bouncer's own wildcard
- * and not as the word `manage` the column was labelled with — and a request that names
- * something else finds nothing here that reads it.
+ * The name and the model are taken from the catalogue and never from the request. The
+ * model's pull-down and the action's cards choose which cell of the catalogue is meant;
+ * what gets written is whatever that cell says it is. So a rule about a whole model is
+ * stored as Bouncer's own wildcard and not as the word `manage` the column was labelled
+ * with — and a request that names something else finds nothing here that reads it.
  */
 final class NarrowAbility
 {
@@ -45,7 +46,13 @@ final class NarrowAbility
     public const string TITLE = 'title';
 
     /**
-     * @return array<int, Select>
+     * The action is cards rather than a second pull-down, because the choice is the
+     * whole step and the approved design lays it out to be read at a glance: the label
+     * large, the policy method's own name in monospace under it. The cards write the
+     * same state path the pull-down wrote, so the refusal below and everything that
+     * reads the pair are untouched.
+     *
+     * @return array<int, ActionCards|Select>
      */
     public static function ability(): array
     {
@@ -55,9 +62,11 @@ final class NarrowAbility
                 ->options(self::subjects())
                 ->required()
                 ->live(),
-            Select::make(self::ACTION)
+            ActionCards::make(self::ACTION)
                 ->label(__('filament-bouncer::abilities.wizard.action'))
+                ->helperText(__('filament-bouncer::abilities.wizard.actions_note'))
                 ->options(static fn (Get $get): array => self::actions(self::text($get(self::SUBJECT))))
+                ->columnSpanFull()
                 ->required()
                 ->live()
                 // Without this the pair is only ever as good as the pull-downs, and a
@@ -152,6 +161,33 @@ final class NarrowAbility
     }
 
     /**
+     * Public because the live sentence above the wizard needs the same words the cards
+     * offer, and a second spelling of the manage column's label is how the two would
+     * come to disagree.
+     *
+     * @return array<string, string>
+     */
+    public static function actions(?string $key): array
+    {
+        $subject = $key === null ? null : app(CatalogRegistry::class)->current()->subject($key);
+
+        if (! $subject instanceof Subject) {
+            return [];
+        }
+
+        $labels = app(Labels::class);
+        $actions = [];
+
+        foreach (array_keys($subject->cells()) as $action) {
+            $actions[$action] = $action === Ability::MANAGE_ACTION
+                ? __('filament-bouncer::roles.form.manage')
+                : $labels->action($action);
+        }
+
+        return $actions;
+    }
+
+    /**
      * The three refusals this screen owes the reader, in the order they matter.
      */
     private static function refuse(Get $get, Closure $fail): void
@@ -222,29 +258,6 @@ final class NarrowAbility
         }
 
         return $subjects;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private static function actions(?string $key): array
-    {
-        $subject = $key === null ? null : app(CatalogRegistry::class)->current()->subject($key);
-
-        if (! $subject instanceof Subject) {
-            return [];
-        }
-
-        $labels = app(Labels::class);
-        $actions = [];
-
-        foreach (array_keys($subject->cells()) as $action) {
-            $actions[$action] = $action === Ability::MANAGE_ACTION
-                ? __('filament-bouncer::roles.form.manage')
-                : $labels->action($action);
-        }
-
-        return $actions;
     }
 
     /**

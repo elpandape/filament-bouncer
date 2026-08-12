@@ -6,20 +6,23 @@ namespace ElPandaPe\FilamentBouncer\Filament\Concerns;
 
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
-use ElPandaPe\FilamentBouncer\Store\Reach;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\AbilityFacts;
+use Filament\Schemas\Components\View;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Database\Models;
 
 /**
- * The two things about a rule that are not columns of it.
+ * The one thing about a rule that is not a column of it: what each role says about it.
  *
- * How far it reaches is spread over three columns and reads as none of them; what each
- * role says about it lives in another table entirely. Filament fills a form out of the
- * record's attributes and finds neither, so both are laid over the data on the way in and
+ * That lives in another table entirely. Filament fills a form out of the record's
+ * attributes and finds nothing, so the stances are laid over the data on the way in and
  * lifted back out on the way to the record — otherwise the holders would be handed to a
  * mass assignment as a column that does not exist, which under strict Eloquent throws.
+ *
+ * The sentence the two record pages hold above everything else is composed here too,
+ * because it is the same reading of the same row on both.
  */
 trait PresentsAbility
 {
@@ -29,12 +32,33 @@ trait PresentsAbility
     private array $holders = [];
 
     /**
+     * The stored rule as a sentence, standing above the page. Static here: the row is
+     * already written, so the chips are filled before the view is handed the words.
+     */
+    protected function phraseHero(): View
+    {
+        // The analyser works out `view-string` by looking for the file among the paths
+        // the application renders from, and a package's namespaced view is never among
+        // them.
+        /** @var view-string $hero */
+        $hero = 'filament-bouncer::forms.phrase-hero';
+
+        return View::make($hero)->viewData(function (): array {
+            $facts = AbilityFacts::of($this->getRecord());
+
+            return [
+                'live' => false,
+                'slots' => [$facts->actionLabel, $facts->subjectLabel, $facts->reachReading],
+            ];
+        });
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     protected function fillFacts(array $data, Model $ability): array
     {
-        $data[AbilityForm::REACH] = Reach::reading($ability);
         $data[AbilityForm::HOLDERS] = $this->stances($ability);
 
         return $data;
@@ -51,7 +75,7 @@ trait PresentsAbility
 
         $this->holders = $holders;
 
-        unset($data[AbilityForm::HOLDERS], $data[AbilityForm::REACH]);
+        unset($data[AbilityForm::HOLDERS]);
 
         return $data;
     }

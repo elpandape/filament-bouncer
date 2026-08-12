@@ -265,3 +265,24 @@ test('the heading says what the reconciliation has to say about the row', functi
     livewire(EditAbility::class, ['record' => changedRow('update', Post::class)->getKey()])
         ->assertSee(__('filament-bouncer::abilities.declared.declared_note'));
 });
+
+test('the sentence stands above the form, filled from the stored row', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    livewire(EditAbility::class, ['record' => changedRow('update', Post::class)->getKey()])
+        ->assertSeeHtml('class="fb-phrase"')
+        ->assertSeeHtml('fb-phrase-slot fb-phrase-slot-filled')
+        ->assertSee(__('filament-bouncer::abilities.phrase.can'));
+});
+
+test('the definition is presented as entries and not as disabled inputs', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    livewire(EditAbility::class, ['record' => changedRow('update', Post::class)->getKey()])
+        ->assertSeeHtml('class="fb fb-entries"')
+        ->assertSeeHtml('<code class="fb-code">update</code>')
+        ->assertSeeHtml('<code class="fb-code">'.e(Post::class).'</code>')
+        ->assertDontSeeHtml('disabled="disabled"');
+});

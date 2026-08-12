@@ -75,14 +75,77 @@ test('the listing names the model each rule decides about', function (): void {
         ->assertSee(__('filament-bouncer::abilities.form.no_entity'));
 });
 
-test('it gathers the rules under the thing they decide about', function (): void {
+test('it gathers the rules under the thing they decide about, and for good', function (): void {
     signInAsAbilityManager();
     reconcileStore();
 
     $table = AbilityResource::table(Filament\Tables\Table::make(new ListAbilities));
 
     expect($table->getDefaultGroup()?->getId())->toBe('entity_type')
-        ->and(array_keys($table->getGroups()))->toBe(['entity_type']);
+        ->and(array_keys($table->getGroups()))->toBe(['entity_type'])
+        ->and($table->areGroupingSettingsHidden())->toBeTrue();
+});
+
+test('a group heading carries the model, its count and its class in monospace', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $count = Models::ability()->newQuery()->where('entity_type', Post::class)->count();
+
+    livewire(ListAbilities::class)
+        ->assertSee('Posts — '.trans_choice('filament-bouncer::abilities.table.group_count', $count, ['count' => $count]))
+        ->assertSeeHtml('<span class="fb-code">'.e(Post::class).'</span>');
+});
+
+test('the figures wear chips above the table', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    Bouncer::allow('reviewer')->toOwn(Post::class)->to('delete');
+    Bouncer::allow('reviewer')->everything();
+    Bouncer::forbid('reviewer')->to('update', Post::class);
+    Bouncer::refresh();
+
+    livewire(ListAbilities::class)
+        ->assertSeeHtml('class="fb fb-chips"')
+        ->assertSee(__('filament-bouncer::abilities.chips.all'))
+        ->assertSeeHtml(__('filament-bouncer::abilities.chips.narrowed').' · <b>1</b>')
+        ->assertSeeHtml(__('filament-bouncer::abilities.chips.wildcard').' · <b>1</b>')
+        ->assertSeeHtml(__('filament-bouncer::abilities.chips.forbidden').' · <b>1</b>');
+});
+
+test('the reach wears the informational badge only when the rule narrows something', function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $table = AbilityResource::table(Filament\Tables\Table::make(new ListAbilities));
+
+    /** @var Filament\Tables\Columns\TextColumn $reach */
+    $reach = $table->getColumn('reach');
+
+    expect($reach->record(listedAbility('update', Post::class))->getColor(Reach::All->label()))->toBe('gray')
+        ->and($reach->record(abilityOwnedRow())->getColor(Reach::Owned->label()))->toBe('info');
+});
+
+test("a holder's chip is green for a grant and red for a denial", function (): void {
+    signInAsAbilityManager();
+    reconcileStore();
+
+    $labels = app(Labels::class);
+
+    $table = AbilityResource::table(Filament\Tables\Table::make(new ListAbilities));
+
+    /** @var Filament\Tables\Columns\TextColumn $holders */
+    $holders = $table->getColumn('holders');
+
+    expect($holders->getColor(__('filament-bouncer::abilities.table.holder', [
+        'role' => 'editor',
+        'stance' => $labels->stance(Stance::Granted),
+    ])))->toBe('success')
+        ->and($holders->getColor(__('filament-bouncer::abilities.table.holder', [
+            'role' => 'editor',
+            'stance' => $labels->stance(Stance::Forbidden),
+        ])))->toBe('danger');
 });
 
 test('a rule the code declares is told apart from one nobody declares', function (): void {

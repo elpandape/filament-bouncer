@@ -2,6 +2,7 @@
     $rows = $getRows();
     $stances = $getStances();
     $disabled = $isDisabled();
+    $directUsers = $isWithheld() ? [] : $getDirectUsers();
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
@@ -61,6 +62,34 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+    @endif
+
+    @if ($directUsers !== [])
+        <div class="fb fb-direct">
+            <p class="fb-direct-heading">{{ $getDirectHeading() }}</p>
+
+            @foreach ($directUsers as $user)
+                <div class="fb-holder fb-direct-user">
+                    <span class="fb-avatar" aria-hidden="true">{{ $user['initials'] }}</span>
+                    <div class="fb-row-body">
+                        <span class="fb-row-name">{{ $user['name'] }}</span>
+                        @if (filled($user['email']))
+                            <span class="fb-row-note">{{ $user['email'] }}</span>
+                        @endif
+                    </div>
+                    @if ($user['forbidden'])
+                        <span class="fb-badge-dng">{{ __('filament-bouncer::abilities.form.direct_forbidden') }}</span>
+                    @else
+                        <span class="fb-badge-ok">{{ __('filament-bouncer::abilities.form.direct_granted') }}</span>
+                    @endif
+                </div>
+            @endforeach
+
+            <div class="fb-notice-info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                <span>{{ $getDirectNote() }}</span>
+            </div>
         </div>
     @endif
 </x-dynamic-component>

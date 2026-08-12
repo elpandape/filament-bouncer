@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas;
 
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityHolders;
+use ElPandaPe\FilamentBouncer\Support\AbilityFacts;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * What a rule is, and who says what about it.
@@ -15,9 +18,11 @@ use Filament\Schemas\Schema;
  * One field on this screen is written and three are not, and the split is the point. The
  * name the code hands the Gate and the model it hands along with it are declarations:
  * they are a policy method, a page, a widget or a key in configuration, and
- * `filament-bouncer:reconcile` is what writes them. Rewriting either here would leave a
- * row nothing ever asks about, and Bouncer never complains about a name that does not
- * exist — it just answers no, for ever, to everybody.
+ * `filament-bouncer:reconcile` is what writes them. That is why the three are presented
+ * as entries rather than disabled inputs — a greyed field reads as something broken,
+ * an entry reads as something settled, and settled is what they are. Rewriting either
+ * would leave a row nothing ever asks about, and Bouncer never complains about a name
+ * that does not exist — it just answers no, for ever, to everybody.
  *
  * The title is the exception because the title is read by people and by nothing else.
  */
@@ -28,32 +33,23 @@ final class AbilityForm
      */
     public const string HOLDERS = 'holders';
 
-    /**
-     * How far the rule goes, read out of the row rather than stored on it.
-     */
-    public const string REACH = 'reach';
-
     public static function configure(Schema $schema): Schema
     {
+        // The analyser works out `view-string` by looking for the file among the paths
+        // the application renders from, and a package's namespaced view is never among
+        // them.
+        /** @var view-string $facts */
+        $facts = 'filament-bouncer::forms.ability-facts';
+
         return $schema->components([
             Section::make(__('filament-bouncer::abilities.form.rule'))
                 ->description(__('filament-bouncer::abilities.form.declared_note'))
                 ->schema([
-                    TextInput::make('name')
-                        ->label(__('filament-bouncer::abilities.form.name'))
-                        ->disabled()
-                        ->dehydrated(false),
-                    TextInput::make('entity_type')
-                        ->label(__('filament-bouncer::abilities.form.entity'))
-                        ->disabled()
-                        ->dehydrated(false)
-                        ->formatStateUsing(static fn (mixed $state): string => is_string($state)
-                            ? $state
-                            : __('filament-bouncer::abilities.form.no_entity')),
-                    TextInput::make(self::REACH)
-                        ->label(__('filament-bouncer::abilities.form.reach'))
-                        ->disabled()
-                        ->dehydrated(false),
+                    View::make($facts)
+                        ->viewData(static fn (?Model $record): array => [
+                            'facts' => $record instanceof Model ? AbilityFacts::of($record) : null,
+                        ])
+                        ->columnSpanFull(),
                     TextInput::make('title')
                         ->label(__('filament-bouncer::abilities.form.title'))
                         ->maxLength(150)

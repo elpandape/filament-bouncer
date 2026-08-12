@@ -25,3 +25,7 @@ test('the field brings the words its cells are read in', function (): void {
         ->toHaveKeys([Stance::Granted->value, Stance::Neutral->value, Stance::Forbidden->value])
         ->and(AbilityHolders::make('holders')->getNeutral())->toBe(Stance::Neutral->value);
 });
+
+test('a form with no record has no direct holders to speak of', function (): void {
+    expect(AbilityHolders::make('holders')->getDirectUsers())->toBeEmpty();
+});
