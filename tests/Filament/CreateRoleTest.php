@@ -245,3 +245,12 @@ test('a denial also counts as saying something', function (): void {
 
     expect(Models::role()->newQuery()->where('name', 'vetado')->exists())->toBeTrue();
 });
+test('the abilities step heads itself and carries the grid', function (): void {
+    signInAsRoleManager();
+
+    $html = livewire(CreateRole::class)->html();
+
+    expect($html)->toContain(__('filament-bouncer::roles.wizard.abilities_heading'))
+        ->and($html)->toContain(__('filament-bouncer::roles.wizard.abilities_note'))
+        ->and($html)->toContain('fb-seg');
+});
