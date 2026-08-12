@@ -393,6 +393,13 @@
 
 /* ── What it all adds up to, kept in sight ─────────────────────────────────── */
 
+/* The bar is pinned to the bottom of the viewport while the grid is on screen, so
+   whatever sits under it is hidden. The last section gets room to scroll clear of it
+   instead — without this the bar permanently covers a subject heading. */
+.fb > section:last-of-type {
+    padding-block-end: 3rem;
+}
+
 .fb-summary {
     position: sticky;
     inset-block-end: 0;
