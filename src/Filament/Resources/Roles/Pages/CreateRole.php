@@ -11,7 +11,8 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,7 +73,11 @@ final class CreateRole extends CreateRecord
                 ]),
             Step::make(__('filament-bouncer::roles.wizard.review'))
                 ->description(__('filament-bouncer::roles.wizard.review_hint'))
-                ->schema([Text::make(RoleForm::review())]),
+                ->schema([
+                    Section::make(__('filament-bouncer::roles.wizard.review_heading'))
+                        ->description(__('filament-bouncer::roles.wizard.review_note'))
+                        ->schema([$this->reviewComponent()]),
+                ]),
         ];
     }
 
@@ -96,5 +101,22 @@ final class CreateRole extends CreateRecord
         if ($role instanceof Model) {
             $this->writeStances($role);
         }
+    }
+
+    /**
+     * What is about to be written, drawn by a view of the package's own.
+     *
+     * The analyser works out `view-string` by looking for the file among the paths the
+     * application renders from, and a package's namespaced view is never among them: it
+     * would have to be called `roles.review` in the consuming application to be found at
+     * all. The annotation says what it has no way of working out; the test that reads
+     * the last step is what proves the file is really there.
+     */
+    private function reviewComponent(): View
+    {
+        /** @var view-string $view */
+        $view = 'filament-bouncer::roles.review';
+
+        return View::make($view)->viewData(fn (Get $get): array => RoleForm::reviewData($get));
     }
 }

@@ -39,8 +39,14 @@ return [
         'abilities_note' => 'The catalogue derives from the policies. For each action: grant it (✓), say nothing (–) or forbid it (✗). A denial beats any grant reaching the same ability from another role.',
         'abilities_hint' => 'What whoever holds it will be able to do.',
         'review' => 'Review',
+        'review_heading' => 'Review',
+        'review_note' => 'What is about to be written, subject by subject.',
         'review_hint' => 'What is about to be written.',
-        'reading' => ':name is about to be created granting :granted of the :total abilities the panel declares, and forbidding :forbidden.',
+    ],
+
+    'review' => [
+        'silent' => 'Nothing said: the role holds back',
+        'total' => ':granted granted · :forbidden forbidden · :neutral left alone',
     ],
 
     'presets' => [

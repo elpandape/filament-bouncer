@@ -39,8 +39,14 @@ return [
         'abilities_note' => 'El catálogo deriva de las Policies. Para cada acción: concédela (✓), abstente (–) o prohíbela (✗). Una prohibición gana a cualquier concesión que llegue por otro rol.',
         'abilities_hint' => 'Lo que podrá hacer quien lo tenga.',
         'review' => 'Revisión',
+        'review_heading' => 'Revisión',
+        'review_note' => 'Lo que se va a escribir, sujeto a sujeto.',
         'review_hint' => 'Lo que está a punto de escribirse.',
-        'reading' => ':name se va a crear concediendo :granted de las :total habilidades que el panel declara, y prohibiendo :forbidden.',
+    ],
+
+    'review' => [
+        'silent' => 'Sin definir: el rol se abstiene',
+        'total' => ':granted concedidas · :forbidden prohibidas · :neutral sin definir',
     ],
 
     'presets' => [

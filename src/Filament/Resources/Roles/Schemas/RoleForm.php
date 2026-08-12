@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 
 use Closure;
+use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
@@ -12,6 +13,7 @@ use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
@@ -129,33 +131,61 @@ final class RoleForm
     }
 
     /**
-     * What is about to be written, in one sentence.
+     * What is about to be written, read back the way it was chosen.
+     *
+     * One line per subject with its granted and its forbidden beside it, and the counting
+     * left for the foot. A sentence with three numbers in it was true and unreadable:
+     * nobody hands out abilities by counting them, and this is the last screen before
+     * they are handed out.
+     *
+     * @return array<string, mixed>
      */
-    public static function review(): Closure
+    public static function reviewData(Get $get): array
     {
-        return static function (Get $get): string {
-            $name = $get('name');
-            $state = $get(self::ABILITIES);
+        $labels = app(Labels::class);
+        $catalog = app(CatalogRegistry::class)->current();
 
-            $granted = 0;
-            $forbidden = 0;
-            $total = 0;
+        /** @var array<string, array<string, string>> $state */
+        $state = is_array($get(self::ABILITIES)) ? $get(self::ABILITIES) : [];
 
-            foreach (is_array($state) ? $state : [] as $actions) {
-                foreach (is_array($actions) ? $actions : [] as $stance) {
-                    $total++;
-                    $granted += $stance === Stance::Granted->value ? 1 : 0;
-                    $forbidden += $stance === Stance::Forbidden->value ? 1 : 0;
+        $subjects = [];
+        $granted = 0;
+        $forbidden = 0;
+        $total = 0;
+
+        foreach ($catalog->subjects as $key => $subject) {
+            $chips = [];
+
+            foreach (array_keys($subject->cells()) as $action) {
+                $total++;
+                $stance = Stance::tryFrom($state[$key][$action] ?? '') ?? Stance::Neutral;
+
+                if ($stance === Stance::Neutral) {
+                    continue;
                 }
+
+                $stance === Stance::Granted ? $granted++ : $forbidden++;
+
+                $chips[] = [
+                    'stance' => $stance->value,
+                    'label' => $action === Ability::MANAGE_ACTION
+                        ? __('filament-bouncer::roles.form.manage')
+                        : $labels->action($action),
+                ];
             }
 
-            return __('filament-bouncer::roles.wizard.reading', [
-                'name' => is_string($name) ? $name : '',
+            $subjects[] = ['label' => $subject->label, 'chips' => $chips];
+        }
+
+        return [
+            'subjects' => $subjects,
+            'silent' => __('filament-bouncer::roles.review.silent'),
+            'total' => __('filament-bouncer::roles.review.total', [
                 'granted' => $granted,
                 'forbidden' => $forbidden,
-                'total' => $total,
-            ]);
-        };
+                'neutral' => $total - $granted - $forbidden,
+            ]),
+        ];
     }
 
     /**
