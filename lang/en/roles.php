@@ -46,7 +46,6 @@ return [
 
     'review' => [
         'silent' => 'Nothing said: the role holds back',
-        'total' => ':granted granted · :forbidden forbidden · :neutral left alone',
     ],
 
     'presets' => [

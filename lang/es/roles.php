@@ -46,7 +46,6 @@ return [
 
     'review' => [
         'silent' => 'Sin definir: el rol se abstiene',
-        'total' => ':granted concedidas · :forbidden prohibidas · :neutral sin definir',
     ],
 
     'presets' => [

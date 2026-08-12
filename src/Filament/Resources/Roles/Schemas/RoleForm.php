@@ -180,10 +180,13 @@ final class RoleForm
         return [
             'subjects' => $subjects,
             'silent' => __('filament-bouncer::roles.review.silent'),
-            'total' => __('filament-bouncer::roles.review.total', [
-                'granted' => $granted,
-                'forbidden' => $forbidden,
-                'neutral' => $total - $granted - $forbidden,
+            // The three counts are read as one line, and each of them has to agree with
+            // its own number: "1 prohibidas" is the sort of thing a screen says when the
+            // plural was decided once for all three.
+            'total' => implode(' · ', [
+                trans_choice('filament-bouncer::roles.summary.granted', $granted, ['count' => $granted]),
+                trans_choice('filament-bouncer::roles.summary.forbidden', $forbidden, ['count' => $forbidden]),
+                trans_choice('filament-bouncer::roles.summary.neutral', $total - $granted - $forbidden, ['count' => $total - $granted - $forbidden]),
             ]),
         ];
     }

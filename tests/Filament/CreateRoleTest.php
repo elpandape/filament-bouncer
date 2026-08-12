@@ -174,11 +174,8 @@ test('the last step reads back the choice, subject by subject', function (): voi
         ->assertSeeHtml('fb-rev-chip-granted')
         ->assertSeeHtml('fb-rev-chip-forbidden')
         ->assertSee(__('filament-bouncer::actions.viewAny'))
-        ->assertSee(__('filament-bouncer::roles.review.total', [
-            'granted' => 1,
-            'forbidden' => 1,
-            'neutral' => $cells - 2,
-        ]));
+        ->assertSee(trans_choice('filament-bouncer::roles.summary.granted', 1, ['count' => 1]))
+        ->assertSee(trans_choice('filament-bouncer::roles.summary.neutral', $cells - 2, ['count' => $cells - 2]));
 });
 
 test('a subject nobody said anything about still gets its line', function (): void {
