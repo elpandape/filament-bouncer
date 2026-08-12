@@ -7,6 +7,53 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.1.0] - 2026-08-11
+
+The screens redrawn in 5.0.0 were faithful in structure and anonymous in look. This is
+the design they were supposed to carry.
+
+### Added
+
+- **A subject can be drawn with an icon**, through a new `icons` key mapping a model
+  class to an icon name. Anything not named there is drawn without one, which is what
+  every panel gets until it says otherwise.
+- **A subject says how many denials it holds**, in red, beside its count. Counted in the
+  browser against the form's own state, so it moves while somebody is still deciding
+  rather than after the save.
+- **A denial reads as one wherever it is written**: the note on a forbidden row, and on a
+  forbidden door, is red and sits beside the action instead of below it in the same
+  amber every other note uses. A denial is not a warning among others — it beats every
+  grant reaching the same ability.
+- **Each of the four figures above the roles list carries an icon**, beside its label.
+
+### Changed
+
+- **A subject names the model it decides about**, not the policy that answers for it.
+  Whoever hands out abilities recognises `App\Models\Post`; the policy behind it is a
+  fact about the code, and the catalogue already carries that.
+- **The presets fold into the subject's own heading**, behind one control, instead of
+  standing as a row of three buttons above every subject's actions. On a panel of thirty
+  resources that row was thirty lines competing with the only thing on the screen that
+  matters.
+- **The three stances read as one control again.** The group is outlined, the inactive
+  positions are dimmer, and the chosen one lifts off the surface. "Not granted" no
+  longer draws with more weight than "granted", which was exactly backwards.
+- **The totals at the foot are chips**, each with its mark and its colour, rather than
+  three plain numbers.
+
+### Fixed
+
+- **The pinned totals no longer cover a row for good.** The closing section is given room
+  to scroll past them; without it the bar sat permanently over a subject heading, which
+  is the one row nobody can scroll away from.
+
+### Upgrading
+
+Run `php artisan filament:assets` after updating: the stylesheet changed. Nothing else
+does — no configuration key was renamed, no ability name moved, and the form state keeps
+its shape. To draw icons beside your subjects, republish the configuration or add the
+`icons` key to the copy you already have.
+
 ## [5.0.0] - 2026-08-11
 
 The screen layer, cut out and drawn again from nothing. A stance is now chosen rather

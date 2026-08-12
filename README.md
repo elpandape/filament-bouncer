@@ -229,6 +229,12 @@ of its weight — read, write, withdraw, irreversible — which is what keeps "s
 "delete for good" from looking like the same decision. Pages, widgets and custom abilities
 answer exactly one question each, so they read as flat lists with the same control.
 
+A subject's own heading carries the model it decides about — not the policy that answers
+for it, which is a fact about the code the catalogue already holds — an icon if `icons`
+names one for that model, how many of its actions are granted, how many it forbids, and
+the three presets folded behind a single control. The denial count is red and counted in
+the browser, so it moves while somebody is still deciding rather than after the save.
+
 Each row holds one of three stances, and the middle one is not a quieter way of saying no:
 
 | Stance | What the role is saying |
@@ -410,6 +416,7 @@ The title Bouncer stores alongside each ability follows the locale in force when
 | `privileged_role` | The role that holds everything, and that the screen refuses to edit |
 | `ownership` | Which column says a record belongs to somebody, model by model |
 | `labels` | Your own words for the actions, scopes and stances |
+| `icons` | An icon for a subject on the roles screen, by model class. Anything unnamed is drawn without one |
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.
