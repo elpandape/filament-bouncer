@@ -114,6 +114,12 @@ what the fields provide — republish it and carry your edits over. Anything con
 two removed classes moves to the replacements named above; anything else — configuration,
 stored abilities, the plugin registration — is as it was.
 
+One thing worth grepping for: the roles field answers to `roles` in the form state now,
+not `filament_bouncer_roles`. `RolesField::NAME` has carried that name all along and has
+been updated with it, so code reading the constant needs no change — but a test that
+filled the old string as a literal will now fill a key nobody reads, and say nothing
+while the roles it named go unassigned.
+
 ## [4.4.0] - 2026-08-11
 
 Roles are handed to a person from that person's screen, which until now only the console
