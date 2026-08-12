@@ -9,6 +9,8 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Database\Eloquent\Model;
@@ -26,10 +28,26 @@ use Illuminate\Database\Eloquent\Model;
  */
 final class CreateRole extends CreateRecord
 {
-    use HasWizard;
+    use HasWizard {
+        getWizardComponent as makeWizardComponent;
+    }
     use SavesRoleAbilities;
 
     protected static string $resource = RoleResource::class;
+
+    public function getSubheading(): string
+    {
+        return __('filament-bouncer::roles.wizard.subtitle');
+    }
+
+    /**
+     * The class is what lets the package's stylesheet reorder the footer the way the
+     * approved design has it — moving is left to the CSS, walking is left to Filament.
+     */
+    public function getWizardComponent(): Component
+    {
+        return $this->makeWizardComponent()->extraAttributes(['class' => 'fb-wizard']);
+    }
 
     /**
      * @return array<int, Step>
@@ -39,8 +57,12 @@ final class CreateRole extends CreateRecord
         return [
             Step::make(__('filament-bouncer::roles.wizard.identity'))
                 ->description(__('filament-bouncer::roles.wizard.identity_hint'))
-                ->schema(RoleForm::identity())
-                ->columns(2),
+                ->schema([
+                    Section::make(__('filament-bouncer::roles.wizard.identity_heading'))
+                        ->description(__('filament-bouncer::roles.wizard.identity_note'))
+                        ->schema(RoleForm::identity(protectedNotice: true))
+                        ->columns(1),
+                ]),
             Step::make(__('filament-bouncer::roles.wizard.abilities'))
                 ->description(__('filament-bouncer::roles.wizard.abilities_hint'))
                 ->schema([RoleForm::grid()]),

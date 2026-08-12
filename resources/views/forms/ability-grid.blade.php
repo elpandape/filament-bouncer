@@ -4,7 +4,6 @@
     $stances = $getStances();
     $disabled = $isDisabled();
     $collapse = $getCollapseLabel();
-    $weight = $getScopeLabel();
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
@@ -143,7 +142,6 @@
                                 <div class="fb-rows" x-show="open[@js($subjectKey)] ?? open.all" x-cloak>
                                     @foreach ($subject['rows'] as $row)
                                         <div class="fb-row" data-action="{{ $row['action'] }}">
-                                            <span class="fb-weight fb-weight-{{ $row['scope'] }}" title="{{ $weight }}" aria-hidden="true"></span>
                                             <div class="fb-row-body">
                                                 <span class="fb-row-name">{{ $row['label'] }}</span>
                                                 <span class="fb-row-action">{{ $row['action'] }}</span>
@@ -181,6 +179,15 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
                     <span x-text="say('neutral', tally().neutral)"></span>
                 </span>
+
+                @if ($doesSubmitFromSummary())
+                    <span class="fb-summary-spacer"></span>
+                    <a href="{{ $getSummaryCancelUrl() }}" class="fb-btn fb-btn-out">{{ __('filament-bouncer::roles.form.cancel') }}</a>
+                    <button type="button" class="fb-btn fb-btn-pri fb-summary-save" x-on:click="$wire.call('save')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                        {{ __('filament-bouncer::roles.form.save') }}
+                    </button>
+                @endif
             </div>
         </div>
     @endif

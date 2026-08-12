@@ -116,6 +116,44 @@ test('it is composed one question at a time, ending on what is about to be writt
         ->assertSee(__('filament-bouncer::roles.wizard.review'));
 });
 
+test('the screen says up front that nothing is saved until the end', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)->assertSee(__('filament-bouncer::roles.wizard.subtitle'));
+});
+
+test('the identity step explains the two names and hints each field', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->assertSee(__('filament-bouncer::roles.wizard.identity_heading'))
+        ->assertSee(__('filament-bouncer::roles.wizard.identity_note'))
+        ->assertSee(__('filament-bouncer::roles.form.name_placeholder'))
+        ->assertSee(__('filament-bouncer::roles.form.title_placeholder'));
+});
+
+test('the wizard is marked for the stylesheet that seats its footer', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)->assertSeeHtml('fb-wizard');
+});
+
+test('the reserved name is warned about where the name is being chosen', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)
+        ->assertSeeHtml('fb-protected-notice')
+        ->assertSeeHtml('<b>super-admin</b>');
+});
+
+test('with no protected role configured there is nothing to warn about', function (): void {
+    signInAsRoleManager();
+
+    livewire(CreateRole::class)->assertDontSeeHtml('fb-protected-notice');
+});
+
 test('the last step reads back what the first two chose', function (): void {
     signInAsRoleManager();
 

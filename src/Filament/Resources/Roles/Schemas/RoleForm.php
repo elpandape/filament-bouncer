@@ -7,15 +7,19 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 /**
  * What a role is called, and everything it is allowed to say.
@@ -35,7 +39,7 @@ final class RoleForm
      */
     public const string ABILITIES = 'abilities';
 
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, bool $submitsFromSummary = false): Schema
     {
         return $schema->components([
             Section::make(__('filament-bouncer::roles.form.role'))
@@ -46,19 +50,21 @@ final class RoleForm
             // heading and a sentence above would push the first subject a screenful
             // down to say what the rows underneath already say.
             Section::make()
-                ->schema([self::grid()])
+                ->schema([self::grid($submitsFromSummary)])
                 ->columnSpanFull(),
         ]);
     }
 
     /**
-     * @return array<int, TextInput>
+     * @return array<int, Component|TextInput>
      */
-    public static function identity(): array
+    public static function identity(bool $protectedNotice = false): array
     {
-        return [
+        $fields = [
             TextInput::make('name')
                 ->label(__('filament-bouncer::roles.form.name'))
+                ->placeholder(__('filament-bouncer::roles.form.name_placeholder'))
+                ->helperText(new HtmlString(__('filament-bouncer::roles.form.name_help')))
                 ->required()
                 ->maxLength(150)
                 ->unique(ignoreRecord: true)
@@ -74,8 +80,26 @@ final class RoleForm
                 }),
             TextInput::make('title')
                 ->label(__('filament-bouncer::roles.form.title'))
+                ->placeholder(__('filament-bouncer::roles.form.title_placeholder'))
+                ->helperText(__('filament-bouncer::roles.form.title_help'))
                 ->maxLength(150),
         ];
+
+        $reserved = app(PrivilegedRole::class)->name();
+
+        // The warning is only worth its room where the name is being chosen, and only
+        // when there is a reserved name to warn about.
+        if ($protectedNotice && $reserved !== null) {
+            // The analyser works out `view-string` by looking for the file among the
+            // paths the application renders from, and a package's namespaced view is
+            // never among them.
+            /** @var view-string $notice */
+            $notice = 'filament-bouncer::forms.protected-role-notice';
+
+            $fields[] = View::make($notice)->viewData(['name' => $reserved]);
+        }
+
+        return $fields;
     }
 
     /**
@@ -86,12 +110,18 @@ final class RoleForm
      * second answer to a question the policy has already answered: whoever may work
      * this screen hands out all of it, including to themselves.
      */
-    public static function grid(): AbilityGrid
+    public static function grid(bool $submitsFromSummary = false): AbilityGrid
     {
-        return AbilityGrid::make(self::ABILITIES)
+        $grid = AbilityGrid::make(self::ABILITIES)
             ->hiddenLabel()
             ->catalog(app(CatalogRegistry::class)->current())
             ->notes(self::notes(...));
+
+        if ($submitsFromSummary) {
+            $grid->submitsFromSummary(RoleResource::getUrl('index'));
+        }
+
+        return $grid;
     }
 
     /**

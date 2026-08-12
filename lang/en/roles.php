@@ -21,12 +21,21 @@ return [
         'forbidden_count' => '{1} 1 forbidden|[2,*] :count forbidden',
         'model_count' => ':granted of :total',
         'reserved' => 'That name belongs to the role that holds everything, which the reconciliation writes and this screen does not.',
-        'scope' => 'Weight',
+        'name_placeholder' => 'e.g. support',
+        'name_help' => 'Lowercase and dashes. It is the role\'s <code>name</code> in Bouncer.',
+        'title_placeholder' => 'e.g. Customer support',
+        'title_help' => 'How it reads on listings and record pages.',
+        'protected_notice' => '<b>:name</b> is the protected role: only somebody who already holds it hands it out, and nobody takes it off its last holder. No new role may bear the name.',
+        'save' => 'Save changes',
+        'cancel' => 'Cancel',
     ],
 
     'wizard' => [
+        'subtitle' => 'Three steps: identity, permissions and review. Nothing is saved until the end.',
         'identity' => 'The role',
         'identity_hint' => 'What it is called, and what it is called by.',
+        'identity_heading' => 'The role\'s identity',
+        'identity_note' => 'The name is the internal identifier; the title is what people see.',
         'abilities' => 'Abilities',
         'abilities_hint' => 'What whoever holds it will be able to do.',
         'review' => 'Review',
@@ -59,26 +68,57 @@ return [
         'plural' => 'Roles',
     ],
 
+    'list' => [
+        'subtitle' => 'The panel\'s security posture at a glance: who may do what, and what is forbidden.',
+    ],
+
     'table' => [
         'abilities' => 'Abilities',
         'name' => 'Role',
         'coverage' => 'Reach',
-        'reading' => ':granted of :total',
         'reaches_all' => 'Everything, through the wildcard',
         'holders' => 'Accounts',
         'updated' => 'Changed',
         'empty' => 'No role has been composed yet.',
+        'search' => 'Search by name or title',
+        'legend' => 'coverage over the :total abilities of the catalogue',
+        'locked' => 'This role is not worked on from here: it is the way back in, or one you hold.',
+    ],
+
+    'edit' => [
+        'holders' => '{0} 0 users with this role|{1} 1 user with this role|[2,*] :count users with this role',
+        'updated' => 'updated :when',
+    ],
+
+    'record' => [
+        'identity' => 'Identity',
+        'name' => 'Name',
+        'title' => 'Title',
+        'holders' => 'Users holding the role',
+        'updated' => 'Updated',
+        'created' => 'Created',
+        'forbidden_heading' => 'Forbidden',
+        'forbidden_empty' => 'This role forbids nothing.',
+        'forbidden_note' => 'A denial beats any grant arriving through another role.',
+        'holders_heading' => 'Users with this role',
+        'holders_empty' => 'Nobody holds this role.',
+        'retract' => 'Take the role away',
+        'last_holder' => 'The way back in is never taken off its last holder.',
+    ],
+
+    'coverage' => [
+        'catalog' => 'Coverage over the :total abilities of the catalogue',
+        'granted' => '{1} granted|granted',
+        'forbidden' => '{1} forbidden|forbidden',
+        'neutral' => 'not defined',
+        'of' => 'of :total',
     ],
 
     'stats' => [
         'roles' => 'Roles',
-        'roles_note' => 'Composed on this screen.',
         'abilities' => 'Abilities declared',
-        'abilities_note' => 'What the panel is able to ask about.',
         'forbidden' => 'Denials in force',
-        'forbidden_note' => 'A denial beats any grant reaching the same ability.',
         'unassigned' => 'Accounts without a role',
-        'unassigned_note' => 'They reach the panel and can do nothing in it.',
     ],
 
     'relation' => [

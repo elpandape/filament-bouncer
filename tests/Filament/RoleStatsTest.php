@@ -61,7 +61,7 @@ test('a denial in force is counted apart and shown in red', function (): void {
 
     livewire(RoleStats::class)
         ->assertSee(__('filament-bouncer::roles.stats.forbidden'))
-        ->assertSeeHtml('fi-color-danger');
+        ->assertSeeHtml('fb-stat-n-dng');
 });
 
 test('no denial at all is not shouted about', function (): void {
@@ -69,7 +69,7 @@ test('no denial at all is not shouted about', function (): void {
 
     countedRole();
 
-    livewire(RoleStats::class)->assertDontSeeHtml('fi-color-danger');
+    livewire(RoleStats::class)->assertDontSeeHtml('fb-stat-n-dng');
 });
 
 test('it counts the accounts that hold no role at all', function (): void {
@@ -90,6 +90,16 @@ test('every figure carries an icon', function (): void {
     signInAsRoleManager();
 
     expect(mb_substr_count(livewire(RoleStats::class)->html(), 'fi-icon'))->toBe(4);
+});
+
+test('each figure is an icon in a tinted box beside a bare number', function (): void {
+    signInAsRoleManager();
+
+    livewire(RoleStats::class)
+        ->assertSeeHtml('fb-stat-ic fb-stat-ic-pri')
+        ->assertSeeHtml('fb-stat-ic fb-stat-ic-dng')
+        ->assertSeeHtml('fb-stat-ic fb-stat-ic-warn')
+        ->assertSeeHtml('fb-stat-l');
 });
 
 test('the figures are out of sight for somebody never granted them', function (): void {

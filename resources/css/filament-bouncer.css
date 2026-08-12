@@ -23,11 +23,6 @@
     --fb-line: color-mix(in oklab, var(--gray-950) 8%, transparent);
     --fb-hairline: color-mix(in oklab, var(--gray-950) 5%, transparent);
 
-    --fb-weight-read: var(--gray-400);
-    --fb-weight-write: var(--info-600);
-    --fb-weight-withdraw: var(--warning-600);
-    --fb-weight-irreversible: var(--danger-600);
-
     --fb-yes: var(--success-600);
     --fb-yes-soft: color-mix(in oklab, var(--success-500) 12%, #fff);
     --fb-yes-line: color-mix(in oklab, var(--success-600) 25%, transparent);
@@ -47,11 +42,6 @@
     --fb-ghost: var(--gray-600);
     --fb-line: color-mix(in oklab, #fff 12%, transparent);
     --fb-hairline: color-mix(in oklab, #fff 7%, transparent);
-
-    --fb-weight-read: var(--gray-500);
-    --fb-weight-write: var(--info-400);
-    --fb-weight-withdraw: var(--warning-400);
-    --fb-weight-irreversible: var(--danger-400);
 
     --fb-yes: var(--success-500);
     --fb-yes-soft: color-mix(in oklab, var(--success-500) 14%, var(--gray-900));
@@ -183,21 +173,6 @@
 .fb-row:hover {
     background: var(--fb-raised);
 }
-
-/* The weight of an action, where it can be read beside it. Grouping the columns by
-   scope is what kept "see a list" and "delete for good" from looking like the same
-   decision; laid out as rows, that job falls to this. */
-.fb-weight {
-    inline-size: 0.25rem;
-    block-size: 1.15rem;
-    border-radius: 9999px;
-    flex: none;
-}
-
-.fb-weight-read { background: var(--fb-weight-read); }
-.fb-weight-write { background: var(--fb-weight-write); }
-.fb-weight-withdraw { background: var(--fb-weight-withdraw); }
-.fb-weight-irreversible { background: var(--fb-weight-irreversible); }
 
 .fb-row-body {
     flex: 1;
@@ -463,11 +438,12 @@
     --fb-cov-no: var(--danger-600);
     --fb-cov-rest: color-mix(in oklab, var(--gray-950) 10%, transparent);
     --fb-cov-text: var(--gray-500);
+    --fb-cov-strong: var(--gray-700);
 
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    min-inline-size: 9rem;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-inline-size: 12rem;
 }
 
 :is(.dark) .fb-cov {
@@ -475,15 +451,17 @@
     --fb-cov-no: var(--danger-500);
     --fb-cov-rest: color-mix(in oklab, #fff 14%, transparent);
     --fb-cov-text: var(--gray-400);
+    --fb-cov-strong: var(--gray-300);
 }
 
 .fb-cov-bar {
     display: flex;
-    flex: 1;
     overflow: hidden;
-    block-size: 0.4rem;
+    inline-size: 100%;
+    block-size: 0.5rem;
     border-radius: 9999px;
     background: var(--fb-cov-rest);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gray-950) 6%, transparent);
 }
 
 .fb-cov-part {
@@ -493,25 +471,364 @@
 
 .fb-cov-granted { background: var(--fb-cov-yes); }
 .fb-cov-forbidden { background: var(--fb-cov-no); }
-.fb-cov-neutral { background: transparent; }
 
 .fb-cov-reading {
-    flex: none;
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
+    color: var(--fb-cov-text);
+    white-space: nowrap;
+}
+
+.fb-cov-num {
+    font-weight: 600;
+    color: var(--fb-cov-strong);
+}
+
+.fb-cov-num-ok { color: var(--fb-cov-yes); }
+.fb-cov-num-dng { color: var(--fb-cov-no); }
+
+.fb-cov-aside {
+    font-weight: 400;
     color: var(--fb-cov-text);
 }
 
 /* The same bar on a record page, where there is room to read it without leaning in. */
 .fb-cov-lg {
     max-inline-size: 26rem;
-    gap: 0.85rem;
 }
 
 .fb-cov-lg .fb-cov-bar {
-    block-size: 0.6rem;
+    block-size: 0.75rem;
 }
 
 .fb-cov-lg .fb-cov-reading {
     font-size: 0.8125rem;
+}
+
+/* The sentence under the roles table saying what every bar is drawn against. */
+.fb-catalog-legend {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+:is(.dark) .fb-catalog-legend {
+    color: var(--gray-400);
+}
+
+/* ── The figures above the roles table, as cards ───────────────────────────── */
+
+.fb-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+    .fb-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.fb-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.125rem 1.25rem;
+    border-radius: var(--radius-xl, 0.75rem);
+    background: #fff;
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-950) 6%, transparent), 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:is(.dark) .fb-stat {
+    background: var(--gray-900);
+    box-shadow: 0 0 0 1px color-mix(in oklab, #fff 10%, transparent), 0 1px 2px 0 rgb(0 0 0 / 0.3);
+}
+
+.fb-stat-ic {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: 0.625rem;
+    flex: none;
+    background: var(--gray-100);
+    color: var(--gray-500);
+}
+
+:is(.dark) .fb-stat-ic {
+    background: color-mix(in oklab, #fff 6%, transparent);
+    color: var(--gray-400);
+}
+
+.fb-stat-ic svg {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+}
+
+.fb-stat-ic-pri {
+    background: color-mix(in oklab, var(--primary-500) 12%, #fff);
+    color: var(--primary-600);
+}
+
+.fb-stat-ic-warn {
+    background: color-mix(in oklab, var(--warning-500) 12%, #fff);
+    color: var(--warning-600);
+}
+
+.fb-stat-ic-dng {
+    background: color-mix(in oklab, var(--danger-500) 12%, #fff);
+    color: var(--danger-600);
+}
+
+:is(.dark) .fb-stat-ic-pri {
+    background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900));
+    color: var(--primary-400);
+}
+
+:is(.dark) .fb-stat-ic-warn {
+    background: color-mix(in oklab, var(--warning-500) 14%, var(--gray-900));
+    color: var(--warning-400);
+}
+
+:is(.dark) .fb-stat-ic-dng {
+    background: color-mix(in oklab, var(--danger-500) 14%, var(--gray-900));
+    color: var(--danger-400);
+}
+
+.fb-stat-n {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    color: var(--gray-950);
+}
+
+:is(.dark) .fb-stat-n {
+    color: var(--gray-100);
+}
+
+.fb-stat-n-dng {
+    color: var(--danger-600);
+}
+
+:is(.dark) .fb-stat-n-dng {
+    color: var(--danger-400);
+}
+
+.fb-stat-l {
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+}
+
+:is(.dark) .fb-stat-l {
+    color: var(--gray-400);
+}
+
+/* ── Buttons the package draws itself, where Filament's are out of reach ───── */
+
+.fb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-radius: var(--radius-lg, 0.5rem);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.fb-btn svg {
+    inline-size: 1rem;
+    block-size: 1rem;
+    flex: none;
+}
+
+.fb-btn-pri {
+    background: var(--primary-600);
+    color: #fff;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.fb-btn-pri:hover {
+    background: var(--primary-500);
+}
+
+.fb-btn-out {
+    background: var(--fb-surface, #fff);
+    color: var(--fb-muted, var(--gray-500));
+    box-shadow: inset 0 0 0 1px var(--fb-line, color-mix(in oklab, var(--gray-950) 12%, transparent)), 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.fb-btn-out:hover {
+    background: var(--fb-raised, var(--gray-50));
+    color: var(--fb-text, var(--gray-950));
+}
+
+.fb-btn-sm {
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.8125rem;
+}
+
+.fb-summary-spacer {
+    flex: 1;
+}
+
+/* ── The wizard's footer, walked by Filament and seated by the design ──────── */
+
+/* The second child is the cancel slot. Filament only shows it on the first step; the
+   design keeps it in sight on every step and on the far side, which is why the display
+   has to out-argue the inline style Alpine writes. */
+.fb-wizard .fi-sc-wizard-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fb-wizard .fi-sc-wizard-footer > div:nth-child(2) {
+    display: block !important;
+    order: 2;
+    margin-inline-start: auto;
+}
+
+/* ── The warning about the protected role, under the name being chosen ─────── */
+
+.fb-protected-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-lg, 0.5rem);
+    font-size: 0.875rem;
+    background: color-mix(in oklab, var(--warning-500) 10%, #fff);
+    color: var(--warning-600);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning-600) 25%, transparent);
+}
+
+:is(.dark) .fb-protected-notice {
+    background: color-mix(in oklab, var(--warning-500) 12%, var(--gray-900));
+    color: var(--warning-400);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--warning-400) 30%, transparent);
+}
+
+.fb-protected-notice svg {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    flex: none;
+    margin-block-start: 0.0625rem;
+}
+
+/* ── The edit header: facts on the left, the reach bar on the right ────────── */
+
+.fb-edit-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.fb-edit-heading-facts {
+    margin: 0;
+}
+
+.fb-edit-heading-cov {
+    min-inline-size: 15rem;
+}
+
+/* ── The denials card of the record page ───────────────────────────────────── */
+
+.fb-forbidden-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--fb-muted);
+}
+
+.fb-forbidden-empty svg {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    margin-block-end: 0.75rem;
+    color: var(--fb-ghost);
+}
+
+.fb-forbidden-note {
+    margin-block-start: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--fb-faint);
+}
+
+.fb-forbidden-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.fb-forbidden-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.55rem 0.35rem;
+}
+
+.fb-forbidden-row + .fb-forbidden-row {
+    border-block-start: 1px solid var(--fb-hairline);
+}
+
+.fb-badge-dng {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-md, 0.375rem);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--fb-no);
+    background: var(--fb-no-soft);
+    box-shadow: inset 0 0 0 1px var(--fb-no-line);
+}
+
+.fb-badge-dng svg {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    flex: none;
+}
+
+.fb-forbidden-subject {
+    font-size: 0.8125rem;
+    color: var(--fb-text);
+}
+
+/* ── The people holding the role, on its record page ───────────────────────── */
+
+.fb-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: 9999px;
+    flex: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    background: color-mix(in oklab, var(--primary-500) 12%, #fff);
+    color: var(--primary-600);
+}
+
+:is(.dark) .fb-avatar {
+    background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900));
+    color: var(--primary-400);
+}
+
+.fb-holder-locked {
+    display: inline-grid;
+    place-items: center;
+    color: var(--fb-faint);
+}
+
+.fb-holder-locked svg {
+    inline-size: 1rem;
+    block-size: 1rem;
 }

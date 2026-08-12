@@ -53,6 +53,10 @@ final class AbilityGrid extends Field
 
     private ?Closure $notes = null;
 
+    private bool $submitsFromSummary = false;
+
+    private ?string $summaryCancelUrl = null;
+
     public function catalog(Catalog $catalog): static
     {
         $this->catalog = $catalog;
@@ -76,10 +80,36 @@ final class AbilityGrid extends Field
     }
 
     /**
+     * Put the save and the way out inside the summary bar, instead of a button row of
+     * the page's own below it.
+     *
+     * The page that wants this asks for it; the creation wizard never does, because
+     * there the save belongs to the wizard's last step. The buttons also stay away from
+     * a disabled grid — a record page reads, it does not save.
+     */
+    public function submitsFromSummary(string $cancelUrl): static
+    {
+        $this->submitsFromSummary = true;
+        $this->summaryCancelUrl = $cancelUrl;
+
+        return $this;
+    }
+
+    public function doesSubmitFromSummary(): bool
+    {
+        return $this->submitsFromSummary && ! $this->isDisabled();
+    }
+
+    public function getSummaryCancelUrl(): ?string
+    {
+        return $this->summaryCancelUrl;
+    }
+
+    /**
      * The catalogue, ready to draw: a section per tab, a subject per section, a row per
      * action.
      *
-     * @return array<string, array{label: string, doors: bool, subjects: array<string, array{label: string, class: string|null, icon: string|null, rows: array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>}>}>
+     * @return array<string, array{label: string, doors: bool, subjects: array<string, array{label: string, class: string|null, icon: string|null, rows: array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>}>}>
      */
     public function getSections(): array
     {
@@ -175,11 +205,6 @@ final class AbilityGrid extends Field
         return __('filament-bouncer::roles.form.collapse');
     }
 
-    public function getScopeLabel(): string
-    {
-        return __('filament-bouncer::roles.form.scope');
-    }
-
     public function isEmptyCatalog(): bool
     {
         return $this->catalog->isEmpty();
@@ -237,7 +262,7 @@ final class AbilityGrid extends Field
      * @param  array<string, array<string, string>>  $notes
      * @param  array<string, array<string, bool>>  $broader
      * @param  array<string, array<string, string>>  $stances
-     * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
+     * @return array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>
      */
     private function rowsFor(string $key, Subject $subject, Labels $labels, array $notes, array $broader, array $stances): array
     {
@@ -249,7 +274,6 @@ final class AbilityGrid extends Field
                 'label' => $action === Ability::MANAGE_ACTION
                     ? __('filament-bouncer::roles.form.manage')
                     : $labels->action($action),
-                'scope' => ($this->catalog->actions[$action] ?? AbilityScope::Write)->value,
                 'note' => $notes[$key][$action] ?? null,
                 'kind' => ($stances[$key][$action] ?? null) === Stance::Forbidden->value ? 'forbidden' : null,
                 'broader' => $broader[$key][$action] ?? false,

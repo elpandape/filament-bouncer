@@ -6,8 +6,8 @@ namespace ElPandaPe\FilamentBouncer\Filament\Widgets;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\AuthorizesWidget;
-use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\Widget;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\Database\Models;
@@ -19,32 +19,40 @@ use Silber\Bouncer\Database\Models;
  * here: a denial in force explains a role that looks generous and is not, and an account
  * holding no role at all reaches the panel and finds it empty — a support ticket waiting
  * to be filed, visible from the one screen able to answer it.
+ *
+ * A view of the package's own rather than `StatsOverviewWidget`, because the approved
+ * design draws each figure as an icon in a tinted box beside a bare number, and the stock
+ * widget cannot be told to. The figures carry no explanatory sentences: the design says
+ * the label is enough, and anything longer belongs in the documentation.
  */
-final class RoleStats extends StatsOverviewWidget
+final class RoleStats extends Widget
 {
     use AuthorizesWidget;
 
-    /**
-     * @return array<int, Stat>
-     */
-    protected function getStats(): array
-    {
-        $forbidden = $this->forbidden();
+    protected int|string|array $columnSpan = 'full';
 
+    public function render(): ViewContract
+    {
+        // The analyser works out `view-string` by looking for the file among the paths
+        // the application renders from, and a package's namespaced view is never among
+        // them — which is also why the parent's property cannot take this name as its
+        // default.
+        /** @var view-string $view */
+        $view = 'filament-bouncer::widgets.role-stats';
+
+        return view($view, $this->getViewData());
+    }
+
+    /**
+     * @return array{roles: int, declared: int, forbidden: int, unassigned: int}
+     */
+    protected function getViewData(): array
+    {
         return [
-            Stat::make(__('filament-bouncer::roles.stats.roles'), $this->roles())
-                ->description(__('filament-bouncer::roles.stats.roles_note'))
-                ->icon('heroicon-m-shield-check'),
-            Stat::make(__('filament-bouncer::roles.stats.abilities'), $this->declared())
-                ->description(__('filament-bouncer::roles.stats.abilities_note'))
-                ->icon('heroicon-m-key'),
-            Stat::make(__('filament-bouncer::roles.stats.forbidden'), $forbidden)
-                ->description(__('filament-bouncer::roles.stats.forbidden_note'))
-                ->icon('heroicon-m-no-symbol')
-                ->color($forbidden > 0 ? 'danger' : 'gray'),
-            Stat::make(__('filament-bouncer::roles.stats.unassigned'), $this->unassigned())
-                ->description(__('filament-bouncer::roles.stats.unassigned_note'))
-                ->icon('heroicon-m-user-minus'),
+            'roles' => $this->roles(),
+            'declared' => $this->declared(),
+            'forbidden' => $this->forbidden(),
+            'unassigned' => $this->unassigned(),
         ];
     }
 

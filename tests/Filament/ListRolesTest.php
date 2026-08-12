@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables\RolesTable;
@@ -38,6 +40,12 @@ function deleteArmedByHand(Model $role): void
 function stillStanding(Model $role): bool
 {
     return Models::role()->newQuery()->whereKey($role->getKey())->exists();
+}
+
+function listedCatalogCells(): int
+{
+    return collect(app(CatalogRegistry::class)->current()->subjects)
+        ->sum(static fn (Subject $subject): int => count($subject->cells()));
 }
 
 test('the screen lists the roles that exist', function (): void {
@@ -85,6 +93,42 @@ test('the row of a role the reader holds offers neither either', function (): vo
         ->assertActionHidden(TestAction::make('edit')->table($mine))
         ->assertActionHidden(TestAction::make('delete')->table($mine))
         ->assertActionVisible(TestAction::make('edit')->table($somebody));
+});
+
+test('the rows nobody works on from here say so with a padlock', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    $reader = signInAsRoleManager();
+
+    $privileged = listedRole('super-admin');
+    $mine = listedRole('editor');
+    $ordinary = listedRole('reviewer');
+
+    Bouncer::assign('editor')->to($reader);
+    Bouncer::refresh();
+
+    livewire(ListRoles::class)
+        ->assertActionVisible(TestAction::make('locked')->table($privileged))
+        ->assertActionVisible(TestAction::make('locked')->table($mine))
+        ->assertActionHidden(TestAction::make('locked')->table($ordinary));
+});
+
+test('the listing announces itself and offers searching by name or title', function (): void {
+    signInAsRoleManager();
+
+    livewire(ListRoles::class)
+        ->assertSee(__('filament-bouncer::roles.list.subtitle'))
+        ->assertSee(__('filament-bouncer::roles.table.search'));
+});
+
+test('the foot of the table names the catalogue every bar is drawn against', function (): void {
+    signInAsRoleManager();
+
+    listedRole();
+
+    livewire(ListRoles::class)
+        ->assertSeeHtml('fb-catalog-legend')
+        ->assertSee(__('filament-bouncer::roles.table.legend', ['total' => listedCatalogCells()]));
 });
 
 test('a row still offers being read when it may not be changed', function (): void {

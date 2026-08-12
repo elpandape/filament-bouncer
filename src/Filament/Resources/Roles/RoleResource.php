@@ -151,6 +151,19 @@ final class RoleResource extends Resource
     }
 
     /**
+     * Whether the row shows the padlock instead of a way of working on the record.
+     *
+     * This is the two refusals below and nothing else — deliberately not the policy's
+     * answer, because the padlock explains why a role that could otherwise be worked on
+     * is out of reach, and a reader the policy refuses everything to would see it lie
+     * on every row.
+     */
+    public static function isLocked(Model $record): bool
+    {
+        return ! self::mayBeChanged($record);
+    }
+
+    /**
      * The two roles nobody works on from here, whatever their abilities say.
      *
      * Your own, because everything you may hand out you may hand to yourself, and a role

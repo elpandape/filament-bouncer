@@ -31,18 +31,18 @@ function gridField(): AbilityGrid
 }
 
 /**
- * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
+ * @return array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>
  */
 function gridRowsFor(string $key): array
 {
-    /** @var array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}> $rows */
+    /** @var array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}> $rows */
     $rows = gridField()->getSections()['subjects']['subjects'][$key]['rows'] ?? [];
 
     return $rows;
 }
 
 /**
- * @return array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}>
+ * @return array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>
  */
 function gridRowsOn(Model $role, string $key): array
 {
@@ -51,7 +51,7 @@ function gridRowsOn(Model $role, string $key): array
 
     foreach ($host->getSchema('form')?->getComponents() ?? [] as $component) {
         if ($component instanceof AbilityGrid) {
-            /** @var array<int, array{action: string, label: string, scope: string, note: string|null, kind: string|null, broader: bool}> $rows */
+            /** @var array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}> $rows */
             $rows = $component->getSections()['subjects']['subjects'][$key]['rows'] ?? [];
 
             return $rows;
@@ -68,15 +68,6 @@ test('a subject is laid out as rows, and every action it declares gets one', fun
 
     expect($rows)->not->toBeEmpty()
         ->and(array_column($rows, 'action'))->toContain('viewAny', 'view', 'delete');
-});
-
-test('an action carries the weight the catalogue gave it', function (): void {
-    signIn();
-
-    $rows = collect(gridRowsFor(Subject::keyFor(Post::class)));
-
-    expect($rows->firstWhere('action', 'viewAny')['scope'] ?? null)->toBe('read')
-        ->and($rows->firstWhere('action', 'delete')['scope'] ?? null)->toBe('withdraw');
 });
 
 test('the grant covering a whole model comes first, under a key of its own', function (): void {
@@ -245,12 +236,16 @@ test('each stance is its own button, and its word is its accessible name', funct
         ->assertSeeHtml(__('filament-bouncer::stances.forbidden'));
 });
 
-test('an action shows the weight it carries', function (): void {
+test('the weight mark the approved design retired is gone from the rows', function (): void {
     signIn();
 
-    livewire(GridHost::class)
-        ->assertSeeHtml('fb-weight-read')
-        ->assertSeeHtml('fb-weight-withdraw');
+    livewire(GridHost::class)->assertDontSeeHtml('fb-weight');
+});
+
+test('the summary of a grid nobody flagged carries no buttons', function (): void {
+    signIn();
+
+    livewire(GridHost::class)->assertDontSeeHtml('fb-summary-save');
 });
 
 test('what it all adds up to stays in sight', function (): void {

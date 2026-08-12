@@ -16,6 +16,11 @@ final class ListRoles extends ListRecords
 {
     protected static string $resource = RoleResource::class;
 
+    public function getSubheading(): string
+    {
+        return __('filament-bouncer::roles.list.subtitle');
+    }
+
     /**
      * @return array<int, Action>
      */

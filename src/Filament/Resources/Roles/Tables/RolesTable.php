@@ -7,11 +7,14 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\Database\Models;
@@ -22,6 +25,10 @@ use Silber\Bouncer\Database\Models;
  * A name on its own says nothing about what a role can do, and the answer is the whole
  * point of the screen: hence the bar, which is the catalogue drawn to scale — what the
  * role grants, what it denies, and what it leaves alone.
+ *
+ * Reading and changing are drawn as text links, the destructive way lives behind the
+ * kebab, and the two rows nobody works on from here carry a padlock in its place: an
+ * explanation where a silently missing button would read as a bug.
  *
  * There are no bulk actions here, and there is no adding any. Filament authorises a bulk
  * delete once for the whole selection, so a single yes would walk past both refusals the
@@ -45,8 +52,6 @@ final class RolesTable
                     ->state(self::reach(...)),
                 TextColumn::make('holders')
                     ->label(__('filament-bouncer::roles.table.holders'))
-                    ->badge()
-                    ->color('gray')
                     ->state(self::holders(...)),
                 TextColumn::make('updated_at')
                     ->label(__('filament-bouncer::roles.table.updated'))
@@ -54,12 +59,35 @@ final class RolesTable
                     ->sortable(),
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->link()
+                    ->icon(null),
                 EditAction::make()
+                    ->link()
+                    ->icon(null)
                     ->visible(static fn (Model $record): bool => RoleResource::canEdit($record)),
-                DeleteAction::make()
-                    ->visible(static fn (Model $record): bool => RoleResource::canDelete($record)),
+                ActionGroup::make([
+                    DeleteAction::make()
+                        ->visible(static fn (Model $record): bool => RoleResource::canDelete($record)),
+                ])->visible(static fn (Model $record): bool => ! RoleResource::isLocked($record)),
+                Action::make('locked')
+                    ->hiddenLabel()
+                    ->iconButton()
+                    ->icon('heroicon-o-lock-closed')
+                    ->disabled()
+                    ->tooltip(__('filament-bouncer::roles.table.locked'))
+                    ->visible(static fn (Model $record): bool => RoleResource::isLocked($record)),
             ])
+            ->searchPlaceholder(__('filament-bouncer::roles.table.search'))
+            ->contentFooter(static function (): View {
+                // The analyser works out `view-string` by looking for the file among the
+                // paths the application renders from, and a package's namespaced view is
+                // never among them.
+                /** @var view-string $legend */
+                $legend = 'filament-bouncer::tables.catalog-legend';
+
+                return view($legend, ['total' => self::catalogTotal()]);
+            })
             ->defaultSort('name')
             ->emptyStateHeading(__('filament-bouncer::roles.table.empty'));
     }
@@ -87,13 +115,27 @@ final class RolesTable
     }
 
     /**
+     * How many cells every bar is drawn against, for the legend under the table.
+     */
+    private static function catalogTotal(): int
+    {
+        $total = 0;
+
+        foreach (app(CatalogRegistry::class)->current()->subjects as $subject) {
+            $total += count($subject->cells());
+        }
+
+        return $total;
+    }
+
+    /**
      * The bar, worked out here so the view has nothing to decide.
      *
      * A role reaching everything through the wildcard holds no rule of its own for any
      * cell, so drawing the bar from its grants alone would report that it can do nothing
      * at all. It is drawn full instead, and says why in words.
      *
-     * @return array{granted: int, forbidden: int, neutral: int, total: int, reaches_all: bool, shares: array{granted: float, forbidden: float, neutral: float}, reading: string}
+     * @return array{granted: int, forbidden: int, neutral: int, total: int, reaches_all: bool, shares: array{granted: float, forbidden: float, neutral: float}}
      */
     private static function reach(Model $record): array
     {
@@ -107,7 +149,6 @@ final class RolesTable
                 'total' => $coverage->total,
                 'reaches_all' => true,
                 'shares' => ['granted' => 100.0, 'forbidden' => 0.0, 'neutral' => 0.0],
-                'reading' => __('filament-bouncer::roles.table.reaches_all'),
             ];
         }
 
@@ -122,10 +163,6 @@ final class RolesTable
                 'forbidden' => self::share($coverage->forbidden, $coverage->total),
                 'neutral' => self::share($coverage->neutral, $coverage->total),
             ],
-            'reading' => __('filament-bouncer::roles.table.reading', [
-                'granted' => $coverage->granted,
-                'total' => $coverage->total,
-            ]),
         ];
     }
 

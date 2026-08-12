@@ -21,12 +21,21 @@ return [
         'forbidden_count' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'model_count' => ':granted de :total',
         'reserved' => 'Ese nombre es el del rol que lo tiene todo, que escribe la reconciliación y no esta pantalla.',
-        'scope' => 'Peso',
+        'name_placeholder' => 'p. ej. soporte',
+        'name_help' => 'Minúsculas y guiones. Es el <code>name</code> del rol en Bouncer.',
+        'title_placeholder' => 'p. ej. Atención a usuarios',
+        'title_help' => 'Cómo se muestra en listados y fichas.',
+        'protected_notice' => '<b>:name</b> es el rol protegido: solo lo entrega quien ya lo tiene y a su último titular no se le puede quitar. Ningún rol nuevo puede llamarse así.',
+        'save' => 'Guardar cambios',
+        'cancel' => 'Cancelar',
     ],
 
     'wizard' => [
+        'subtitle' => 'Tres pasos: identidad, permisos y revisión. Nada se guarda hasta el final.',
         'identity' => 'El rol',
         'identity_hint' => 'Cómo se llama, y cómo se le nombra.',
+        'identity_heading' => 'Identidad del rol',
+        'identity_note' => 'El nombre es el identificador interno; el título es lo que ven las personas.',
         'abilities' => 'Habilidades',
         'abilities_hint' => 'Lo que podrá hacer quien lo tenga.',
         'review' => 'Revisión',
@@ -59,26 +68,57 @@ return [
         'plural' => 'Roles',
     ],
 
+    'list' => [
+        'subtitle' => 'La postura de seguridad del panel de un vistazo: quién puede qué, y qué está prohibido.',
+    ],
+
     'table' => [
         'abilities' => 'Habilidades',
         'name' => 'Rol',
         'coverage' => 'Alcance',
-        'reading' => ':granted de :total',
         'reaches_all' => 'Todo, por el comodín',
         'holders' => 'Cuentas',
         'updated' => 'Cambiado',
         'empty' => 'Todavía no hay ningún rol compuesto.',
+        'search' => 'Buscar por nombre o título',
+        'legend' => 'cobertura sobre las :total habilidades del catálogo',
+        'locked' => 'Este rol no se trabaja desde aquí: es la vía de vuelta, o uno que tú tienes.',
+    ],
+
+    'edit' => [
+        'holders' => '{0} 0 usuarios con este rol|{1} 1 usuario con este rol|[2,*] :count usuarios con este rol',
+        'updated' => 'actualizado :when',
+    ],
+
+    'record' => [
+        'identity' => 'Identidad',
+        'name' => 'Nombre',
+        'title' => 'Título',
+        'holders' => 'Usuarios con el rol',
+        'updated' => 'Actualizado',
+        'created' => 'Creado',
+        'forbidden_heading' => 'Prohibiciones',
+        'forbidden_empty' => 'Este rol no prohíbe nada.',
+        'forbidden_note' => 'Una prohibición gana a cualquier concesión que llegue por otro rol.',
+        'holders_heading' => 'Usuarios con este rol',
+        'holders_empty' => 'Nadie tiene este rol.',
+        'retract' => 'Quitar rol',
+        'last_holder' => 'La vía de vuelta no se le quita nunca a su último titular.',
+    ],
+
+    'coverage' => [
+        'catalog' => 'Cobertura sobre las :total habilidades del catálogo',
+        'granted' => '{1} concedida|concedidas',
+        'forbidden' => '{1} prohibida|prohibidas',
+        'neutral' => 'sin definir',
+        'of' => 'de :total',
     ],
 
     'stats' => [
         'roles' => 'Roles',
-        'roles_note' => 'Compuestos en esta pantalla.',
         'abilities' => 'Habilidades declaradas',
-        'abilities_note' => 'Sobre lo que el panel sabe preguntar.',
         'forbidden' => 'Prohibiciones vigentes',
-        'forbidden_note' => 'Una prohibición vence a cualquier concesión que llegue a la misma habilidad.',
         'unassigned' => 'Cuentas sin ningún rol',
-        'unassigned_note' => 'Llegan al panel y no pueden hacer nada en él.',
     ],
 
     'relation' => [

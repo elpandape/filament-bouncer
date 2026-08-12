@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
+use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +27,12 @@ function editedRole(string $name = 'editor'): Model
     $role = Models::role()->newQuery()->create(['name' => $name]);
 
     return $role;
+}
+
+function editedCatalogCells(): int
+{
+    return collect(app(CatalogRegistry::class)->current()->subjects)
+        ->sum(static fn (Subject $subject): int => count($subject->cells()));
 }
 
 /**
@@ -178,9 +186,38 @@ test('a row says when the role holds rules the grid cannot write', function (): 
         ->assertSee(trans_choice('filament-bouncer::roles.form.restricted_records', 1, ['count' => 1]));
 });
 
-test('the screen of a role that may be worked on offers deleting it', function (): void {
+test('the header no longer offers deleting, which lives behind the kebab of the listing', function (): void {
     signInAsRoleManager();
 
     livewire(EditRole::class, ['record' => editedRole()->getKey()])
-        ->assertActionVisible(TestAction::make('delete'));
+        ->assertActionDoesNotExist(TestAction::make('delete'))
+        ->assertOk();
+});
+
+test('the save lives inside the summary bar and the page adds no button row below', function (): void {
+    signInAsRoleManager();
+
+    livewire(EditRole::class, ['record' => editedRole()->getKey()])
+        ->assertSeeHtml('fb-summary-save')
+        ->assertSeeHtml('x-on:click="$wire.call(\'save\')"');
+});
+
+test('the header reads the facts on one side and the reach bar on the other', function (): void {
+    signInAsRoleManager();
+
+    $role = editedRole();
+    $holder = User::forceCreate([
+        'name' => 'Killa',
+        'email' => 'killa@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    grant($role, [['viewAny', Post::class]]);
+    Bouncer::assign('editor')->to($holder);
+    Bouncer::refresh();
+
+    livewire(EditRole::class, ['record' => $role->getKey()])
+        ->assertSeeHtml('fb-edit-heading')
+        ->assertSee(trans_choice('filament-bouncer::roles.edit.holders', 1, ['count' => 1]))
+        ->assertSee(__('filament-bouncer::roles.coverage.catalog', ['total' => editedCatalogCells()]));
 });
