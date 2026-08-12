@@ -212,3 +212,21 @@ test('what a row says beyond its stance is read off the record', function (): vo
     expect($grid->getNotes())->toBeEmpty()
         ->and($grid->getBroader())->toBeEmpty();
 });
+
+test('a catalogue small enough to read opens itself', function (): void {
+    signIn();
+
+    expect(gridField()->getOpenByDefault())->toBe(['all' => true]);
+});
+
+test('a catalogue too long to open at once arrives folded', function (): void {
+    signIn();
+
+    config()->set('filament-bouncer.custom', array_fill_keys(
+        array_map(static fn (int $index): string => 'invented-'.$index, range(1, 80)),
+        'write',
+    ));
+    app(CatalogRegistry::class)->forget();
+
+    expect(gridField()->getOpenByDefault())->toBe(['all' => false]);
+});

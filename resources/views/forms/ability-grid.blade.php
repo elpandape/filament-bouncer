@@ -14,7 +14,7 @@
         <div
             x-data="{
                 state: $wire.$entangle('{{ $getStatePath() }}'),
-                open: {},
+                open: @js($getOpenByDefault()),
                 disabled: @js($disabled),
                 set(subject, action, stance) {
                     if (this.disabled) {
@@ -100,12 +100,12 @@
                         @endforeach
                     @else
                         @foreach ($section['subjects'] as $subjectKey => $subject)
-                            <div class="fb-subject" x-bind:class="open[@js($subjectKey)] ? 'fb-subject-open' : ''">
+                            <div class="fb-subject" x-bind:class="(open[@js($subjectKey)] ?? open.all) ? 'fb-subject-open' : ''">
                                 <button
                                     type="button"
                                     class="fb-subject-head"
-                                    x-on:click="open[@js($subjectKey)] = ! open[@js($subjectKey)]"
-                                    x-bind:aria-expanded="open[@js($subjectKey)] ? 'true' : 'false'"
+                                    x-on:click="open[@js($subjectKey)] = ! (open[@js($subjectKey)] ?? open.all)"
+                                    x-bind:aria-expanded="(open[@js($subjectKey)] ?? open.all) ? 'true' : 'false'"
                                     aria-label="{{ $collapse }}"
                                 >
                                     <svg class="fb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
@@ -116,7 +116,7 @@
                                     <span class="fb-subject-count" x-text="@js(__('filament-bouncer::roles.form.model_count', ['granted' => '%g', 'total' => count($subject['rows'])])).replace('%g', granted(@js($subjectKey)))"></span>
                                 </button>
 
-                                <div class="fb-rows" x-show="open[@js($subjectKey)]" x-cloak>
+                                <div class="fb-rows" x-show="open[@js($subjectKey)] ?? open.all" x-cloak>
                                     <div class="fb-presets">
                                         <button type="button" class="fb-preset" @disabled($disabled) x-on:click="preset(@js($subjectKey), @js($presets['read']), 'granted')">{{ __('filament-bouncer::roles.presets.read') }}</button>
                                         <button type="button" class="fb-preset" @disabled($disabled) x-on:click="preset(@js($subjectKey), null, 'granted')">{{ __('filament-bouncer::roles.presets.all') }}</button>

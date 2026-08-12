@@ -37,6 +37,17 @@ use Illuminate\Support\Facades\Gate;
  */
 final class AbilityGrid extends Field
 {
+    /**
+     * How many rows a screen may open at once before it stops being one.
+     *
+     * Measured rather than guessed: three buttons a row means a panel of thirty resources
+     * would draw over five hundred of them at once, which is a long page and a slow first
+     * paint. Below the threshold the fold buys nothing and costs a click on every subject
+     * anybody came to change — and a screen that opens showing only headings reads as
+     * broken.
+     */
+    private const int OPEN_UP_TO = 60;
+
     protected string $view = 'filament-bouncer::forms.ability-grid';
 
     private Catalog $catalog;
@@ -133,6 +144,20 @@ final class AbilityGrid extends Field
     public function getNeutral(): string
     {
         return Stance::Neutral->value;
+    }
+
+    /**
+     * @return array{all: bool}
+     */
+    public function getOpenByDefault(): array
+    {
+        $rows = 0;
+
+        foreach ($this->catalog->subjects as $subject) {
+            $rows += count($subject->cells());
+        }
+
+        return ['all' => $rows <= self::OPEN_UP_TO];
     }
 
     public function getEmptyLabel(): string
