@@ -6,7 +6,6 @@ namespace ElPandaPe\FilamentBouncer\Filament\Widgets;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\AuthorizesWidget;
-use Filament\Support\Enums\IconPosition;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Query\Builder;
@@ -35,17 +34,17 @@ final class RoleStats extends StatsOverviewWidget
         return [
             Stat::make(__('filament-bouncer::roles.stats.roles'), $this->roles())
                 ->description(__('filament-bouncer::roles.stats.roles_note'))
-                ->descriptionIcon('heroicon-m-shield-check', IconPosition::Before),
+                ->icon('heroicon-m-shield-check'),
             Stat::make(__('filament-bouncer::roles.stats.abilities'), $this->declared())
                 ->description(__('filament-bouncer::roles.stats.abilities_note'))
-                ->descriptionIcon('heroicon-m-key', IconPosition::Before),
+                ->icon('heroicon-m-key'),
             Stat::make(__('filament-bouncer::roles.stats.forbidden'), $forbidden)
                 ->description(__('filament-bouncer::roles.stats.forbidden_note'))
-                ->descriptionIcon('heroicon-m-no-symbol', IconPosition::Before)
+                ->icon('heroicon-m-no-symbol')
                 ->color($forbidden > 0 ? 'danger' : 'gray'),
             Stat::make(__('filament-bouncer::roles.stats.unassigned'), $this->unassigned())
                 ->description(__('filament-bouncer::roles.stats.unassigned_note'))
-                ->descriptionIcon('heroicon-m-user-minus', IconPosition::Before),
+                ->icon('heroicon-m-user-minus'),
         ];
     }
 

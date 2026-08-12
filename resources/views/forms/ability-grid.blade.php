@@ -97,7 +97,7 @@
                                 <div class="fb-row-body">
                                     <span class="fb-row-name">{{ $subject['label'] }}</span>
                                     @if (filled($row['note']))
-                                        <span class="fb-row-note">{{ $row['note'] }}</span>
+                                        <span class="fb-row-note{{ $row['kind'] === 'forbidden' ? ' fb-row-note-forbidden' : '' }}">{{ $row['note'] }}</span>
                                     @endif
                                 </div>
                             </div>
