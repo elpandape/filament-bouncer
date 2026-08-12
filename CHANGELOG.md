@@ -7,6 +7,37 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [5.2.0] - 2026-08-11
+
+5.1.0 gave the screens back their pieces. This gives them the measurements, taken from
+the approved design's own stylesheet rather than read off a picture of it.
+
+### Changed
+
+- **A stance is a tinted chip, not a solid fill.** The chosen position now draws a pale
+  ground, its mark in its own colour and a ring around it — which is what the design
+  specified and what a picture of it does not tell you. Filled solid with a white glyph,
+  the control read as a toolbar rather than as three words to choose between.
+- **The rows keep the rhythm they were drawn with**: dashed rules between actions, the
+  deeper indent under a subject, and taller controls. Approximating spacing by eye is how
+  a screen ends up structurally right and visually anonymous.
+- **The totals float over the page as a pill** — rounded, blurred, lifted — instead of a
+  bar pinned to the edge of the card.
+- **The catalogue's own card lost its heading and its sentence.** Both said what every row
+  underneath says, and between them they pushed the first subject nearly a screenful down.
+- **The name and the title take the full width**, as one band above the catalogue rather
+  than a narrow card beside empty space.
+
+### Added
+
+- **The reach bar is on the screen that changes it**, not only on the one that reads it.
+  Seeing how far a role already goes is the first thing anybody does before moving a
+  single stance.
+
+### Upgrading
+
+Run `php artisan filament:assets`. Nothing else changes.
+
 ## [5.1.0] - 2026-08-11
 
 The screens redrawn in 5.0.0 were faithful in structure and anonymous in look. This is
