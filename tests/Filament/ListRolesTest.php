@@ -139,18 +139,6 @@ test('the actions lead to pages of their own instead of opening a modal', functi
         ->assertActionHasUrl(TestAction::make('edit')->table($role), RoleResource::getUrl('edit', ['record' => $role]));
 });
 
-test('a role says how many accounts hold it', function (): void {
-    $reader = signInAsRoleManager();
-
-    $role = listedRole();
-    Bouncer::assign('editor')->to($reader);
-    Bouncer::refresh();
-
-    livewire(ListRoles::class)
-        ->assertSee(__('filament-bouncer::roles.table.holders'))
-        ->assertSee('1');
-});
-
 test('the screen offers composing a role of its own', function (): void {
     signInAsRoleManager();
 
@@ -207,14 +195,13 @@ test('the table offers nothing to a selection', function (): void {
         ->and($table->isSelectionEnabled())->toBeFalse();
 });
 
-test('the listing names the role, its title and how many hold it', function (): void {
+test('the listing names the role, its title and the tenant it belongs to', function (): void {
     signInAsRoleManager();
 
     $role = listedRole();
-    $role->forceFill(['title' => 'Editorial'])->save();
 
     livewire(ListRoles::class)
         ->assertCanSeeTableRecords([$role])
-        ->assertSee('Editorial')
-        ->assertSee(__('filament-bouncer::roles.table.holders'));
+        ->assertSee(__('filament-bouncer::roles.table.title'))
+        ->assertSee(__('filament-bouncer::roles.table.scope'));
 });

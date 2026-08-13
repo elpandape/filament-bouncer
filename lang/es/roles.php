@@ -63,11 +63,11 @@ return [
     ],
 
     'table' => [
+        'scope' => 'Tenant',
         'title' => 'Título',
         'created' => 'Creado',
         'name' => 'Rol',
         'reaches_all' => 'Todo, por el comodín',
-        'holders' => 'Cuentas',
         'updated' => 'Cambiado',
         'empty' => 'Todavía no hay ningún rol compuesto.',
         'search' => 'Buscar por nombre o título',
@@ -75,11 +75,12 @@ return [
     ],
 
     'edit' => [
-        'holders' => '{0} 0 usuarios con este rol|{1} 1 usuario con este rol|[2,*] :count usuarios con este rol',
         'updated' => 'actualizado :when',
     ],
 
     'record' => [
+        'identity_note' => 'El nombre por el que pregunta el código, y el que se lee en pantalla.',
+        'title_empty' => 'Sin título',
         'metadata' => 'Metadatos',
         'scope' => 'Tenant',
         'scope_global' => 'Global',
@@ -103,7 +104,6 @@ return [
         'identity' => 'Identidad',
         'name' => 'Nombre',
         'title' => 'Título',
-        'holders' => 'Usuarios con el rol',
         'updated' => 'Actualizado',
         'created' => 'Creado',
         'forbidden_heading' => 'Prohibiciones',

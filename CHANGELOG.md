@@ -7,6 +7,39 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.2.0] - 2026-08-13
+
+### Changed
+
+- **The roles screen matches the one it was designed against.** The listing names the role,
+  its title and the tenant it belongs to, and the record page reads identity and abilities
+  on the left with tenant, orphan rules and metadata on the right. Both had drifted into
+  carrying figures the design never had.
+
+### Removed
+
+- **The holders card of the record page, and with it the way to take a role off an
+  account.** The card was not in the approved design. Roles are still handed out and taken
+  away from the account's own page, where the relation lives; this screen no longer offers
+  a second door onto it.
+- **The reach bar of the record page.** The catalogue drawn to scale answers how much of it
+  a role covers, which is not the question the page is opened with — what it grants and what
+  it forbids is said subject by subject right below.
+
+### Note on upgrading
+
+Nothing changes about what is stored or who may do what: the two refusals, the reserved
+name and the padlock on the rows nobody works on from here are all untouched. Anything
+calling `ViewRole::retractRoleAction()` will not find it.
+
+## [6.1.1] - 2026-08-13
+
+### Fixed
+
+- The listing's title and created columns were showing their translation key instead of a
+  word, and a holder's row was pushing its action past the edge of the card now that the
+  card is drawn in the narrow column.
+
 ## [6.1.0] - 2026-08-13
 
 ### Changed

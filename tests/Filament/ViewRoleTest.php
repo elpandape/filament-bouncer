@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
@@ -159,50 +160,17 @@ test('the record of an ordinary role offers the way in', function (): void {
         ->assertActionVisible(TestAction::make('edit'));
 });
 
-test('how far the role reaches is read before a single row of it is', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    grant($role, [['viewAny', Post::class]]);
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSeeHtml('fb-cov-lg')
-        ->assertSeeHtml('data-granted="1"');
-});
-
-test('a role reaching everything through the wildcard reads full', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    Bouncer::allow($role)->everything();
-    Bouncer::refresh();
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSeeHtml('data-reaches-all="true"')
-        ->assertSee(__('filament-bouncer::roles.table.reaches_all'));
-});
-
-test('the identity is read as entries, not as inputs waiting for nobody', function (): void {
+test('the identity is read as entries, and the tenant beside it', function (): void {
     signInAsRoleManager();
 
     $role = readRole();
 
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSee(__('filament-bouncer::roles.record.identity'))
-        ->assertSee(__('filament-bouncer::roles.record.holders'))
+        ->assertSee(__('filament-bouncer::roles.record.scope'))
+        ->assertSee(__('filament-bouncer::roles.record.metadata'))
         ->assertSee(__('filament-bouncer::roles.record.updated'))
         ->assertSee(__('filament-bouncer::roles.record.created'));
-});
-
-test('the reach bar of the record page reads its three figures out in words', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    grant($role, [['viewAny', Post::class]]);
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSee(trans_choice('filament-bouncer::roles.coverage.granted', 1))
-        ->assertSee(__('filament-bouncer::roles.coverage.neutral'));
 });
 
 test('a reading page offers no save inside the summary bar', function (): void {
@@ -210,42 +178,6 @@ test('a reading page offers no save inside the summary bar', function (): void {
 
     livewire(ViewRole::class, ['record' => readRole()->getKey()])
         ->assertDontSeeHtml('fb-summary-save');
-});
-
-test('the people holding the role are on its page', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    $holder = readHolder();
-
-    Bouncer::assign('editor')->to($holder);
-    Bouncer::refresh();
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSee('Killa')
-        ->assertSee('killa@example.test')
-        ->assertSee(__('filament-bouncer::roles.record.retract'));
-});
-
-test('a role nobody holds says so instead of drawing an empty list', function (): void {
-    signInAsRoleManager();
-
-    livewire(ViewRole::class, ['record' => readRole()->getKey()])
-        ->assertSee(__('filament-bouncer::roles.record.holders_empty'));
-});
-
-test('taking the role away goes through the store and off the account', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    $holder = readHolder();
-
-    Bouncer::assign('editor')->to($holder);
-    Bouncer::refresh();
-
-    readRetractArmedByHand($role, $holder);
-
-    expect(readHolds($role, $holder))->toBeFalse();
 });
 
 test('a retract armed against nobody changes nothing', function (): void {
@@ -279,25 +211,6 @@ test('the last holder of the way back in keeps it, even against a request armed 
     readRetractArmedByHand($role, $holder);
 
     expect(readHolds($role, $holder))->toBeTrue();
-});
-
-test('the way back in still comes off an account that is not its last holder', function (): void {
-    config()->set('filament-bouncer.privileged_role', 'super-admin');
-
-    signInAsRoleManager();
-
-    $role = readRole('super-admin');
-    $first = readHolder();
-    $second = readHolder('Amaru', 'amaru@example.test');
-
-    Bouncer::assign('super-admin')->to($first);
-    Bouncer::assign('super-admin')->to($second);
-    Bouncer::refresh();
-
-    readRetractArmedByHand($role, $first);
-
-    expect(readHolds($role, $first))->toBeFalse()
-        ->and(readHolds($role, $second))->toBeTrue();
 });
 
 test('a narrowed rule names the record it reaches, and the one it owns says so', function (): void {
@@ -365,4 +278,37 @@ test('what the role is silent about is spelled out while the names still fit', f
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSchemaComponentExists('abilities', checkComponentUsing: fn (AbilityTags $entry): bool => $entry->spellsSilent())
         ->assertSee(__('filament-bouncer::roles.record.and'));
+});
+
+test('a door the role reaches is read apart from the subjects', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+
+    Bouncer::allow($role)->to('page:'.Subject::keyFor(Settings::class));
+    Bouncer::refresh();
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
+            $doors = array_column($entry->getDoors(), 'rows', 'tab');
+
+            return array_column($doors['pages'] ?? [], 'key') === [Subject::keyFor(Settings::class)];
+        })
+        ->assertSee(__('filament-bouncer::roles.tabs.pages'));
+});
+
+test('what the role reaches through a broader rule is read as reached', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+
+    Bouncer::allow($role)->everything();
+    Bouncer::refresh();
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
+            $stances = $entry->getStances()[Subject::keyFor(Post::class)] ?? [];
+
+            return ($stances['viewAny'] ?? '') === 'broader';
+        });
 });

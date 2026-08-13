@@ -13,8 +13,6 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Silber\Bouncer\Database\Models;
 
 /**
  * The roles, as a listing.
@@ -24,9 +22,9 @@ use Silber\Bouncer\Database\Models;
  * this role may delete accounts, which is what anybody comes to a listing to find out. The
  * record page says it subject by subject, and that is one click away.
  *
- * Reading and changing are drawn as text links, the destructive way lives behind the
- * kebab, and the two rows nobody works on from here carry a padlock in its place: an
- * explanation where a silently missing button would read as a bug.
+ * The destructive way lives behind the kebab, and the two rows nobody works on from here
+ * carry a padlock in its place: an explanation where a silently missing button would read
+ * as a bug.
  *
  * There are no bulk actions here, and there is no adding any. Filament authorises a bulk
  * delete once for the whole selection, so a single yes would walk past both refusals the
@@ -41,16 +39,15 @@ final class RolesTable
             ->columns([
                 TextColumn::make('name')
                     ->label(__('filament-bouncer::roles.table.name'))
-                    ->badge()
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('title')
                     ->label(__('filament-bouncer::roles.table.title'))
-                    ->searchable()
-                    ->placeholder('—'),
-                TextColumn::make('holders')
-                    ->label(__('filament-bouncer::roles.table.holders'))
-                    ->state(self::holders(...)),
+                    ->searchable(),
+                TextColumn::make('scope')
+                    ->label(__('filament-bouncer::roles.table.scope'))
+                    ->numeric()
+                    ->sortable()
+                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
                 TextColumn::make('created_at')
                     ->label(__('filament-bouncer::roles.table.created'))
                     ->dateTime()
@@ -58,16 +55,13 @@ final class RolesTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label(__('filament-bouncer::roles.table.updated'))
-                    ->since()
-                    ->sortable(),
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->link()
-                    ->icon(null),
+                ViewAction::make(),
                 EditAction::make()
-                    ->link()
-                    ->icon(null)
                     ->visible(static fn (Model $record): bool => RoleResource::canEdit($record)),
                 ActionGroup::make([
                     DeleteAction::make()
@@ -84,19 +78,5 @@ final class RolesTable
             ->searchPlaceholder(__('filament-bouncer::roles.table.search'))
             ->defaultSort('name')
             ->emptyStateHeading(__('filament-bouncer::roles.table.empty'));
-    }
-
-    /**
-     * How many accounts hold the role.
-     *
-     * Counted through the pivot rather than a relation, because the role model is
-     * whatever the application configured and nothing promises the analyser that it
-     * carries Bouncer's traits.
-     */
-    private static function holders(Model $record): int
-    {
-        return DB::table(Models::table('assigned_roles'))
-            ->where('role_id', $record->getKey())
-            ->count();
     }
 }

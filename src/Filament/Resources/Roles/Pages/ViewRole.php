@@ -4,26 +4,18 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages;
 
-use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\FillsRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
-use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
-use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
-use ElPandaPe\FilamentBouncer\Support\Initials;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\BouncerFacade as Bouncer;
-use Silber\Bouncer\Database\Models;
 
 /**
  * What a role says, read in the shape it is written in.
@@ -95,45 +87,11 @@ final class ViewRole extends ViewRecord
                 Group::make()
                     ->columnSpan(['lg' => 1])
                     ->schema([
+                        $this->tenantSection(),
                         $this->orphansSection(),
-                        $this->holdersSection(),
                         $this->metadataSection(),
                     ]),
             ]);
-    }
-
-    /**
-     * Taking the role off one of its holders, armed from the holders card.
-     *
-     * The write goes through Bouncer rather than the relation, because the pivot row
-     * Bouncer keeps carries a scope column an `attach` never fills in; and it refuses
-     * the last holder of the way back in even when a request arms it by hand — the
-     * hidden button alone would be theatre.
-     */
-    public function retractRoleAction(): Action
-    {
-        return Action::make('retractRole')
-            ->label(__('filament-bouncer::roles.record.retract'))
-            ->requiresConfirmation()
-            ->action(function (array $arguments): void {
-                $holder = Models::user()->newQuery()->find($arguments['holder'] ?? null);
-
-                if (! $holder instanceof Model) {
-                    return;
-                }
-
-                /** @var string $name */
-                $name = $this->getRecord()->getAttribute('name');
-
-                $privileged = app(PrivilegedRole::class);
-
-                if ($privileged->isNamed($name) && $privileged->isLastHolder($holder)) {
-                    return;
-                }
-
-                Bouncer::retract($name)->from($holder);
-                Bouncer::refresh();
-            });
     }
 
     /**
@@ -192,10 +150,6 @@ final class ViewRole extends ViewRecord
     {
         return Section::make(__('filament-bouncer::roles.record.metadata'))
             ->schema([
-                TextEntry::make('scope')
-                    ->label(__('filament-bouncer::roles.record.scope'))
-                    ->numeric()
-                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
                 TextEntry::make('created_at')
                     ->label(__('filament-bouncer::roles.record.created'))
                     ->since(),
@@ -207,98 +161,28 @@ final class ViewRole extends ViewRecord
 
     private function identitySection(): Section
     {
-        // The analyser works out `view-string` by looking for the file among the paths
-        // the application renders from, and a package's namespaced view is never among
-        // them.
-        /** @var view-string $coverage */
-        $coverage = 'filament-bouncer::roles.coverage';
-
         return Section::make(__('filament-bouncer::roles.record.identity'))
+            ->description(__('filament-bouncer::roles.record.identity_note'))
             ->icon('heroicon-o-shield-check')
-            ->columns(3)
             ->schema([
                 TextEntry::make('name')
                     ->label(__('filament-bouncer::roles.record.name'))
                     ->badge()
-                    ->color('warning'),
+                    ->copyable(),
                 TextEntry::make('title')
-                    ->label(__('filament-bouncer::roles.record.title')),
-                TextEntry::make('holders')
-                    ->label(__('filament-bouncer::roles.record.holders'))
-                    ->state(fn (): int => $this->holdersCount()),
-                View::make($coverage)
-                    ->viewData(fn (): array => [
-                        'coverage' => RoleCoverage::for($this->getRecord(), app(CatalogRegistry::class)->current()),
-                        'detailed' => true,
-                    ])
-                    ->columnSpanFull(),
+                    ->label(__('filament-bouncer::roles.record.title'))
+                    ->placeholder(__('filament-bouncer::roles.record.title_empty')),
             ]);
     }
 
-    private function holdersSection(): Section
+    private function tenantSection(): Section
     {
-        /** @var view-string $card */
-        $card = 'filament-bouncer::roles.holders';
-
-        return Section::make(__('filament-bouncer::roles.record.holders_heading'))
+        return Section::make(__('filament-bouncer::roles.record.scope'))
             ->schema([
-                View::make($card)->viewData(fn (): array => ['holders' => $this->holders()]),
+                TextEntry::make('scope')
+                    ->hiddenLabel()
+                    ->numeric()
+                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
             ]);
-    }
-
-    private function holdersCount(): int
-    {
-        return DB::table(Models::table('assigned_roles'))
-            ->where('role_id', $this->getRecord()->getKey())
-            ->count();
-    }
-
-    /**
-     * The accounts holding this role, read through the pivot because the account model
-     * is whatever the application configured. The attributes are taken off the raw
-     * array rather than the accessors, so an account model without a name or an email
-     * answers null instead of throwing under `Model::shouldBeStrict()`.
-     *
-     * @return array<int, array{key: int|string, name: string, email: string|null, initials: string, removable: bool}>
-     */
-    private function holders(): array
-    {
-        $accounts = Models::user();
-        $assigned = Models::table('assigned_roles');
-
-        $records = $accounts->newQuery()
-            ->join($assigned, $assigned.'.entity_id', '=', $accounts->getQualifiedKeyName())
-            ->where($assigned.'.entity_type', $accounts->getMorphClass())
-            ->where($assigned.'.role_id', $this->getRecord()->getKey())
-            ->get([$accounts->getTable().'.*']);
-
-        /** @var string $roleName */
-        $roleName = $this->getRecord()->getAttribute('name');
-
-        $privileged = app(PrivilegedRole::class);
-        $guarded = $privileged->isNamed($roleName);
-        $holders = [];
-
-        foreach ($records as $record) {
-            $attributes = $record->getAttributes();
-
-            $name = $attributes['name'] ?? null;
-            $email = $attributes['email'] ?? null;
-
-            /** @var int|string $key */
-            $key = $record->getKey();
-
-            $shown = is_string($name) && $name !== '' ? $name : (is_string($email) ? $email : (string) $key);
-
-            $holders[] = [
-                'key' => $key,
-                'name' => $shown,
-                'email' => is_string($email) ? $email : null,
-                'initials' => Initials::of($shown),
-                'removable' => ! $guarded || ! $privileged->isLastHolder($record),
-            ];
-        }
-
-        return $holders;
     }
 }

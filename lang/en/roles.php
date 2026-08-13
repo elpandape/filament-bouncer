@@ -63,11 +63,11 @@ return [
     ],
 
     'table' => [
+        'scope' => 'Tenant',
         'title' => 'Title',
         'created' => 'Created',
         'name' => 'Role',
         'reaches_all' => 'Everything, through the wildcard',
-        'holders' => 'Accounts',
         'updated' => 'Changed',
         'empty' => 'No role has been composed yet.',
         'search' => 'Search by name or title',
@@ -75,11 +75,12 @@ return [
     ],
 
     'edit' => [
-        'holders' => '{0} 0 users with this role|{1} 1 user with this role|[2,*] :count users with this role',
         'updated' => 'updated :when',
     ],
 
     'record' => [
+        'identity_note' => 'The name the code asks by, and the one read on screen.',
+        'title_empty' => 'No title',
         'metadata' => 'Metadata',
         'scope' => 'Tenant',
         'scope_global' => 'Global',
@@ -103,7 +104,6 @@ return [
         'identity' => 'Identity',
         'name' => 'Name',
         'title' => 'Title',
-        'holders' => 'Users holding the role',
         'updated' => 'Updated',
         'created' => 'Created',
         'forbidden_heading' => 'Forbidden',
