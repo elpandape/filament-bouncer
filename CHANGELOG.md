@@ -7,6 +7,62 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.0.0] - 2026-08-13
+
+### Changed
+
+- **The catalogue is laid out as subjects against actions.** A row per subject and a column
+  per action, instead of a card per subject with a row per action. The question this screen
+  is opened with — may this role delete? — is now read down a column across every subject,
+  which is what an audit does; before it meant walking twenty-eight folds. The subject
+  column is pinned and the table scrolls, because the columns are the union of whatever any
+  policy declares and grow on their own: a row whose subject has left the screen cannot be
+  read.
+- **The stance is one box that cycles**, not three buttons side by side. Seven columns times
+  three would be twenty-one controls a row. The cost is the one the three buttons avoided —
+  reaching a denial by passing through a grant, a rule that exists on screen for a moment
+  and never on purpose — and it is paid off by Shift, which walks the cycle backwards and
+  reaches the denial in one step.
+- **Composing a role is one screen.** The three-step wizard was the answer to the old
+  layout's height; drawn as a matrix the whole catalogue fits beside the name, and the alta
+  is now the same screen as the edit rather than a second way of composing the same thing.
+  The review step goes with it, and that is a real loss taken knowingly: it was the last
+  screen before abilities were handed out.
+- **The record page reads what the role says, as tags**, instead of the grid over again
+  with everything disabled. A grid nobody can touch still has to draw every cell to answer
+  three things, and the three that matter read as faintly as the ones saying nothing.
+- **A subject names the policy its columns come from**, rather than the class of its model.
+  It is what makes the row decidable: its columns are the methods of that class and of no
+  other, so anybody wondering why a column is missing knows which file to open.
+
+### Added
+
+- **A cell already holding a narrowed rule is marked.** A grant to what its holder owns, or
+  to a single record, falls on exactly one cell — and this screen neither writes nor removes
+  it, so the box would otherwise read as an abstention on a role that can plainly do it. The
+  dot sits on the corner, the words go in the title, and the legend at the foot is drawn only
+  when some cell carries one.
+- **A shortcut for reading, on the row and on the corner**, plus clearing on the corner. It
+  is exclusive: it grants what it names and silences the rest of that row. Nothing is offered
+  for what withdraws or for the irreversible.
+- **The record page names the record a narrowed rule reaches**, and says when that record is
+  gone — a rule left pointing at nothing which no screen gave away before.
+- **The record page warns about what the next `--prune` would take**, counting only the
+  doomed rules: reading the same alarm over a row on its way out and over one in no danger is
+  how people learn to ignore the alarm.
+
+### Removed
+
+- The folded sections and their threshold, the three-preset menu, and the segmented control.
+  All three were answers to a layout that no longer exists.
+
+### Note on upgrading
+
+**The names abilities are stored under have not changed**, so no row in anybody's database
+moves. What breaks is the public API of the field: `AbilityGrid::getSections()` returns a
+different shape, and `getOpenByDefault()`, `getCollapseLabel()` and the old `getPresets()`
+are gone. Anything overriding the grid's view will need rewriting.
+
 ## [5.4.0] - 2026-08-12
 
 ### Changed
