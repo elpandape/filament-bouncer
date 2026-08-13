@@ -11,6 +11,7 @@ use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
 use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
+use ElPandaPe\FilamentBouncer\Store\Diagnosis;
 use ElPandaPe\FilamentBouncer\Support\Ownership;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
@@ -33,6 +34,11 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         $this->app->singleton(CatalogRegistry::class);
 
         $this->app->singleton(AbilityStore::class);
+
+        // With a memory that lasts one request: diagnosing a row costs queries, the listing's
+        // health column asks twice per row and the widget twice per table. `scoped` is what keeps
+        // that memory from outliving the request that built it.
+        $this->app->scoped(Diagnosis::class);
     }
 
     public function boot(): void
