@@ -7,6 +7,63 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [7.0.0] - 2026-08-13
+
+The abilities screen is rebuilt around the only questions it can answer that no other screen
+can: whether a stored rule is sound, and what the Gate says about it right now. Nothing that
+is written down changes — no ability is renamed, no row is touched, and the reconciliation
+behaves exactly as before. What goes is a set of classes the screen no longer needs, which is
+what makes this a major bump.
+
+### Added
+
+- **A health report on every rule.** Four things that are true in the store and that nothing
+  else detects: a rule written twice, one naming a model that no longer loads, one fenced to
+  a record that has been deleted, and one carrying a tenant that hides it from the rest of
+  the system. The listing carries one icon saying whether there is anything and how bad; the
+  record page asks the four questions and each answer carries the fact inside it — a
+  "duplicate" that does not say **which** row sends the reader off to look for it.
+- **A probe on the record page.** Ask what the Gate answers, for any role or account, right
+  now. That a role holds a rule and that the Gate says yes to it are not the same thing: a
+  denial from another role wins, the wildcard grants what nobody wrote down, and a fenced
+  rule only answers about the record it fences. Without it, the only way to check a fenced
+  rule is to hand it out and watch.
+- **A health widget**, `ElPandaPe\FilamentBouncer\Filament\Widgets\AbilityHealth`, counting
+  each ailment across the whole table with every figure opening its rows. **The plugin does
+  not register it**: doing so would put it on your dashboard uninvited and add a subject to
+  your catalogue, turning `--check` red until you reconcile. Register it yourself when you
+  want it — the README says how.
+- **A title that follows the name it is derived from**, on both the roles form and the
+  abilities one. It offers what Bouncer would derive, locked, with a button that hands it
+  over to whoever wants to write their own: a field left blank does not say what it will end
+  up holding, and one that keeps rewriting itself cannot be trusted with what you wrote.
+- **A `tenancy` config key.** It decides whether the tenant is part of the abilities screen's
+  vocabulary — a column, a field, an entry — or simply not there. Left `null` it asks the
+  panel whether Filament's own tenancy is turned on, so an installation that does not scope
+  its rows needs to set nothing and is never told its rows are anomalous.
+
+### Changed
+
+- **The action and the model are picked, not typed.** Both come from what the catalogue
+  already knows, the model reads by its label and never by its class name, and a rule the
+  store already holds is refused before it is written. Whoever needs a name the catalogue
+  does not carry can still write one.
+- **The fenced record is named through the resource that titles it**, falling back to its key
+  where the panel shows no resource for that model. An id on its own does not say what the
+  rule reaches, which is the one thing worth checking before handing it out.
+- **The model and the record are one column**, and the reach only speaks when it is not the
+  ordinary one. Saying "all records" under nine rows in ten was drowning the two that are
+  fenced.
+
+### Removed
+
+- **The composing wizard, the living sentence, the holders card and the action cards.** They
+  answered questions that the roles screen and the account's own page already answer. With
+  them go `Filament\Resources\Abilities\Schemas\NarrowAbility`, `Filament\Forms\AbilityHolders`,
+  `Filament\Forms\ActionCards`, `Filament\Concerns\PresentsAbility`, `Support\AbilityFacts`,
+  `Support\Initials` and `Store\Reach`, along with their views. **If your application
+  references any of them, that is the upgrade.** Nothing else in the public API moves.
+
 ## [6.3.2] - 2026-08-13
 
 ### Removed
