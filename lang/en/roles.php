@@ -111,6 +111,8 @@ return [
 
     'relation' => [
         'title' => 'Roles',
+        'role' => 'Role',
+        'view' => 'Open',
         'assign' => 'Assign a role',
         'assign_submit' => 'Assign',
         'retract' => 'Take away',

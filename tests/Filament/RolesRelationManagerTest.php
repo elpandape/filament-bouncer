@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Filament\RelationManagers\RolesRelationManager;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\Users\Pages\ViewUser;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Actions\Action;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -196,4 +198,22 @@ test('the tab is called what it holds', function (): void {
     rolesTab(tabbedAccount())
         ->assertSee(__('filament-bouncer::roles.relation.title'))
         ->assertSee(__('filament-bouncer::roles.relation.empty'));
+});
+
+test('a row on the tab opens the role it names', function (): void {
+    signInAsRoleManager();
+
+    $account = tabbedAccount();
+    $editor = tabbedRole();
+
+    Bouncer::assign('editor')->to($account);
+    Bouncer::refresh();
+
+    // The row says the name and the title and nothing about what the role may do, so without this
+    // reading that means going to the roles listing and finding the row again by hand.
+    rolesTab($account)
+        ->assertActionExists(
+            TestAction::make('view')->table($editor),
+            checkActionUsing: fn (Action $action): bool => $action->getUrl() === RoleResource::getUrl('view', ['record' => $editor]),
+        );
 });

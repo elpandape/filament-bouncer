@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\RelationManagers;
 
 use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -136,6 +137,14 @@ final class RolesRelationManager extends RelationManager
                     }),
             ])
             ->recordActions([
+                // The row says the role's name and its title, and nothing about what it may do.
+                // That lives one screen away, and without a way through, reading it means going
+                // to the roles listing and finding the row again by hand.
+                Action::make('view')
+                    ->label(__('filament-bouncer::roles.relation.view'))
+                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->url(static fn (Model $record): string => RoleResource::getUrl('view', ['record' => $record]))
+                    ->visible(static fn (Model $record): bool => RoleResource::canView($record)),
                 Action::make('retract')
                     ->label(__('filament-bouncer::roles.relation.retract'))
                     ->requiresConfirmation()
