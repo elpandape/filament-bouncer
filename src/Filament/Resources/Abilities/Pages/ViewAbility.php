@@ -18,9 +18,10 @@ final class ViewAbility extends ViewRecord
     /**
      * The reconciliation's answer about this row stands where a delete button would have. That is
      * the trade the screen makes: it will not offer to take a row away, so it owes the reader an
-     * account of how the row does go.
+     * account of how the row does go — where there is one to give. A row the reconciliation never
+     * spoke for is going nowhere, and says so with nothing.
      */
-    public function getSubheading(): string
+    public function getSubheading(): ?string
     {
         return Declaration::of($this->getRecord())->note();
     }

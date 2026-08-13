@@ -98,7 +98,6 @@ return [
         'apart' => 'outside the catalogue',
         'declared_note' => 'The code declares this ability, so the reconciliation keeps it.',
         'drifted_note' => 'Nothing declares this ability any more. The next filament-bouncer:reconcile --prune takes it away, and every grant pointing at it with it.',
-        'apart_note' => 'This rule was never the reconciliation\'s to declare, so --check does not fail on it and --prune does not take it away.',
     ],
 
     'health' => [

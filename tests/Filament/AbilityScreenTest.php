@@ -11,6 +11,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ListAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ViewAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
 use ElPandaPe\FilamentBouncer\Store\Ailment;
+use ElPandaPe\FilamentBouncer\Store\Declaration;
 use ElPandaPe\FilamentBouncer\Store\Diagnosis;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
@@ -351,6 +352,16 @@ test('the record page reads the rule and asks the four questions about it', func
         ->assertSee(Ailment::Twin->question())
         ->assertSee(Ailment::GhostModel->question())
         ->assertOk();
+});
+
+test('the record page accounts for how a row goes, and says nothing over one that goes nowhere', function (): void {
+    // Fenced to one record, which is a shape the reconciliation never writes and therefore never
+    // speaks for — the one state with no account to give, against a declared row, which has one.
+    $apart = stored(['entity_type' => Post::class, 'entity_id' => Post::forceCreate(['title' => 'Fenced'])->getKey()]);
+
+    expect(Declaration::of($apart))->toBe(Declaration::Apart)
+        ->and(Declaration::of($apart)->note())->toBeNull()
+        ->and(Declaration::of(declaredAbility())->note())->not->toBeNull();
 });
 
 test('the probe offers the roles beside the accounts, and asks about a rule with no model', function (): void {

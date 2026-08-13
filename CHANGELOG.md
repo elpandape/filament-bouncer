@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [7.0.1] - 2026-08-13
+
+### Removed
+
+- The sentence under the heading of a rule the reconciliation never spoke for. It said that
+  `--check` does not fail on it and `--prune` does not take it away — a sentence about two
+  things that are not going to happen. The badge already names the state, and reading an
+  explanation over a row in no danger is how people learn to skip the one over a row that is.
+  `Store\Declaration::note()` now answers `null` for that state.
+
 ## [7.0.0] - 2026-08-13
 
 The abilities screen is rebuilt around the only questions it can answer that no other screen

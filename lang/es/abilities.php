@@ -98,7 +98,6 @@ return [
         'apart' => 'fuera del catálogo',
         'declared_note' => 'El código declara esta habilidad, así que la reconciliación la conserva.',
         'drifted_note' => 'Ya no la declara nadie. El próximo filament-bouncer:reconcile --prune se la lleva, y con ella cada concesión que la apuntaba.',
-        'apart_note' => 'Esta regla nunca fue de la reconciliación, así que --check no falla por ella y --prune no se la lleva.',
     ],
 
     'health' => [

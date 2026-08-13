@@ -21,7 +21,7 @@ final class EditAbility extends EditRecord
 {
     protected static string $resource = AbilityResource::class;
 
-    public function getSubheading(): string
+    public function getSubheading(): ?string
     {
         return Declaration::of($this->getRecord())->note();
     }

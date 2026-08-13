@@ -66,11 +66,19 @@ enum Declaration: string
     }
 
     /**
-     * The same answer at the length a record page has room for.
+     * The same answer at the length a record page has room for, for the two states that have
+     * something to say.
+     *
+     * A row the reconciliation never spoke for has nothing: its note said that `--check` does not
+     * fail on it and `--prune` does not take it, which is a sentence about two things that are not
+     * going to happen. The badge already names the state, and reading an explanation over a row in
+     * no danger is how people learn to skip the one over a row that is.
      */
-    public function note(): string
+    public function note(): ?string
     {
-        return __('filament-bouncer::abilities.declared.'.$this->value.'_note');
+        return $this === self::Apart
+            ? null
+            : (string) __('filament-bouncer::abilities.declared.'.$this->value.'_note');
     }
 
     public function color(): string
