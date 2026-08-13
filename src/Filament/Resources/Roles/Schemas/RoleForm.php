@@ -13,6 +13,7 @@ use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Tenancy;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
@@ -67,6 +68,7 @@ final class RoleForm
                         // writing it by hand makes rows the rest of the system does not
                         // expect — and lets two roles share a name.
                         Section::make(__('filament-bouncer::roles.record.scope'))
+                            ->visible(fn (): bool => resolve(Tenancy::class)->inUse())
                             ->schema([
                                 TextEntry::make('scope')
                                     ->hiddenLabel()

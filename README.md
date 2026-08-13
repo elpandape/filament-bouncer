@@ -443,6 +443,7 @@ The title Bouncer stores alongside each ability follows the locale in force when
 | Key | What it decides |
 |---|---|
 | `panel` | The panel whose components declare the catalogue. `null` uses the default one |
+| `tenancy` | Whether the tenant is part of the screens' vocabulary at all. `null` asks the panel |
 | `navigation.icon` | The icon of the roles resource. `null` leaves it without one |
 | `navigation.group` | The navigation group it belongs to. `null` leaves it ungrouped |
 | `navigation.sort` | Its position. `null` leaves Filament's own ordering |
@@ -458,6 +459,13 @@ The title Bouncer stores alongside each ability follows the locale in force when
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.
+
+`tenancy` decides whether Bouncer's tenant column is drawn at all — the column on both
+listings, the section on both record pages, the entry on both forms — and whether a row
+carrying one is reported as hidden from the rest of the system. Left `null` it asks the panel
+whether Filament's own tenancy is turned on, so an installation that does not scope its rows
+needs to set nothing and is never shown a column every row answers the same way. Set it to
+`true` where you scope Bouncer's rows by something Filament does not know about.
 
 ### Ownership
 

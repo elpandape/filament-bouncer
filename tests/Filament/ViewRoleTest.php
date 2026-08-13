@@ -160,7 +160,9 @@ test('the record of an ordinary role offers the way in', function (): void {
         ->assertActionVisible(TestAction::make('edit'));
 });
 
-test('the identity is read as entries, and the tenant beside it', function (): void {
+test('the identity is read as entries, and the tenant beside it where there is one', function (): void {
+    config()->set('filament-bouncer.tenancy', true);
+
     signInAsRoleManager();
 
     $role = readRole();
@@ -171,6 +173,16 @@ test('the identity is read as entries, and the tenant beside it', function (): v
         ->assertSee(__('filament-bouncer::roles.record.metadata'))
         ->assertSee(__('filament-bouncer::roles.record.updated'))
         ->assertSee(__('filament-bouncer::roles.record.created'));
+});
+
+test('the tenant is not read at all where the installation does not scope its rows', function (): void {
+    config()->set('filament-bouncer.tenancy', false);
+
+    signInAsRoleManager();
+
+    livewire(ViewRole::class, ['record' => readRole()->getKey()])
+        ->assertSee(__('filament-bouncer::roles.record.identity'))
+        ->assertDontSee(__('filament-bouncer::roles.record.scope'));
 });
 
 test('a reading page offers no save inside the summary bar', function (): void {

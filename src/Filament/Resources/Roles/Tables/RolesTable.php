@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables;
 
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Support\Tenancy;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -47,7 +48,9 @@ final class RolesTable
                     ->label(__('filament-bouncer::roles.table.scope'))
                     ->numeric()
                     ->sortable()
-                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
+                    ->placeholder(__('filament-bouncer::roles.record.scope_global'))
+                    // A column every row answers the same way is a column that only costs width.
+                    ->visible(fn (): bool => resolve(Tenancy::class)->inUse()),
                 TextColumn::make('created_at')
                     ->label(__('filament-bouncer::roles.table.created'))
                     ->dateTime()

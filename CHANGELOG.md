@@ -7,6 +7,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [7.1.0] - 2026-08-13
+
+### Changed
+
+- **The roles screen leaves the tenant out where the installation does not scope its rows** —
+  the column on the listing, the section on the record page and the entry on the form, the
+  three of them. This is what the abilities screen already did, and the reason is the same:
+  where nothing is scoped every role answers with the same blank, and a column every row
+  answers identically only costs width. Nothing needs setting for it: the `tenancy` key left
+  `null` asks the panel whether Filament's own tenancy is turned on. Set it to `true` to keep
+  the tenant on screen regardless.
+
 ## [7.0.1] - 2026-08-13
 
 ### Removed

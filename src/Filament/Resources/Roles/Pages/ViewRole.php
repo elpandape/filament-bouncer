@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Filament\Concerns\FillsRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
+use ElPandaPe\FilamentBouncer\Support\Tenancy;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -168,9 +169,15 @@ final class ViewRole extends ViewRecord
             ]);
     }
 
+    /**
+     * The tenant is drawn only where the installation scopes its rows. Where it does not, every
+     * role carries the same nothing, and a section saying so on every record page is a heading
+     * that never varies.
+     */
     private function tenantSection(): Section
     {
         return Section::make(__('filament-bouncer::roles.record.scope'))
+            ->visible(fn (): bool => resolve(Tenancy::class)->inUse())
             ->schema([
                 TextEntry::make('scope')
                     ->hiddenLabel()

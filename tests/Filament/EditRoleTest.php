@@ -196,6 +196,8 @@ test('the header no longer offers deleting, which lives behind the kebab of the 
 });
 
 test('the screen reads what is known about the role beside what it may do', function (): void {
+    config()->set('filament-bouncer.tenancy', true);
+
     signInAsRoleManager();
 
     livewire(EditRole::class, ['record' => editedRole()->getKey()])

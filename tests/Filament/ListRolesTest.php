@@ -188,6 +188,8 @@ test('the table offers nothing to a selection', function (): void {
 });
 
 test('the listing names the role, its title and the tenant it belongs to', function (): void {
+    config()->set('filament-bouncer.tenancy', true);
+
     signInAsRoleManager();
 
     $role = listedRole();
@@ -196,4 +198,17 @@ test('the listing names the role, its title and the tenant it belongs to', funct
         ->assertCanSeeTableRecords([$role])
         ->assertSee(__('filament-bouncer::roles.table.title'))
         ->assertSee(__('filament-bouncer::roles.table.scope'));
+});
+
+test('the listing carries no tenant column where the installation does not scope its rows', function (): void {
+    config()->set('filament-bouncer.tenancy', false);
+
+    signInAsRoleManager();
+
+    $role = listedRole();
+
+    livewire(ListRoles::class)
+        ->assertCanSeeTableRecords([$role])
+        ->assertSee(__('filament-bouncer::roles.table.title'))
+        ->assertDontSee(__('filament-bouncer::roles.table.scope'));
 });
