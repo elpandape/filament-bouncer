@@ -7,6 +7,29 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [7.2.0] - 2026-08-13
+
+### Added
+
+- **The wildcard row is padlocked**, the same way the roles screen padlocks the role that holds
+  everything, and for the same reason: `*` over `*` is the pair `PrivilegedRole` asks the
+  clipboard about to know whether that role still reaches everything, and the very row it writes
+  back to restore it. Renaming that row, or pointing it at a model, takes the role's reach away
+  without the role being touched — a way back in that can be edited is not one. Only that pair
+  is locked: `*` over one model grants a great deal but nothing depends on it to get back in,
+  and this screen exists to be able to correct it.
+- **A row on the roles tab of an account opens the role it names.** The row says the name and
+  the title and nothing about what the role may do; without a way through, reading that meant
+  going to the roles listing and finding the row again by hand.
+- **A test that fails when a screen would show a key instead of a word.** It reads every
+  `filament-bouncer::` name written out in full across the source and the views, and asks the
+  language files for the keys and the view finder for the views.
+
+### Fixed
+
+- **The role column on an account's roles tab showed its translation key** rather than a word,
+  in both tongues. It is the kind of thing only the new test above catches on its own.
+
 ## [7.1.0] - 2026-08-13
 
 ### Changed
