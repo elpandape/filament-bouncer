@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
@@ -213,41 +212,6 @@ test('a reading page offers no save inside the summary bar', function (): void {
         ->assertDontSeeHtml('fb-summary-save');
 });
 
-test('a role that forbids nothing says so, and says why it matters', function (): void {
-    signInAsRoleManager();
-
-    livewire(ViewRole::class, ['record' => readRole()->getKey()])
-        ->assertSee(__('filament-bouncer::roles.record.forbidden_empty'))
-        ->assertSee(__('filament-bouncer::roles.record.forbidden_note'));
-});
-
-test('a denial is listed on the card with its action and its subject', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    Bouncer::forbid($role)->to('delete', Post::class);
-    Bouncer::refresh();
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSeeHtml('fb-badge-dng')
-        ->assertDontSee(__('filament-bouncer::roles.record.forbidden_empty'));
-});
-
-test('a denial covering the whole model is listed as the manage row, not as a method name', function (): void {
-    signInAsRoleManager();
-
-    $role = readRole();
-    Bouncer::forbid($role)->to(Ability::MANAGE_NAME, Post::class);
-    Bouncer::refresh();
-
-    livewire(ViewRole::class, ['record' => $role->getKey()])
-        ->assertSeeHtmlInOrder([
-            'fb-badge-dng',
-            __('filament-bouncer::roles.form.manage'),
-            'fb-forbidden-subject',
-        ]);
-});
-
 test('the people holding the role are on its page', function (): void {
     signInAsRoleManager();
 
@@ -350,9 +314,11 @@ test('a narrowed rule names the record it reaches, and the one it owns says so',
         ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
             $narrowed = array_column($entry->getNarrowed(), null, 'action');
 
-            return array_column($narrowed['view']['records'] ?? [], 'title') === ['Quipu']
-                && ($narrowed['update']['owned'] ?? false) === true
-                && ($narrowed['update']['records'] ?? null) === [];
+            $view = $narrowed['view'] ?? null;
+            $update = $narrowed['update'] ?? null;
+
+            return $view !== null && array_column($view['records'], 'title') === ['Quipu']
+                && $update !== null && $update['owned'] && $update['records'] === [];
         })
         ->assertSee(__('filament-bouncer::roles.record.narrowed_heading'))
         ->assertSee(__('filament-bouncer::roles.record.owned'));
@@ -373,7 +339,7 @@ test('a narrowed rule whose record is gone says so instead of hiding it', functi
         ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
             $records = array_merge([], ...array_column($entry->getNarrowed(), 'records'));
 
-            return count($records) === 1 && ($records[0]['missing'] ?? false) === true;
+            return count($records) === 1 && $records[0]['missing'];
         })
         ->assertSee(__('filament-bouncer::roles.record.record_gone'));
 });
@@ -392,7 +358,9 @@ test('what the role is silent about is spelled out while the names still fit', f
     signInAsRoleManager();
 
     $role = readRole();
-    grant($role, [['viewAny', Post::class], ['viewAny', Models::classname(Role::class)]]);
+    grant($role, [['viewAny', Post::class]]);
+    Bouncer::allow($role)->to('viewAny', Models::classname(Role::class));
+    Bouncer::refresh();
 
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSchemaComponentExists('abilities', checkComponentUsing: fn (AbilityTags $entry): bool => $entry->spellsSilent())

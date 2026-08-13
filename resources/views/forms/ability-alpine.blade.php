@@ -49,44 +49,14 @@ apply(subject, actions, offered) {
 clear(subject, offered) {
     this.apply(subject, [], offered)
 },
-granted(subject) {
-    return Object.values(this.state?.[subject] ?? {}).filter((s) => s === 'granted').length
-},
-forbidden(subject) {
-    return Object.values(this.state?.[subject] ?? {}).filter((s) => s === 'forbidden').length
-},
-{{-- The count is only known here, and the words for one and for many are only known
-     there, so both forms come along and this picks. --}}
-words: {
-    granted: { one: @js(trans_choice('filament-bouncer::roles.summary.granted', 1)), many: @js(trans_choice('filament-bouncer::roles.summary.granted', 2, ['count' => '%n'])) },
-    forbidden: { one: @js(trans_choice('filament-bouncer::roles.summary.forbidden', 1)), many: @js(trans_choice('filament-bouncer::roles.summary.forbidden', 2, ['count' => '%n'])) },
-    neutral: { one: @js(trans_choice('filament-bouncer::roles.summary.neutral', 1)), many: @js(trans_choice('filament-bouncer::roles.summary.neutral', 2, ['count' => '%n'])) },
-    badge: { one: @js(trans_choice('filament-bouncer::roles.form.forbidden_count', 1)), many: @js(trans_choice('filament-bouncer::roles.form.forbidden_count', 2, ['count' => '%n'])) },
-},
-say(kind, count) {
-    return count === 1 ? this.words[kind].one : this.words[kind].many.replace('%n', count)
-},
 {{-- What a tab has to show on itself: a group is written along with the three others in
      one save, so without this a role reaching a dangerous page reads as harmless from
      whichever tab happens to be open. --}}
 grantedIn(keys) {
-    return keys.reduce((total, key) => total + this.granted(key), 0)
+    return keys.reduce((total, key) => total + Object.values(this.state?.[key] ?? {}).filter((s) => s === 'granted').length, 0)
 },
 tallyIn(keys) {
     const total = keys.reduce((sum, key) => sum + Object.keys(this.state?.[key] ?? {}).length, 0)
 
     return this.grantedIn(keys) + ' / ' + total
-},
-tally() {
-    let granted = 0, forbidden = 0, neutral = 0
-
-    for (const actions of Object.values(this.state ?? {})) {
-        for (const stance of Object.values(actions ?? {})) {
-            if (stance === 'granted') { granted++ }
-            else if (stance === 'forbidden') { forbidden++ }
-            else { neutral++ }
-        }
-    }
-
-    return { granted, forbidden, neutral }
 },

@@ -80,6 +80,9 @@ return [
     ],
 
     'record' => [
+        'metadata' => 'Metadatos',
+        'scope' => 'Tenant',
+        'scope_global' => 'Global',
         'abilities_heading' => 'Habilidades',
         'abilities_note' => 'Lo que este rol concede y lo que prohíbe, y nada más.',
         'orphans_heading' => 'Reglas huérfanas',

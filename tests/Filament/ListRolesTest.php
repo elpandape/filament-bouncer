@@ -7,7 +7,6 @@ use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables\RolesTable;
-use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Table;
@@ -121,16 +120,6 @@ test('the listing announces itself and offers searching by name or title', funct
         ->assertSee(__('filament-bouncer::roles.table.search'));
 });
 
-test('the foot of the table names the catalogue every bar is drawn against', function (): void {
-    signInAsRoleManager();
-
-    listedRole();
-
-    livewire(ListRoles::class)
-        ->assertSeeHtml('fb-catalog-legend')
-        ->assertSee(__('filament-bouncer::roles.table.legend', ['total' => listedCatalogCells()]));
-});
-
 test('a row still offers being read when it may not be changed', function (): void {
     config()->set('filament-bouncer.privileged_role', 'super-admin');
 
@@ -148,43 +137,6 @@ test('the actions lead to pages of their own instead of opening a modal', functi
     livewire(ListRoles::class)
         ->assertActionHasUrl(TestAction::make('view')->table($role), RoleResource::getUrl('view', ['record' => $role]))
         ->assertActionHasUrl(TestAction::make('edit')->table($role), RoleResource::getUrl('edit', ['record' => $role]));
-});
-
-test('the reach bar reads what the role holds', function (): void {
-    signInAsRoleManager();
-
-    $role = listedRole();
-    grant($role, [['viewAny', Post::class]]);
-
-    livewire(ListRoles::class)
-        ->assertSeeHtml('data-granted="1"')
-        ->assertSeeHtml('data-forbidden="0"')
-        ->assertSeeHtml('data-reaches-all="false"');
-});
-
-test('the reach bar counts a denial apart from a grant', function (): void {
-    signInAsRoleManager();
-
-    $role = listedRole();
-    grant($role, [['viewAny', Post::class]]);
-    Bouncer::forbid($role)->to('delete', Post::class);
-    Bouncer::refresh();
-
-    livewire(ListRoles::class)
-        ->assertSeeHtml('data-granted="1"')
-        ->assertSeeHtml('data-forbidden="1"');
-});
-
-test('a role reaching everything through the wildcard is drawn full and says so', function (): void {
-    signInAsRoleManager();
-
-    $role = listedRole();
-    Bouncer::allow($role)->everything();
-    Bouncer::refresh();
-
-    livewire(ListRoles::class)
-        ->assertSeeHtml('data-reaches-all="true"')
-        ->assertSee(__('filament-bouncer::roles.table.reaches_all'));
 });
 
 test('a role says how many accounts hold it', function (): void {
@@ -253,4 +205,16 @@ test('the table offers nothing to a selection', function (): void {
 
     expect($table->getToolbarActions())->toBeEmpty()
         ->and($table->isSelectionEnabled())->toBeFalse();
+});
+
+test('the listing names the role, its title and how many hold it', function (): void {
+    signInAsRoleManager();
+
+    $role = listedRole();
+    $role->forceFill(['title' => 'Editorial'])->save();
+
+    livewire(ListRoles::class)
+        ->assertCanSeeTableRecords([$role])
+        ->assertSee('Editorial')
+        ->assertSee(__('filament-bouncer::roles.table.holders'));
 });

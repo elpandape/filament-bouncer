@@ -7,6 +7,31 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.1.0] - 2026-08-13
+
+### Changed
+
+- **The record page is read wide on the left and narrow on the right.** What the role says
+  takes the width, because it is what the page is opened for; the warning about what it is
+  losing goes in the narrow column beside the metadata, which is where a warning belongs — it
+  does not need the width of the content, it needs to be where people look. The dates move
+  out of the identity card and into a metadata one, along with the tenant.
+- **The listing names the role, its title and how many hold it.** The bar drawing the
+  catalogue to scale on every row is gone, and so is the legend counting what it was drawn
+  against. A figure summing up a whole catalogue tells nobody whether this role may delete
+  accounts, which is what anybody comes to a listing to find out; the record page says it
+  subject by subject and is one click away.
+
+### Removed
+
+- **The three figures under the grid.** "Nothing granted · nothing forbidden · twenty-two
+  undefined" counts cells, and the number of cells is a fact about the catalogue rather than
+  an answer about the role. The save and the way out stay where they were.
+- **The denial badge beside each subject**, which said in a corner what the row already says
+  in red.
+- **The denials card of the record page.** The tags say what is forbidden, in red, on the
+  subject it is forbidden about; a card listing them again was the same answer twice.
+
 ## [6.0.0] - 2026-08-13
 
 ### Changed

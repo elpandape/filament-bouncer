@@ -66,8 +66,6 @@
                                 @endif
                             </span>
 
-                            <span class="fb-subject-forbidden" x-show="forbidden(@js($row['key'])) > 0" x-text="say('badge', forbidden(@js($row['key'])))" x-cloak></span>
-
                             {{-- One shortcut per row, to the right of the name: in a column
                                  repeated once per subject, every extra control is paid for
                                  as many times as there are rows. Clearing belongs to the

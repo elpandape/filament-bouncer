@@ -235,21 +235,6 @@ test('a shortcut is offered on the row and on the corner, and clearing only on t
         ->assertSee(__('filament-bouncer::roles.grid.clear'));
 });
 
-test('the footer wraps its three figures in chips', function (): void {
-    signIn();
-
-    livewire(GridHost::class)
-        ->assertSeeHtml('fb-summary-chip fb-summary-chip-granted')
-        ->assertSeeHtml('fb-summary-chip fb-summary-chip-forbidden')
-        ->assertSeeHtml('fb-summary-chip fb-summary-chip-neutral');
-});
-
-test('the badge of denials is in the markup for alpine to count', function (): void {
-    signIn();
-
-    livewire(GridHost::class)->assertSeeHtml('fb-subject-forbidden');
-});
-
 test('a role holding nothing has no cell reached by anything broader', function (): void {
     signIn();
 
@@ -260,14 +245,6 @@ test('the summary of a grid nobody flagged carries no buttons', function (): voi
     signIn();
 
     livewire(GridHost::class)->assertDontSeeHtml('fb-summary-save');
-});
-
-test('what it all adds up to stays in sight', function (): void {
-    signIn();
-
-    livewire(GridHost::class)
-        ->assertSeeHtml('class="fb-summary"')
-        ->assertSeeHtml(trans_choice('filament-bouncer::roles.summary.granted', 1));
 });
 
 test('a door is drawn as a line, not as a column', function (): void {

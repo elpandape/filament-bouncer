@@ -4,22 +4,19 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages;
 
-use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\FillsRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
-use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
-use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Initials;
-use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
@@ -77,15 +74,32 @@ final class ViewRole extends ViewRecord
         ]);
     }
 
+    /**
+     * Wide on the left, narrow on the right.
+     *
+     * What the role says takes the width, because it is what the page is opened for. The
+     * warning about what it is losing goes in the narrow column beside the metadata: a
+     * warning does not need the width of the content, it needs to be where people look.
+     */
     public function infolist(Schema $schema): Schema
     {
-        return $schema->components([
-            $this->identitySection(),
-            $this->abilitiesSection(),
-            $this->orphansSection(),
-            $this->forbiddenSection(),
-            $this->holdersSection(),
-        ]);
+        return $schema
+            ->columns(4)
+            ->components([
+                Group::make()
+                    ->columnSpan(['lg' => 3])
+                    ->schema([
+                        $this->identitySection(),
+                        $this->abilitiesSection(),
+                    ]),
+                Group::make()
+                    ->columnSpan(['lg' => 1])
+                    ->schema([
+                        $this->orphansSection(),
+                        $this->holdersSection(),
+                        $this->metadataSection(),
+                    ]),
+            ]);
     }
 
     /**
@@ -167,8 +181,28 @@ final class ViewRole extends ViewRecord
     private function orphansSection(): Section
     {
         return Section::make(__('filament-bouncer::roles.record.orphans_heading'))
-            ->schema([OrphanChips::make('orphans')->hiddenLabel()])
-            ->columnSpanFull();
+            ->icon('heroicon-o-link-slash')
+            ->schema([OrphanChips::make('orphans')->hiddenLabel()]);
+    }
+
+    /**
+     * When and what tenant, which is what is known about the role rather than what it does.
+     */
+    private function metadataSection(): Section
+    {
+        return Section::make(__('filament-bouncer::roles.record.metadata'))
+            ->schema([
+                TextEntry::make('scope')
+                    ->label(__('filament-bouncer::roles.record.scope'))
+                    ->numeric()
+                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
+                TextEntry::make('created_at')
+                    ->label(__('filament-bouncer::roles.record.created'))
+                    ->since(),
+                TextEntry::make('updated_at')
+                    ->label(__('filament-bouncer::roles.record.updated'))
+                    ->since(),
+            ]);
     }
 
     private function identitySection(): Section
@@ -192,29 +226,12 @@ final class ViewRole extends ViewRecord
                 TextEntry::make('holders')
                     ->label(__('filament-bouncer::roles.record.holders'))
                     ->state(fn (): int => $this->holdersCount()),
-                TextEntry::make('updated_at')
-                    ->label(__('filament-bouncer::roles.record.updated'))
-                    ->since(),
-                TextEntry::make('created_at')
-                    ->label(__('filament-bouncer::roles.record.created'))
-                    ->since(),
                 View::make($coverage)
                     ->viewData(fn (): array => [
                         'coverage' => RoleCoverage::for($this->getRecord(), app(CatalogRegistry::class)->current()),
                         'detailed' => true,
                     ])
                     ->columnSpanFull(),
-            ]);
-    }
-
-    private function forbiddenSection(): Section
-    {
-        /** @var view-string $card */
-        $card = 'filament-bouncer::roles.forbidden-card';
-
-        return Section::make(__('filament-bouncer::roles.record.forbidden_heading'))
-            ->schema([
-                View::make($card)->viewData(fn (): array => ['forbidden' => $this->forbidden()]),
             ]);
     }
 
@@ -234,35 +251,6 @@ final class ViewRole extends ViewRecord
         return DB::table(Models::table('assigned_roles'))
             ->where('role_id', $this->getRecord()->getKey())
             ->count();
-    }
-
-    /**
-     * The denials this role holds, said in the words of the catalogue.
-     *
-     * @return array<int, array{action: string, subject: string}>
-     */
-    private function forbidden(): array
-    {
-        $state = app(RoleAbilities::class)->toFormState($this->getRecord());
-        $labels = app(Labels::class);
-        $rows = [];
-
-        foreach (app(CatalogRegistry::class)->current()->subjects as $key => $subject) {
-            foreach (array_keys($subject->cells()) as $action) {
-                if (($state[$key][$action] ?? '') !== Stance::Forbidden->value) {
-                    continue;
-                }
-
-                $rows[] = [
-                    'action' => $action === Ability::MANAGE_ACTION
-                        ? __('filament-bouncer::roles.form.manage')
-                        : $labels->action($action),
-                    'subject' => $subject->label,
-                ];
-            }
-        }
-
-        return $rows;
     }
 
     /**

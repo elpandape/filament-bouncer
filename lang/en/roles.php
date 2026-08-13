@@ -80,6 +80,9 @@ return [
     ],
 
     'record' => [
+        'metadata' => 'Metadata',
+        'scope' => 'Tenant',
+        'scope_global' => 'Global',
         'abilities_heading' => 'Abilities',
         'abilities_note' => 'What this role grants and what it forbids, and nothing else.',
         'orphans_heading' => 'Orphan rules',
