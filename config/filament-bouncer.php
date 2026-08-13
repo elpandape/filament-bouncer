@@ -12,6 +12,16 @@ return [
     'panel' => null,
 
     /*
+     * Whether this installation scopes Bouncer's rows to a tenant.
+     *
+     * It decides whether the tenant is part of the abilities screen's vocabulary — a column, a
+     * field, an entry — or something that is simply not there, and whether a row carrying one is
+     * reported as an anomaly. Leaving this null asks the panel whether Filament's own tenancy is
+     * turned on for it, which is the one signal that is both about this panel and settled at boot.
+     */
+    'tenancy' => null,
+
+    /*
      * How the roles resource presents itself inside the panel. These are the consuming
      * application's decisions, not the package's: the group may be called something
      * else, the order depends on what else that panel holds, and the icon on whichever
