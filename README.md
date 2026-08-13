@@ -155,53 +155,91 @@ two of them.
 
 ## The abilities screen
 
-The other axis of the same table: not what a role may do, but who may do a thing. The list
-gathers every stored row under the model it decides about, because the name is the least
-distinguishing part of a rule — a dozen models all have a `view`, and "what may be decided
-about a post" is the question somebody arriving here actually has. Each row carries its
-title, the name the code asks the Gate, **how far it reaches**, who holds it — with what
-each holder says — and where it stands with the reconciliation: declared by the code,
-declared by nothing (which is drift, and `--prune` will take it), or outside the catalogue
-altogether, which is no danger at all.
+The other axis of the same table: not what a role may do, but what may be done. It is the store's
+workbench — the roles screen is for handing abilities out, this one is for keeping the store sound.
 
-The mark goes beside each holder and never on the rule, because a stored ability is
-neither a grant nor a denial. Granting and forbidding live in the pivot and belong to a
-holder, so the same row is quite properly granted to one role and forbidden to another —
-a label calling the row either one would be false about half of them.
+Each row carries the name the code asks the Gate, its title, **how far it reaches**, where it stands
+with the reconciliation, and its **health**.
 
-Opening a row gives the roles screen read the other way round: one rule, every role — the
-ones that say nothing about it too, since the question is who may be given this — each
-with the same three-way choice, writing the same rows of the same table through the same
-store. The exception is a row the catalogue no longer declares: it still shows, because
-seeing that it is doomed is the point, but its cells are withheld, on the screen and at
-the write. A grant made against it would be swept by the next `--prune` along with the
-row, silently.
+### Composing a rule
 
-### Narrowing a rule
+Both the action and the model are picked from the catalogue rather than typed: the actions are the
+methods of your policies, the models are what the panel puts on screen. The reading leads and the
+identifier follows — `Update (update)` — because the reading is what the list is scanned by and the
+identifier is what gets stored.
 
-The plain rule — "may change posts" — comes from the code that asks about it, so the screen
-does not invent one. What the code has no way to say is how far a rule reaches, and that is
-what the composer makes, in three steps: the ability, the reach, and a review that reads
-the sentence they add up to — "change, on posts, for whatever its holder owns" — before it
-is written. The title is asked last, beside that sentence, because the title is read by
-people and by nothing else.
+The **name can be taken out of the list**, with a button beside it, because composing a rule the
+catalogue does not yet declare is the one thing this screen is for. **The model cannot**, and that
+asymmetry is deliberate: a model the panel does not declare is exactly what the health column reports
+as a ghost, and typing one by hand would be composing what the other half of the screen exists to
+detect.
+
+The title composes itself while you type, with Bouncer's own generator, and stays closed until you
+ask for it — a derived title and a hand-written one read identically on screen, so without the lock
+there is no telling which one is in front of you and no way back to the derived one.
+
+Two things are refused, at the write and not only on the screen: a **second row saying what one
+already says**, because the two are granted and withdrawn separately and whoever withdrew one would
+believe the rule was gone; and a **record that is not there**, which is said in red beside the field
+as it is typed rather than after the save.
 
 | Narrowed to | What Bouncer stores | What it means |
 |---|---|---|
 | What its holder owns | `only_owned = true` | The rule holds for the records that belong to whoever has it |
 | One record | `entity_id = 7` | The rule holds for that record and no other |
 
-The name and the model are taken from the catalogue entry the choices land on, never from
-the request, so a narrowed rule is always spelled the way the code spells the rule it
-narrows. Three things are refused, each where the write happens and not only on the
-screen: a rule that narrows nothing, because the plain row is the reconciliation's to
-write; a rule about one record of something that is not a model, because there is no
-record to point at; and a second row saying what one already says, because this screen
-only ever shows one of them — whoever cleared the one they were shown would walk away
-believing they had taken the rule back.
+### Health
 
-A narrowed row has no cell on the roles grid, because the grid matches the plain row and
-only the plain row. Handing it out therefore happens here, and writes exactly that row.
+Four things that are true in the store, that nothing else detects, and that can only be mended from
+here — because this is the only screen that lists every row.
+
+| | What it means |
+|---|---|
+| **Duplicate** | Another row says exactly the same thing. They are granted and withdrawn separately |
+| **Ghost model** | The model it names no longer loads. Bouncer answers no, for ever, and never says why |
+| **Ghost record** | It is fenced to a record that has been deleted |
+| **Invisible** | It carries a tenant on an installation that does not use one, so nothing else can see it |
+
+None of them is the reconciliation's business: a row the catalogue no longer declares is *healthy* —
+`--prune` takes it and says so — and the declaration column already reports that. Conflating the two
+teaches people to ignore both.
+
+The listing sums a row up in **one icon** — sound, out of sight, or answering wrongly — with the
+whole account in its tooltip and a filter to see one ailment at a time. The record page asks the four
+questions and answers each **with the fact inside**: which row is the twin, which class does not
+load. "Duplicate" without saying which sends you off to look for it.
+
+### Trying a rule out
+
+That a role holds a rule and that the Gate says yes to it are not the same thing: a denial from
+another role wins, the wildcard grants what nobody wrote down, and a fenced rule only answers about
+the record it fences. The record page will ask Bouncer, for any role or account, what it answers
+right now — which beats the alternative of handing the rule out and watching.
+
+### There is no delete, here or anywhere on this screen
+
+A row is pointed at by every grant ever made from it, and taking the row away takes all of them with
+it, silently. The way a row goes is that the code stops declaring it and `--prune` sweeps it,
+reporting how many it swept — which is what the declaration column is for.
+
+### The health widget
+
+`ElPandaPe\FilamentBouncer\Filament\Widgets\AbilityHealth` counts each ailment across the whole
+table, from outside the screen, with every figure opening its rows. **The plugin does not register
+it**, on purpose: doing so would put it on your dashboard uninvited and — because a panel refuses to
+boot with a widget that declares nobody — add a subject to your catalogue, turning `--check` red
+until you reconcile. Add it yourself when you want it:
+
+```php
+use ElPandaPe\FilamentBouncer\Filament\Widgets\AbilityHealth;
+
+$panel->widgets([
+    AbilityHealth::class,
+]);
+```
+
+Then run `filament-bouncer:reconcile` so the ability it declares is written down, and grant it like
+any other.
 
 ## The roles screen
 
