@@ -47,7 +47,7 @@ final class RoleForm
             ->components([
                 Group::make()
                     ->schema([
-                        Section::make(__('filament-bouncer::roles.form.role'))
+                        Section::make(__('filament-bouncer::roles.record.identity'))
                             ->description(__('filament-bouncer::roles.record.identity_note'))
                             ->icon('heroicon-o-shield-check')
                             ->schema(self::identity(protectedNotice: $requiresAStance)),

@@ -6,7 +6,6 @@ return [
 
     'form' => [
         'abilities_note' => 'Everything the panel declares. Whoever may work this screen hands out any of them, including to themselves.',
-        'role' => 'Role',
         'name' => 'Name',
         'title' => 'Title',
         'empty' => 'You hold no abilities of your own, so there is nothing here to hand on.',
@@ -14,7 +13,7 @@ return [
         'overruled' => 'Granted here, but a broader rule forbids it.',
         'restricted_owned' => 'It also holds a rule here for only what it owns, which the grid leaves untouched.',
         'restricted_records' => 'It also holds a rule here about one record, which the grid leaves untouched.|It also holds rules here about :count records, which the grid leaves untouched.',
-        'manage' => 'Everything about it',
+        'manage' => 'Manage',
         'forbidden_count' => '{1} 1 forbidden|[2,*] :count forbidden',
         'model_count' => ':granted of :total',
         'requires_stance' => 'Grant or forbid at least one ability before continuing.',
@@ -121,7 +120,6 @@ return [
         'assign' => 'Assign a role',
         'assign_submit' => 'Assign',
         'retract' => 'Take away',
-        'role' => 'Role',
         'empty' => 'This account holds no role.',
     ],
 

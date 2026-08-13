@@ -6,7 +6,6 @@ return [
 
     'form' => [
         'abilities_note' => 'Todo lo que el panel declara. Quien puede trabajar esta pantalla reparte cualquiera de ellas, incluso a sí mismo.',
-        'role' => 'Rol',
         'name' => 'Nombre',
         'title' => 'Título',
         'empty' => 'No tienes ninguna habilidad propia, así que aquí no hay nada que ceder.',
@@ -14,7 +13,7 @@ return [
         'overruled' => 'Concedida aquí, pero una regla más amplia la prohíbe.',
         'restricted_owned' => 'También tiene aquí una regla para solo lo suyo, que la rejilla no toca.',
         'restricted_records' => 'También tiene aquí una regla sobre un registro, que la rejilla no toca.|También tiene aquí reglas sobre :count registros, que la rejilla no toca.',
-        'manage' => 'Todo sobre esto',
+        'manage' => 'Administrar',
         'forbidden_count' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'model_count' => ':granted de :total',
         'requires_stance' => 'Concede o prohíbe al menos una habilidad antes de continuar.',
@@ -121,7 +120,6 @@ return [
         'assign' => 'Asignar un rol',
         'assign_submit' => 'Asignar',
         'retract' => 'Quitar',
-        'role' => 'Rol',
         'empty' => 'Esta cuenta no tiene ningún rol.',
     ],
 

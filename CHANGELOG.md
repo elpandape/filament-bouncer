@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.3.1] - 2026-08-13
+
+### Changed
+
+- The identity section is headed "Identity" and the column granting a whole subject is
+  called "Manage", which is what the screen this one is matched against calls them.
+
 ## [6.3.0] - 2026-08-13
 
 ### Changed

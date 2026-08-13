@@ -195,7 +195,7 @@ test('the whole catalogue is offered on one screen, without steps to walk', func
 
     livewire(CreateRole::class)
         ->assertSeeHtml('class="fb-table"')
-        ->assertSee(__('filament-bouncer::roles.form.role'))
+        ->assertSee(__('filament-bouncer::roles.record.identity'))
         ->assertSee(__('filament-bouncer::roles.create.subtitle'))
         ->assertDontSeeHtml('fi-wi-step')
         ->assertOk();
