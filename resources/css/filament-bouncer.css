@@ -52,300 +52,355 @@
     --fb-noted: var(--warning-400);
 }
 
-/* ── A section per tab ─────────────────────────────────────────────────────── */
+/* ── The tabs, one per group ───────────────────────────────────────────────── */
 
-.fb-section + .fb-section {
-    margin-block-start: 1.5rem;
-}
-
-.fb-section-name {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--fb-muted);
-    margin-block-end: 0.35rem;
-}
-
-/* ── A subject, folded ─────────────────────────────────────────────────────── */
-
-.fb-subject {
-    border-block-start: 1px solid var(--fb-hairline);
-}
-
-.fb-subject-head {
+.fb-tabs {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding-inline-end: 0.35rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-block-end: 0.75rem;
+    border-block-end: 1px solid var(--fb-line);
 }
 
-.fb-subject-head:hover {
-    background: var(--fb-raised);
-}
-
-/* The fold's button, holding everything up to the elastic middle: a head that carries
-   a menu cannot be a button itself, so the reachable target lives here. */
-.fb-subject-toggle {
-    display: flex;
-    flex: 1;
+.fb-tab {
+    display: inline-flex;
+    gap: 0.375rem;
     align-items: center;
-    gap: 0.6rem;
-    min-inline-size: 0;
-    padding: 0.65rem 0.35rem;
+    padding: 0.4375rem 0.625rem;
     border: 0;
-    background: transparent;
-    color: inherit;
-    text-align: start;
+    border-block-end: 2px solid transparent;
+    background: none;
+    color: var(--fb-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.fb-subject-toggle:focus-visible {
-    outline: 2px solid var(--primary-500);
-    outline-offset: -2px;
-}
+.fb-tab:hover { color: var(--fb-text); }
 
-.fb-chevron {
-    inline-size: 0.7rem;
-    block-size: 0.7rem;
-    flex: none;
-    color: var(--fb-faint);
-    transition: transform 0.15s ease;
-}
-
-.fb-subject-open .fb-chevron {
-    transform: rotate(90deg);
-}
-
-.fb-subject-name {
-    font-weight: 600;
+.fb-tab-on {
+    border-block-end-color: var(--primary-600);
     color: var(--fb-text);
 }
 
-.fb-subject-icon {
-    inline-size: 0.875rem;
-    block-size: 0.875rem;
-    flex: none;
-    color: var(--fb-muted);
-}
-
-.fb-subject-class {
-    font-family: ui-monospace, monospace;
-    font-size: 0.6875rem;
+/* The tally is highlighted the moment its group grants anything: the form writes the four
+   groups in one save, so without it a role reaching a dangerous page reads as harmless
+   from whichever tab happens to be open. */
+.fb-tab-count {
+    padding: 0.0625rem 0.375rem;
+    border-radius: 9999px;
+    background-color: var(--fb-sunken);
     color: var(--fb-faint);
-}
-
-.fb-subject-forbidden {
-    flex: none;
-    padding: 0.125rem 0.375rem;
-    border-radius: var(--radius-md, 0.375rem);
     font-size: 0.6875rem;
-    color: var(--fb-no);
-    box-shadow: inset 0 0 0 1px var(--fb-no);
-}
-
-.fb-subject-count {
-    flex: none;
-    font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
-    color: var(--fb-muted);
 }
 
-/* ── An action, as a row ───────────────────────────────────────────────────── */
-
-.fb-rows {
-    display: flex;
-    flex-direction: column;
-    padding: 0 1rem 0.75rem 3rem;
+.fb-tab-count-on {
+    background-color: var(--fb-yes-soft);
+    color: var(--fb-yes);
 }
 
-.fb-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.4375rem 0;
+/* ── The matrix: subjects down, actions across ─────────────────────────────── */
+
+/*
+ * Three things hold the pinned column up and each one breaks it differently on its own:
+ * the clipping ancestor `position: sticky` has to stick against, the separate borders —
+ * with `collapse` the browser assigns them to the table and the pinned cell loses them
+ * exactly when it starts to travel — and the sticky itself.
+ */
+.fb-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: 1px solid var(--fb-line);
+    border-radius: 0.5rem;
+    background-color: var(--fb-surface);
 }
 
-.fb-row + .fb-row {
-    border-block-start: 1px dashed var(--fb-hairline);
-}
-
-.fb-row:hover {
-    background: var(--fb-raised);
-}
-
-.fb-row-body {
-    flex: 1;
-    min-inline-size: 0;
-}
-
-.fb-row-name {
+.fb-table {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.8125rem;
     color: var(--fb-text);
 }
 
-.fb-row-action {
-    font-family: ui-monospace, monospace;
-    font-size: 0.6875rem;
-    color: var(--fb-faint);
-    margin-inline-start: 0.4rem;
+.fb-table :is(th, td) {
+    border-block-end: 1px solid var(--fb-hairline);
 }
 
-.fb-row-note {
+.fb-table tbody tr:last-child :is(th, td) {
+    border-block-end: 0;
+}
+
+.fb-corner,
+.fb-subject {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 2;
+    background-color: var(--fb-surface);
+    border-inline-end: 1px solid var(--fb-line);
+    text-align: start;
+}
+
+.fb-corner {
+    z-index: 3;
+    padding: 0.625rem 0.75rem;
+    vertical-align: end;
+}
+
+.fb-corner-name {
     display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--fb-muted);
+}
+
+.fb-all,
+.fb-group,
+.fb-action {
+    padding: 0.5rem 0.625rem;
     font-size: 0.6875rem;
-    color: var(--fb-noted);
-    line-height: 1.4;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--fb-muted);
+    white-space: nowrap;
 }
 
-/* A denial's note sits on its row and in its colour, not below in amber like one more
-   warning. */
-.fb-row-note-forbidden {
-    display: inline;
-    margin-inline-start: 0.4rem;
-    color: var(--fb-no);
-}
-
-/* ── One action, three words ───────────────────────────────────────────────── */
-
-.fb-seg {
-    display: inline-flex;
-    gap: 0.125rem;
-    padding: 0.125rem;
-    border-radius: var(--radius-lg, 0.5rem);
-    background: var(--fb-sunken);
-    box-shadow: inset 0 0 0 1px var(--fb-line);
-    flex: none;
-}
-
-.fb-seg-btn {
-    display: inline-grid;
-    place-items: center;
-    inline-size: 2rem;
-    block-size: 1.75rem;
-    border: 0;
-    border-radius: var(--radius-md, 0.375rem);
-    background: transparent;
-    color: var(--fb-faint);
-    cursor: pointer;
-    transition: background 0.1s ease, color 0.1s ease;
-}
-
-.fb-seg-btn svg {
-    inline-size: 0.8rem;
-    block-size: 0.8rem;
-}
-
-.fb-seg-btn:hover:not(:disabled) {
-    background: var(--fb-raised);
+.fb-all {
+    background-color: var(--fb-raised);
     color: var(--fb-text);
 }
 
-.fb-seg-btn:disabled {
-    cursor: default;
+.fb-action {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.75rem;
 }
 
-.fb-seg-btn:focus-visible {
-    outline: 2px solid var(--primary-500);
-    outline-offset: 1px;
-}
+.fb-action-label { display: block; }
 
-.fb-seg-granted.fb-seg-on {
-    background: var(--fb-yes-soft);
-    color: var(--fb-yes);
-    box-shadow: inset 0 0 0 1px var(--fb-yes-line);
-}
-
-.fb-seg-forbidden.fb-seg-on {
-    background: var(--fb-no-soft);
-    color: var(--fb-no);
-    box-shadow: inset 0 0 0 1px var(--fb-no-line);
-}
-
-.fb-seg-neutral.fb-seg-on {
-    background: var(--fb-surface);
-    color: var(--fb-text);
-    box-shadow: inset 0 0 0 1px var(--fb-line), 0 1px 2px rgb(0 0 0 / 0.08);
-}
-
-/* Reached by a rule this row does not hold: the tick is drawn, but hollow. Turning it
-   off here would remove nothing. */
-.fb-seg-neutral.fb-seg-broader {
-    color: var(--fb-noted);
-}
-
-/* ── The presets, folded behind a menu ─────────────────────────────────────── */
-
-.fb-presets {
-    position: relative;
-    margin-inline-start: 0.25rem;
-}
-
-.fb-presets-toggle {
-    display: grid;
-    place-items: center;
-    padding: 0.25rem;
-    list-style: none;
-    cursor: pointer;
+.fb-action-name,
+.fb-subject-policy {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    font-weight: 400;
     color: var(--fb-faint);
 }
 
-.fb-presets-toggle::-webkit-details-marker {
-    display: none;
+/* The scope tints the heading and nothing else. A cell tinted by what it may do would
+   compete with the stance, which is the only thing on this screen worth reading first. */
+.fb-scope-read { color: var(--fb-muted); }
+.fb-scope-write { color: var(--info-600); }
+.fb-scope-withdraw { color: var(--warning-600); }
+.fb-scope-irreversible { color: var(--danger-600); }
+
+:is(.dark) .fb-scope-write { color: var(--info-400); }
+:is(.dark) .fb-scope-withdraw { color: var(--warning-400); }
+:is(.dark) .fb-scope-irreversible { color: var(--danger-400); }
+
+th.fb-group.fb-scope-write { background-color: color-mix(in oklab, var(--info-500) 7%, transparent); }
+th.fb-group.fb-scope-withdraw { background-color: color-mix(in oklab, var(--warning-500) 7%, transparent); }
+th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--danger-500) 7%, transparent); }
+
+.fb-subject {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+    white-space: nowrap;
 }
 
-.fb-presets-toggle:hover {
-    color: var(--fb-text);
-}
-
-.fb-presets-toggle svg {
+.fb-subject-icon {
     inline-size: 1rem;
     block-size: 1rem;
-}
-
-.fb-presets[open] > div {
-    position: absolute;
-    inset-block-start: 100%;
-    inset-inline-end: 0;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.25rem;
-    min-inline-size: max-content;
-    padding: 0.375rem;
-    border-radius: var(--radius-lg, 0.5rem);
-    background: var(--fb-surface);
-    box-shadow: 0 0 0 1px var(--fb-line), 0 4px 12px rgb(0 0 0 / 0.12);
-}
-
-.fb-preset {
-    padding: 0.15rem 0.5rem;
-    border: 0;
-    border-radius: var(--radius-md, 0.375rem);
-    background: transparent;
     color: var(--fb-muted);
-    font-size: 0.6875rem;
-    cursor: pointer;
-    box-shadow: inset 0 0 0 1px var(--fb-line);
 }
 
-.fb-preset:hover:not(:disabled) {
-    background: var(--fb-raised);
+.fb-subject-name {
+    display: block;
+    font-weight: 600;
+}
+
+.fb-subject-policy { display: block; }
+
+.fb-subject-forbidden {
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.375rem;
+    box-shadow: inset 0 0 0 1px var(--fb-no-line);
+    color: var(--fb-no);
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+
+.fb-cell {
+    padding: 0.375rem;
+    text-align: center;
+}
+
+.fb-cell-void { color: var(--fb-ghost); }
+
+.fb-void { font-size: 1rem; }
+
+.fb-sr {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ── The stance: one box that cycles ───────────────────────────────────────── */
+
+.fb-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border: 1.5px solid var(--fb-ghost);
+    border-radius: 0.375rem;
+    background-color: transparent;
+    color: transparent;
+    cursor: pointer;
+    transition: border-color 75ms, background-color 75ms, color 75ms;
+}
+
+.fb-box svg {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+}
+
+.fb-box:hover:not(:disabled) { border-color: var(--fb-muted); }
+
+.fb-box:focus-visible {
+    outline: 2px solid var(--primary-600);
+    outline-offset: 2px;
+}
+
+.fb-box:disabled { cursor: default; }
+
+.fb-box-granted {
+    border-color: var(--fb-yes);
+    background-color: var(--fb-yes-soft);
+    color: var(--fb-yes);
+}
+
+.fb-box-forbidden {
+    border-color: var(--fb-no);
+    background-color: var(--fb-no-soft);
+    color: var(--fb-no);
+}
+
+/* What arrives through a broader rule is drawn hollow: it is there and this role did not
+   write it. */
+.fb-box-broader {
+    border-style: dashed;
+    border-color: var(--fb-yes);
+    background-color: transparent;
+    color: color-mix(in oklab, var(--fb-yes) 55%, transparent);
+}
+
+/* The dot marks a rule this screen neither writes nor removes, so the box would otherwise
+   read as an abstention on a role that can plainly do it. It does not fit inside — the box
+   is twenty-two pixels — so it sits on the corner and the words go in the title. */
+.fb-narrowed {
+    position: absolute;
+    inset-block-start: -2px;
+    inset-inline-end: -2px;
+    inline-size: 0.4375rem;
+    block-size: 0.4375rem;
+    border-radius: 9999px;
+    background-color: var(--info-500);
+    box-shadow: 0 0 0 2px var(--fb-surface);
+}
+
+/* ── The shortcuts ─────────────────────────────────────────────────────────── */
+
+.fb-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-inline-start: auto;
+    opacity: 0;
+    transition: opacity 100ms;
+}
+
+/* Offered on pointing at the row and kept while they are being used. In a column repeated
+   once per subject, a control always on show is paid for as many times as there are rows;
+   holding its place with the opacity keeps the row from jumping as it appears. */
+.fb-subject:hover .fb-shortcuts,
+.fb-shortcuts:focus-within,
+.fb-shortcuts-all {
+    opacity: 1;
+}
+
+/* With no fine pointer there is nothing to point at, so they stay on show. */
+@media (hover: none) {
+    .fb-shortcuts { opacity: 1; }
+}
+
+.fb-shortcuts-all { margin-block-start: 0.375rem; }
+
+.fb-shortcut {
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--fb-line);
+    border-radius: 9999px;
+    background: none;
+    color: var(--fb-faint);
+    font-size: 0.625rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.fb-shortcut:hover {
+    border-color: var(--fb-muted);
     color: var(--fb-text);
 }
 
-.fb-preset:disabled {
-    cursor: default;
-    opacity: 0.5;
+/* ── The hint, and the legend of the corner mark ───────────────────────────── */
+
+.fb-hint {
+    margin-block-start: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--fb-muted);
 }
 
-.fb-preset:focus-visible {
-    outline: 2px solid var(--primary-500);
-    outline-offset: 1px;
+/* The legend carries the mark itself: a sentence describing something without showing it
+   makes the reader hunt through the table for what it is talking about. */
+.fb-hint-note::before {
+    content: '';
+    display: inline-block;
+    inline-size: 0.4375rem;
+    block-size: 0.4375rem;
+    margin-inline-end: 0.375rem;
+    border-radius: 9999px;
+    background-color: var(--info-500);
+    vertical-align: middle;
 }
 
 /* ── A door, not a grid: one ability each ──────────────────────────────────── */
+
+.fb-doors {
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--fb-line);
+    border-radius: 0.5rem;
+    background-color: var(--fb-surface);
+    list-style: none;
+}
+
+.fb-door-text {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    font-size: 0.8125rem;
+    color: var(--fb-text);
+}
 
 .fb-door {
     display: flex;

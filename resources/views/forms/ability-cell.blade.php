@@ -1,34 +1,76 @@
 {{--
-    One action, three words.
+    One cell, three stances and two warnings.
 
-    The stance used to be a single button walking the three, because three never fitted a
-    column. Laid out as a row there is width for all of them, and choosing directly
-    removes the trap the cycle carried: reaching "forbidden" meant passing through
-    "granted", a rule that existed on screen for a moment and never on purpose.
+    The gap and the empty box say different things and so they do not look alike: an empty
+    box is a role abstaining, the dot is an action its policy does not declare and that
+    nobody can therefore grant or forbid.
 
-    The neutral segment of a row reached by a broader rule draws the tick rather than the
-    dash, hollow. The dash is true of the row and false of the reader's question: a role
-    holding the wildcard holds no rule of its own for any row here, and a screen full of
-    dashes would say it can do nothing at all.
+    And there is a fourth drawing which is not a stance: the hollow tick on an unmarked
+    box, saying the role answers yes there through a broader rule — the wildcard, for
+    one — without holding a row that names it. Without it, a founder reads as a role that
+    can do nothing.
+
+    The stance is one control that cycles rather than three buttons side by side: seven
+    columns times three would be twenty-one controls a row. The cost is the one the three
+    buttons were there to avoid — reaching "forbidden" by passing through "granted", a
+    rule that exists on screen for a moment and never on purpose — and it is paid off by
+    Shift, which walks the cycle backwards and reaches the denial in one step.
+
+    What the cell is gets composed here and enters the Alpine expression already made.
+    Building it inside with PHP's dot concatenates nothing there: it lands in the attribute
+    as written and the browser reads the rest as broken JavaScript, once per cell, and no
+    server-side test notices.
 --}}
-<div class="fb-seg" role="group" @if (filled($note)) title="{{ $note }}" @endif>
-    @foreach (['granted', 'neutral', 'forbidden'] as $stance)
-        <button
-            type="button"
-            @disabled($disabled)
-            x-on:click="set(@js($subject), @js($action), @js($stance))"
-            x-bind:aria-pressed="at(@js($subject), @js($action)) === @js($stance) ? 'true' : 'false'"
-            x-bind:class="at(@js($subject), @js($action)) === @js($stance) ? 'fb-seg-on' : ''"
-            class="fb-seg-btn fb-seg-{{ $stance }}@if ($stance === 'neutral' && $broader) fb-seg-broader @endif"
-            aria-label="{{ $stances[$stance] ?? $stance }}"
-        >
-            @if ($stance === 'granted' || ($stance === 'neutral' && $broader))
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
-            @elseif ($stance === 'neutral')
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
-            @else
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            @endif
-        </button>
-    @endforeach
-</div>
+@php
+    $describes = $row['label'].' · '.$label;
+    $bare ??= false;
+    $reached = $broader[$row['key']][$action] ?? false;
+    $note = $notes[$row['key']][$action] ?? null;
+    $inherited = ' · '.__('filament-bouncer::roles.form.inherited');
+    $says = $note === null ? '' : ' · '.$note;
+@endphp
+
+@if (! isset($row['cells'][$action]))
+    <td class="fb-cell fb-cell-void fb-scope-{{ $scope }}">
+        <span class="fb-void" aria-hidden="true">·</span>
+        <span class="fb-sr">{{ $describes }} · {{ __('filament-bouncer::roles.grid.undeclared') }}</span>
+    </td>
+@else
+    @unless ($bare)
+        <td class="fb-cell fb-scope-{{ $scope }}">
+    @endunless
+
+    <button
+        type="button"
+        @disabled($disabled)
+        class="fb-box"
+        data-subject="{{ $row['key'] }}"
+        data-action="{{ $action }}"
+        x-on:click="cycle(@js($row['key']), @js($action), $event.shiftKey)"
+        x-bind:class="'fb-box-' + at(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? ' fb-box-broader' : '')"
+        x-bind:title="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? @js($inherited) : '') + @js($says)"
+        x-bind:aria-label="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? @js($inherited) : '') + @js($says)"
+    >
+        @if ($note !== null)
+            <span class="fb-narrowed" aria-hidden="true"></span>
+        @endif
+
+        <svg
+            x-show="at(@js($row['key']), @js($action)) === 'granted' || inherits(@js($row['key']), @js($action), @js($reached))"
+            x-cloak
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="M20 6 9 17l-5-5" /></svg>
+
+        <svg
+            x-show="at(@js($row['key']), @js($action)) === 'forbidden'"
+            x-cloak
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" aria-hidden="true"
+        ><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+    </button>
+
+    @unless ($bare)
+        </td>
+    @endunless
+@endif

@@ -15,6 +15,7 @@ use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\Field;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * The whole catalogue as one field, laid out as sections of rows.
@@ -29,25 +30,19 @@ use Illuminate\Database\Eloquent\Model;
  * than a field per cell. That path is not a decision of this screen's: it is the shape
  * the store reads and writes, so a rewrite of the view cannot break the save.
  *
- * A subject is a section and an action is a row, which is the other way round from a
- * matrix and is what buys the room. In a column, three buttons never fitted and the
- * stance had to be a shape the reader decoded; in a row they fit, and it is three words
- * to choose between.
+ * A subject is a row and an action is a column. That is what makes the screen answerable:
+ * the question somebody comes here with is whether this role may delete, and reading it
+ * down a column across every subject is the only layout that answers it without scrolling
+ * back and forth. The price is that a cell has room for one control instead of three, so
+ * the stance became a box that cycles rather than three buttons side by side.
+ *
+ * The columns are the union of the actions any policy declares, so they grow on their own.
+ * The subject column is therefore pinned and the table scrolls: a row whose subject has
+ * left the screen cannot be read.
  */
 final class AbilityGrid extends Field
 {
-    /**
-     * How many rows a screen may open at once before it stops being one.
-     *
-     * Measured rather than guessed: three buttons a row means a panel of thirty resources
-     * would draw over five hundred of them at once, which is a long page and a slow first
-     * paint. Below the threshold the fold buys nothing and costs a click on every subject
-     * anybody came to change — and a screen that opens showing only headings reads as
-     * broken.
-     */
-    private const int OPEN_UP_TO = 60;
-
-    protected string $view = 'filament-bouncer::forms.ability-grid';
+    protected string $view = 'filament-bouncer::forms.ability-matrix';
 
     private Catalog $catalog;
 
@@ -131,18 +126,17 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * The catalogue, ready to draw: a section per tab, a subject per section, a row per
-     * action.
+     * The catalogue, ready to draw: a section per tab, a row per subject.
      *
-     * @return array<string, array{label: string, doors: bool, subjects: array<string, array{label: string, class: string|null, icon: string|null, rows: array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>}>}>
+     * Only the first tab is a grid. A page, a widget or an ability declared in
+     * configuration answers exactly one action, and a grid one column wide reads worse
+     * than a list does — so those sections carry the action on the row and are drawn as
+     * lines.
+     *
+     * @return array<string, array{label: string, grid: bool, rows: list<array{key: string, label: string, class: string|null, policy: string|null, icon: string|null, action: string|null, cells: array<string, bool>}>}>
      */
     public function getSections(): array
     {
-        $labels = app(Labels::class);
-        $notes = $this->getNotes();
-        $broader = $this->getBroader();
-        $stances = $this->savedStances();
-
         /** @var array<string, string> $icons */
         $icons = config('filament-bouncer.icons', []);
 
@@ -150,21 +144,26 @@ final class AbilityGrid extends Field
 
         foreach ($this->catalog->tabs() as $value => $subjects) {
             $tab = CatalogTab::from((string) $value);
-            $described = [];
+            $rows = [];
 
             foreach ($subjects as $key => $subject) {
-                $described[$key] = [
+                $cells = array_fill_keys(array_keys($subject->cells()), true);
+
+                $rows[] = [
+                    'key' => $key,
                     'label' => $subject->label,
                     'class' => $subject->entityType,
+                    'policy' => $this->policyName($subject),
                     'icon' => $subject->entityType === null ? null : ($icons[$subject->entityType] ?? null),
-                    'rows' => $this->rowsFor($key, $subject, $labels, $notes, $broader, $stances),
+                    'action' => $tab->isGrid() ? null : array_key_first($cells),
+                    'cells' => $cells,
                 ];
             }
 
             $sections[$tab->value] = [
                 'label' => __('filament-bouncer::roles.tabs.'.$tab->value),
-                'doors' => ! $tab->isGrid(),
-                'subjects' => $described,
+                'grid' => $tab->isGrid(),
+                'rows' => $rows,
             ];
         }
 
@@ -172,25 +171,109 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * Which actions a preset would set.
+     * The columns, in the order they are read: the one granting the whole subject first,
+     * then every action under the scope it belongs to.
      *
-     * Only reading is offered as a shortcut of its own. "Everything" and "nothing" need
-     * no list, because they answer for whatever the subject happens to declare, and a
-     * shortcut for withdrawing or for the irreversible is a shortcut nobody should have.
+     * They come only from the subjects the grid draws. Without that filter the single
+     * action of a page would open a column every row of the matrix answers with a dash.
      *
-     * @return array<string, array<int, string>>
+     * @return array{manage: array{action: string, label: string}, groups: list<array{scope: string, label: string, actions: list<array{action: string, label: string}>}>}
+     */
+    public function getColumnGroups(): array
+    {
+        $labels = app(Labels::class);
+        $offered = $this->griddedActions();
+        $groups = [];
+
+        foreach ($this->catalog->actions as $action => $scope) {
+            if (! isset($offered[$action])) {
+                continue;
+            }
+
+            $groups[$scope->value] ??= ['scope' => $scope->value, 'label' => $labels->scope($scope), 'actions' => []];
+            $groups[$scope->value]['actions'][] = ['action' => $action, 'label' => $labels->action($action)];
+        }
+
+        return [
+            'manage' => [
+                'action' => Ability::MANAGE_ACTION,
+                'label' => __('filament-bouncer::roles.form.manage'),
+            ],
+            'groups' => array_values($groups),
+        ];
+    }
+
+    /**
+     * Which subjects a shortcut pressed from the corner of the table reaches.
+     *
+     * The gridded ones and no others: a page or a widget does not declare the action the
+     * shortcut names, so applying it there would say nothing and wipe what they do say.
+     *
+     * @return list<string>
+     */
+    public function getGriddedSubjects(): array
+    {
+        $keys = [];
+
+        foreach ($this->getSections() as $section) {
+            if ($section['grid']) {
+                $keys = [...$keys, ...array_column($section['rows'], 'key')];
+            }
+        }
+
+        return $keys;
+    }
+
+    public function getSubjectLabel(): string
+    {
+        return __('filament-bouncer::roles.grid.subject');
+    }
+
+    public function getClearLabel(): string
+    {
+        return __('filament-bouncer::roles.grid.clear');
+    }
+
+    /**
+     * What the corner mark on a cell means, said once instead of on every cell.
+     *
+     * The view only draws it when there is one. A legend about something not on the screen
+     * teaches people not to read legends.
+     */
+    public function getNoteLegend(): string
+    {
+        return __('filament-bouncer::roles.grid.note_legend');
+    }
+
+    /**
+     * The shortcut a subject's row offers.
+     *
+     * Only reading. "Everything" and "nothing" need no list, because they answer for
+     * whatever the subject happens to declare, and a shortcut for withdrawing or for the
+     * irreversible is a shortcut nobody should have.
+     *
+     * It is exclusive: it grants what it names and silences the rest of that row. Adding
+     * without taking away would make "read only" mean "reading on top of whatever was
+     * already there", which is the opposite of what its name promises.
+     *
+     * @return list<array{key: string, label: string, actions: list<string>}>
      */
     public function getPresets(): array
     {
+        $offered = $this->griddedActions();
         $read = [];
 
         foreach ($this->catalog->actions as $action => $scope) {
-            if ($scope === AbilityScope::Read) {
+            if ($scope === AbilityScope::Read && isset($offered[$action])) {
                 $read[] = $action;
             }
         }
 
-        return ['read' => $read];
+        return $read === [] ? [] : [[
+            'key' => 'read',
+            'label' => __('filament-bouncer::roles.grid.preset_read'),
+            'actions' => $read,
+        ]];
     }
 
     /**
@@ -206,28 +289,9 @@ final class AbilityGrid extends Field
         return Stance::Neutral->value;
     }
 
-    /**
-     * @return array{all: bool}
-     */
-    public function getOpenByDefault(): array
-    {
-        $rows = 0;
-
-        foreach ($this->catalog->subjects as $subject) {
-            $rows += count($subject->cells());
-        }
-
-        return ['all' => $rows <= self::OPEN_UP_TO];
-    }
-
     public function getEmptyLabel(): string
     {
         return __('filament-bouncer::roles.form.empty');
-    }
-
-    public function getCollapseLabel(): string
-    {
-        return __('filament-bouncer::roles.form.collapse');
     }
 
     public function isEmptyCatalog(): bool
@@ -284,44 +348,40 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * @param  array<string, array<string, string>>  $notes
-     * @param  array<string, array<string, bool>>  $broader
-     * @param  array<string, array<string, string>>  $stances
-     * @return array<int, array{action: string, label: string, note: string|null, kind: string|null, broader: bool}>
+     * Which actions the grid holds a column for.
+     *
+     * @return array<string, true>
      */
-    private function rowsFor(string $key, Subject $subject, Labels $labels, array $notes, array $broader, array $stances): array
+    private function griddedActions(): array
     {
-        $rows = [];
+        $offered = [];
 
-        foreach (array_keys($subject->cells()) as $action) {
-            $rows[] = [
-                'action' => $action,
-                'label' => $action === Ability::MANAGE_ACTION
-                    ? __('filament-bouncer::roles.form.manage')
-                    : $labels->action($action),
-                'note' => $notes[$key][$action] ?? null,
-                'kind' => ($stances[$key][$action] ?? null) === Stance::Forbidden->value ? 'forbidden' : null,
-                'broader' => $broader[$key][$action] ?? false,
-            ];
+        foreach ($this->catalog->subjects as $subject) {
+            if ($subject->kind->tab()->isGrid()) {
+                $offered += array_fill_keys(array_keys($subject->cells()), true);
+            }
         }
 
-        return $rows;
+        unset($offered[Ability::MANAGE_ACTION]);
+
+        return $offered;
     }
 
     /**
-     * The stances the role already holds, read to mark the row a denial sits on.
+     * The policy a subject's columns come from, said under its name.
      *
-     * A denial's note belongs in red and on its row, not in amber below like one more
-     * warning, and telling the two apart takes knowing what was saved — which is the
-     * same reading `getBroader()` already does.
-     *
-     * @return array<string, array<string, string>>
+     * It is what makes the row decidable: its columns are the methods of that class and of
+     * no other, so anybody wondering why a column is missing knows which file to open.
      */
-    private function savedStances(): array
+    private function policyName(Subject $subject): ?string
     {
-        $record = $this->recordOrNull();
+        if ($subject->entityType === null) {
+            return null;
+        }
 
-        return $record instanceof Model ? app(RoleAbilities::class)->toFormState($record) : [];
+        $policy = Gate::getPolicyFor($subject->entityType);
+
+        return is_object($policy) ? class_basename($policy) : null;
     }
 
     /**

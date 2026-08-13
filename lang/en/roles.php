@@ -14,7 +14,6 @@ return [
         'restricted_owned' => 'It also holds a rule here for only what it owns, which the grid leaves untouched.',
         'restricted_records' => 'It also holds a rule here about one record, which the grid leaves untouched.|It also holds rules here about :count records, which the grid leaves untouched.',
         'manage' => 'Everything about it',
-        'collapse' => 'Show or hide the actions of this subject',
         'forbidden_count' => '{1} 1 forbidden|[2,*] :count forbidden',
         'model_count' => ':granted of :total',
         'requires_stance' => 'Grant or forbid at least one ability before continuing.',
@@ -48,17 +47,19 @@ return [
         'silent' => 'Nothing said: the role holds back',
     ],
 
-    'presets' => [
-        'label' => 'Set every action',
-        'read' => 'Reading only',
-        'all' => 'Everything',
-        'none' => 'Nothing',
-    ],
-
     'summary' => [
         'granted' => '{1} 1 granted|[2,*] :count granted',
         'forbidden' => '{1} 1 forbidden|[2,*] :count forbidden',
         'neutral' => '{1} 1 not granted|[2,*] :count not granted',
+    ],
+
+    'grid' => [
+        'subject' => 'Subject',
+        'clear' => 'Clear',
+        'undeclared' => 'not declared',
+        'preset_read' => 'Read only',
+        'note_legend' => 'The dot marks a rule narrowed to what its holder owns or to a single record: this screen neither writes nor removes it, so its box says less than the role can do.',
+        'hint' => 'One click cycles the three stances; hold Shift to go back. A denial beats any grant arriving through another role.',
     ],
 
     'tabs' => [

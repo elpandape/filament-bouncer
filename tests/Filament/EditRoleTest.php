@@ -120,7 +120,7 @@ test('an ordinary role opens', function (): void {
     signInAsRoleManager();
 
     livewire(EditRole::class, ['record' => editedRole()->getKey()])
-        ->assertSeeHtml('class="fb-seg"')
+        ->assertSeeHtml('class="fb-table"')
         ->assertOk();
 });
 

@@ -14,7 +14,6 @@ return [
         'restricted_owned' => 'También tiene aquí una regla para solo lo suyo, que la rejilla no toca.',
         'restricted_records' => 'También tiene aquí una regla sobre un registro, que la rejilla no toca.|También tiene aquí reglas sobre :count registros, que la rejilla no toca.',
         'manage' => 'Todo sobre esto',
-        'collapse' => 'Mostrar u ocultar las acciones de este sujeto',
         'forbidden_count' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'model_count' => ':granted de :total',
         'requires_stance' => 'Concede o prohíbe al menos una habilidad antes de continuar.',
@@ -48,17 +47,19 @@ return [
         'silent' => 'Sin definir: el rol se abstiene',
     ],
 
-    'presets' => [
-        'label' => 'Poner todas las acciones en',
-        'read' => 'Solo lectura',
-        'all' => 'Todo',
-        'none' => 'Nada',
-    ],
-
     'summary' => [
         'granted' => '{1} 1 concedida|[2,*] :count concedidas',
         'forbidden' => '{1} 1 prohibida|[2,*] :count prohibidas',
         'neutral' => '{1} 1 sin definir|[2,*] :count sin definir',
+    ],
+
+    'grid' => [
+        'subject' => 'Sujeto',
+        'clear' => 'Vaciar',
+        'undeclared' => 'no declarada',
+        'preset_read' => 'Solo lectura',
+        'note_legend' => 'El punto marca una regla acotada a lo propio o a un registro: esta pantalla no la escribe ni la borra, así que su casilla dice menos de lo que el rol puede.',
+        'hint' => 'Un clic recorre las tres posturas; con la tecla Mayús, al revés. Una prohibición gana a cualquier concesión que llegue por otro rol.',
     ],
 
     'tabs' => [
