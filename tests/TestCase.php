@@ -196,6 +196,9 @@ abstract class TestCase extends ApplicationTestCase
         // this is the fixture model the suite hands to Bouncer for that.
         Schema::create('posts', static function (Blueprint $table): void {
             $table->id();
+            // The record page names the record a narrowed rule reaches, and it asks the
+            // panel's resource to title it — so the fixture needs something to be titled by.
+            $table->string('title')->nullable();
             $table->timestamps();
         });
     }

@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use ElPandaPe\FilamentBouncer\Catalog\Ability;
-use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
@@ -108,37 +106,6 @@ test('somebody holding nothing of their own hands out just the same', function (
         ->and(holds($editor, 'forceDelete', Post::class))->toBeFalse();
 });
 
-test('it is composed one question at a time, ending on what is about to be written', function (): void {
-    signInAsRoleManager();
-
-    livewire(CreateRole::class)
-        ->assertSee(__('filament-bouncer::roles.wizard.identity'))
-        ->assertSee(__('filament-bouncer::roles.wizard.abilities'))
-        ->assertSee(__('filament-bouncer::roles.wizard.review'));
-});
-
-test('the screen says up front that nothing is saved until the end', function (): void {
-    signInAsRoleManager();
-
-    livewire(CreateRole::class)->assertSee(__('filament-bouncer::roles.wizard.subtitle'));
-});
-
-test('the identity step explains the two names and hints each field', function (): void {
-    signInAsRoleManager();
-
-    livewire(CreateRole::class)
-        ->assertSee(__('filament-bouncer::roles.wizard.identity_heading'))
-        ->assertSee(__('filament-bouncer::roles.wizard.identity_note'))
-        ->assertSee(__('filament-bouncer::roles.form.name_placeholder'))
-        ->assertSee(__('filament-bouncer::roles.form.title_placeholder'));
-});
-
-test('the wizard is marked for the stylesheet that seats its footer', function (): void {
-    signInAsRoleManager();
-
-    livewire(CreateRole::class)->assertSeeHtml('fb-wizard');
-});
-
 test('the reserved name is warned about where the name is being chosen', function (): void {
     config()->set('filament-bouncer.privileged_role', 'super-admin');
 
@@ -153,40 +120,6 @@ test('with no protected role configured there is nothing to warn about', functio
     signInAsRoleManager();
 
     livewire(CreateRole::class)->assertDontSeeHtml('fb-protected-notice');
-});
-
-test('the last step reads back the choice, subject by subject', function (): void {
-    signInAsRoleManager();
-
-    $cells = collect(app(CatalogRegistry::class)->current()->subjects)
-        ->sum(static fn (Subject $subject): int => count($subject->cells()));
-
-    livewire(CreateRole::class)
-        ->fillForm([
-            'name' => 'editor',
-            RoleForm::ABILITIES => [
-                Subject::keyFor(Post::class) => [
-                    'viewAny' => Stance::Granted->value,
-                    'delete' => Stance::Forbidden->value,
-                ],
-            ],
-        ])
-        ->assertSeeHtml('fb-rev-chip-granted')
-        ->assertSeeHtml('fb-rev-chip-forbidden')
-        ->assertSee(__('filament-bouncer::actions.viewAny'))
-        ->assertSee(trans_choice('filament-bouncer::roles.summary.granted', 1, ['count' => 1]))
-        ->assertSee(trans_choice('filament-bouncer::roles.summary.neutral', $cells - 2, ['count' => $cells - 2]));
-});
-
-test('a subject nobody said anything about still gets its line', function (): void {
-    signInAsRoleManager();
-
-    livewire(CreateRole::class)
-        ->fillForm([
-            'name' => 'editor',
-            RoleForm::ABILITIES => [Subject::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
-        ])
-        ->assertSee(__('filament-bouncer::roles.review.silent'));
 });
 
 test('the name of the role that holds everything cannot be taken from this screen', function (): void {
@@ -256,26 +189,14 @@ test('a denial also counts as saying something', function (): void {
 
     expect(Models::role()->newQuery()->where('name', 'vetado')->exists())->toBeTrue();
 });
-test('the abilities step heads itself and carries the grid', function (): void {
-    signInAsRoleManager();
 
-    $html = livewire(CreateRole::class)->html();
-
-    expect($html)->toContain(__('filament-bouncer::roles.wizard.abilities_heading'))
-        ->and($html)->toContain(__('filament-bouncer::roles.wizard.abilities_note'))
-        ->and($html)->toContain('fb-seg');
-});
-
-test('a grant covering a whole model is read back by its own name', function (): void {
+test('the whole catalogue is offered on one screen, without steps to walk', function (): void {
     signInAsRoleManager();
 
     livewire(CreateRole::class)
-        ->fillForm([
-            'name' => 'editor',
-            RoleForm::ABILITIES => [
-                Subject::keyFor(Post::class) => [Ability::MANAGE_ACTION => Stance::Granted->value],
-            ],
-        ])
-        ->assertSee(__('filament-bouncer::roles.form.manage'))
-        ->assertSeeHtml('fb-rev-chip-granted');
+        ->assertSeeHtml('class="fb-table"')
+        ->assertSee(__('filament-bouncer::roles.form.role'))
+        ->assertSee(__('filament-bouncer::roles.create.subtitle'))
+        ->assertDontSeeHtml('fi-wi-step')
+        ->assertOk();
 });

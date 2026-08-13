@@ -7,8 +7,9 @@ namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\FillsRoleAbilities;
+use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
+use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
-use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\RoleCoverage;
@@ -72,7 +73,6 @@ final class ViewRole extends ViewRecord
     {
         return $schema->components([
             $this->getInfolistContentComponent(),
-            $this->getFormContentComponent(),
             $this->getRelationManagersContentComponent(),
         ]);
     }
@@ -81,21 +81,10 @@ final class ViewRole extends ViewRecord
     {
         return $schema->components([
             $this->identitySection(),
+            $this->abilitiesSection(),
+            $this->orphansSection(),
             $this->forbiddenSection(),
             $this->holdersSection(),
-        ]);
-    }
-
-    /**
-     * The grid alone: the identity the resource's form carries beside it is already on
-     * the entries above, and a record page that asked twice would answer twice.
-     */
-    public function form(Schema $schema): Schema
-    {
-        return $schema->components([
-            Section::make()
-                ->schema([RoleForm::grid()])
-                ->columnSpanFull(),
         ]);
     }
 
@@ -158,6 +147,28 @@ final class ViewRole extends ViewRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return $this->fillStances($data, $this->getRecord());
+    }
+
+    /**
+     * What the role says, and what it is about to lose.
+     *
+     * This used to be the grid over again, disabled. A grid nobody can touch has to draw
+     * every cell to answer three things, and the three that matter read as faintly as the
+     * ones saying nothing — so the reading is tags, and the grid stays where it is settable.
+     */
+    private function abilitiesSection(): Section
+    {
+        return Section::make(__('filament-bouncer::roles.record.abilities_heading'))
+            ->description(__('filament-bouncer::roles.record.abilities_note'))
+            ->schema([AbilityTags::make('abilities')->hiddenLabel()])
+            ->columnSpanFull();
+    }
+
+    private function orphansSection(): Section
+    {
+        return Section::make(__('filament-bouncer::roles.record.orphans_heading'))
+            ->schema([OrphanChips::make('orphans')->hiddenLabel()])
+            ->columnSpanFull();
     }
 
     private function identitySection(): Section

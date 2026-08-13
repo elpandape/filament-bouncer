@@ -27,24 +27,8 @@ return [
         'cancel' => 'Cancel',
     ],
 
-    'wizard' => [
-        'subtitle' => 'Three steps: identity, permissions and review. Nothing is saved until the end.',
-        'identity' => 'The role',
-        'identity_hint' => 'What it is called, and what it is called by.',
-        'identity_heading' => 'The role\'s identity',
-        'identity_note' => 'The name is the internal identifier; the title is what people see.',
-        'abilities' => 'Abilities',
-        'abilities_heading' => 'Abilities',
-        'abilities_note' => 'The catalogue derives from the policies. For each action: grant it (✓), say nothing (–) or forbid it (✗). A denial beats any grant reaching the same ability from another role.',
-        'abilities_hint' => 'What whoever holds it will be able to do.',
-        'review' => 'Review',
-        'review_heading' => 'Review',
-        'review_note' => 'What is about to be written, subject by subject.',
-        'review_hint' => 'What is about to be written.',
-    ],
-
-    'review' => [
-        'silent' => 'Nothing said: the role holds back',
+    'create' => [
+        'subtitle' => 'Name it and say what whoever holds it may do. Nothing is saved until you create it.',
     ],
 
     'summary' => [
@@ -96,6 +80,23 @@ return [
     ],
 
     'record' => [
+        'abilities_heading' => 'Abilities',
+        'abilities_note' => 'What this role grants and what it forbids, and nothing else.',
+        'orphans_heading' => 'Orphan rules',
+        'narrowed_heading' => 'Narrowed',
+        'narrowed_note' => 'Composed by hand on the abilities screen. The grid of this role neither writes nor removes them.',
+        'owned' => 'only what it owns',
+        'record_gone' => 'gone',
+        'silent_spelled' => 'Says nothing about :names.',
+        'silent_counted' => 'Says nothing about another :count subjects.',
+        'silent_more' => 'See which',
+        'and' => 'and',
+        'tags_empty' => 'This role grants nothing and forbids nothing.',
+        'orphans_loose' => 'No subject',
+        'orphans_none' => 'Nothing to lose',
+        'orphans_some' => 'About to be lost',
+        'orphans_note_none' => 'Nothing this role says points at an ability the code has stopped declaring.',
+        'orphans_note_some' => 'The next sync with --prune takes them, and what they granted with them.',
         'identity' => 'Identity',
         'name' => 'Name',
         'title' => 'Title',

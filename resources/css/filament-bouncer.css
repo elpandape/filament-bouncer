@@ -1270,3 +1270,212 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
     font-variant-numeric: tabular-nums;
     color: var(--fb-text);
 }
+
+/* ── What the role says, worn as tags ──────────────────────────────────────── */
+
+/*
+ * Two columns and not a row that wraps: with `space-between`, the moment the tags no longer
+ * fit they jump whole to the line below and start against the left edge, so the row loses
+ * the column to look down and every subject begins somewhere else.
+ */
+.fb-tg {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--fb-line);
+    border-radius: 0.5rem;
+    background-color: var(--fb-surface);
+    list-style: none;
+}
+
+.fb-tg-apart { margin-block-start: 0.75rem; }
+
+.fb-tg-row {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 0.375rem 1rem;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+}
+
+.fb-tg-row + .fb-tg-row { border-block-start: 1px solid var(--fb-hairline); }
+.fb-tg-row:hover { background-color: var(--fb-raised); }
+
+/* Below this width the fixed column eats the room the tags need, so the row stacks and they
+   start from the left again. */
+@media (width < 56rem) {
+    .fb-tg-row { grid-template-columns: minmax(0, 1fr); }
+    .fb-tg-row .fb-tg-tags { justify-content: flex-start; }
+}
+
+.fb-tg-subject {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.8125rem;
+    color: var(--fb-text);
+}
+
+.fb-tg-subject code,
+.fb-tg-tag code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    color: var(--fb-faint);
+}
+
+.fb-tg-subject code { display: block; }
+
+.fb-tg-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--fb-muted);
+}
+
+.fb-tg-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* The tag carries its action inside rather than underneath: there are few per row, and a
+   second line would make the row's height depend on how many there are. */
+.fb-tg-tag {
+    display: inline-flex;
+    flex-wrap: wrap;
+    column-gap: 0.375rem;
+    align-items: baseline;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.fb-tg-tag-granted {
+    border-color: var(--fb-yes-line);
+    background-color: var(--fb-yes-soft);
+    color: var(--fb-yes);
+}
+
+.fb-tg-tag-forbidden {
+    border-color: var(--fb-no-line);
+    background-color: var(--fb-no-soft);
+    color: var(--fb-no);
+}
+
+/* What arrives through a broader rule is drawn with the dashed border the grid uses and no
+   fill: it is there, and this role did not write it. */
+.fb-tg-tag-broader {
+    border-style: dashed;
+    border-color: color-mix(in oklab, var(--fb-yes) 55%, transparent);
+    color: color-mix(in oklab, var(--fb-yes) 80%, transparent);
+}
+
+.fb-tg-tag-record {
+    border-color: var(--fb-line);
+    color: var(--fb-muted);
+}
+
+.fb-tg-tag-gone {
+    border-style: dashed;
+    border-color: var(--fb-no-line);
+    color: var(--fb-no);
+}
+
+.fb-tg-tag-granted code { color: color-mix(in oklab, var(--fb-yes) 70%, transparent); }
+.fb-tg-tag-forbidden code { color: color-mix(in oklab, var(--fb-no) 70%, transparent); }
+.fb-tg-tag-gone code { color: color-mix(in oklab, var(--fb-no) 70%, transparent); }
+
+.fb-tg-name {
+    padding: 0.5rem 0.75rem 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fb-faint);
+}
+
+.fb-tg-name + .fb-tg-row { border-block-start: 0; }
+
+.fb-tg-foot,
+.fb-tg-empty,
+.fb-tg-silent {
+    font-size: 0.75rem;
+    color: var(--fb-faint);
+}
+
+.fb-tg-foot { padding: 0.375rem 0.75rem 0.625rem; }
+.fb-tg-silent { margin-block-start: 0.5rem; }
+
+.fb-tg-fold summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.fb-tg-fold summary::-webkit-details-marker { display: none; }
+
+.fb-tg-fold summary span {
+    color: var(--fb-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.fb-tg-fold[open] summary { margin-block-end: 0.375rem; }
+
+.fb-tg-fold p {
+    margin: 0.25rem 0 0;
+    line-height: 1.5;
+}
+
+.fb-tg-fold b { color: var(--fb-muted); }
+
+/* ── What the role is about to lose ────────────────────────────────────────── */
+
+.fb-or-head {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fb-faint);
+}
+
+.fb-or-note {
+    margin: 0.625rem 0 0;
+    font-size: 0.75rem;
+    color: var(--fb-muted);
+}
+
+.fb-or-group + .fb-or-group { margin-block-start: 0.5rem; }
+
+.fb-or-group-name {
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--fb-text);
+}
+
+.fb-or-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+/* The identifier goes as it is, without its readable label beside it: the label of an
+   action nobody declares comes from humanising the name, and that title nobody wrote reads
+   as if somebody had. The column is narrow, so the chip breaks where it can rather than
+   stretching to the edge. */
+.fb-or-tag {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--fb-no-line);
+    border-radius: 9999px;
+    background-color: var(--fb-no-soft);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--fb-no);
+    overflow-wrap: anywhere;
+}

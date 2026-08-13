@@ -13,11 +13,9 @@ use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
-use ElPandaPe\FilamentBouncer\Support\Labels;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
@@ -41,18 +39,18 @@ final class RoleForm
      */
     public const string ABILITIES = 'abilities';
 
-    public static function configure(Schema $schema, bool $submitsFromSummary = false): Schema
+    public static function configure(Schema $schema, bool $submitsFromSummary = false, bool $requiresAStance = false): Schema
     {
         return $schema->components([
             Section::make(__('filament-bouncer::roles.form.role'))
-                ->schema(self::identity())
+                ->schema(self::identity(protectedNotice: $requiresAStance))
                 ->columns(2)
                 ->columnSpanFull(),
             // Headless on purpose. The catalogue names itself on every line of it, so a
             // heading and a sentence above would push the first subject a screenful
             // down to say what the rows underneath already say.
             Section::make()
-                ->schema([self::grid($submitsFromSummary)])
+                ->schema([self::grid($submitsFromSummary, $requiresAStance)])
                 ->columnSpanFull(),
         ]);
     }
@@ -128,67 +126,6 @@ final class RoleForm
         }
 
         return $grid;
-    }
-
-    /**
-     * What is about to be written, read back the way it was chosen.
-     *
-     * One line per subject with its granted and its forbidden beside it, and the counting
-     * left for the foot. A sentence with three numbers in it was true and unreadable:
-     * nobody hands out abilities by counting them, and this is the last screen before
-     * they are handed out.
-     *
-     * @return array<string, mixed>
-     */
-    public static function reviewData(Get $get): array
-    {
-        $labels = app(Labels::class);
-        $catalog = app(CatalogRegistry::class)->current();
-
-        /** @var array<string, array<string, string>> $state */
-        $state = is_array($get(self::ABILITIES)) ? $get(self::ABILITIES) : [];
-
-        $subjects = [];
-        $granted = 0;
-        $forbidden = 0;
-        $total = 0;
-
-        foreach ($catalog->subjects as $key => $subject) {
-            $chips = [];
-
-            foreach (array_keys($subject->cells()) as $action) {
-                $total++;
-                $stance = Stance::tryFrom($state[$key][$action] ?? '') ?? Stance::Neutral;
-
-                if ($stance === Stance::Neutral) {
-                    continue;
-                }
-
-                $stance === Stance::Granted ? $granted++ : $forbidden++;
-
-                $chips[] = [
-                    'stance' => $stance->value,
-                    'label' => $action === Ability::MANAGE_ACTION
-                        ? __('filament-bouncer::roles.form.manage')
-                        : $labels->action($action),
-                ];
-            }
-
-            $subjects[] = ['label' => $subject->label, 'chips' => $chips];
-        }
-
-        return [
-            'subjects' => $subjects,
-            'silent' => __('filament-bouncer::roles.review.silent'),
-            // The three counts are read as one line, and each of them has to agree with
-            // its own number: "1 prohibidas" is the sort of thing a screen says when the
-            // plural was decided once for all three.
-            'total' => implode(' · ', [
-                trans_choice('filament-bouncer::roles.summary.granted', $granted, ['count' => $granted]),
-                trans_choice('filament-bouncer::roles.summary.forbidden', $forbidden, ['count' => $forbidden]),
-                trans_choice('filament-bouncer::roles.summary.neutral', $total - $granted - $forbidden, ['count' => $total - $granted - $forbidden]),
-            ]),
-        ];
     }
 
     /**

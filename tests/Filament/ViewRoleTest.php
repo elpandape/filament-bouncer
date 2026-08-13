@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
+use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -14,6 +16,7 @@ use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
+use Silber\Bouncer\Database\Role;
 
 use function Pest\Livewire\livewire;
 
@@ -56,20 +59,76 @@ function readHolds(Model $role, Model $holder): bool
         ->exists();
 }
 
-test('the record is read in the shape it is written in, filled and out of reach', function (): void {
+test('the record says what the role says, and not a grid nobody can touch', function (): void {
     signInAsRoleManager();
 
     $role = readRole();
     grant($role, [['viewAny', Post::class]]);
 
-    $page = livewire(ViewRole::class, ['record' => $role->getKey()]);
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSeeHtml('class="fb-tg"')
+        ->assertSeeHtml('fb-tg-tag-granted')
+        ->assertDontSeeHtml('class="fb-table"');
+});
 
-    /** @var array<string, array<string, string>> $state */
-    $state = $page->get('data.'.RoleForm::ABILITIES);
+test('an action nobody said anything about is left off the reading', function (): void {
+    signInAsRoleManager();
 
-    expect($state[Subject::keyFor(Post::class)]['viewAny'] ?? null)->toBe(Stance::Granted->value);
+    $role = readRole();
+    grant($role, [['viewAny', Post::class]]);
 
-    $page->assertSeeHtml('class="fb-seg"')->assertSeeHtml('disabled: true');
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
+            $rows = array_column($entry->getRows(), 'tags', 'key');
+            $actions = array_column($rows[Subject::keyFor(Post::class)] ?? [], 'action');
+
+            return $actions === ['viewAny'];
+        });
+});
+
+test('what the role is silent about is named at the foot', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    grant($role, [['viewAny', Post::class]]);
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: fn (AbilityTags $entry): bool => $entry->getSilent() !== []);
+});
+
+test('a role saying nothing at all says so', function (): void {
+    signInAsRoleManager();
+
+    livewire(ViewRole::class, ['record' => readRole()->getKey()])
+        ->assertSee(__('filament-bouncer::roles.record.tags_empty'));
+});
+
+test('only the rules the next sync would take away are counted', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    grant($role, [['viewAny', Post::class]]);
+    Bouncer::allow($role)->to('archive', Post::class);
+    Bouncer::refresh();
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('orphans', checkComponentUsing: function (OrphanChips $entry): bool {
+            $doomed = $entry->getDoomed();
+
+            return $entry->getCount() === 1 && ($doomed[0]['action'] ?? '') === 'archive';
+        })
+        ->assertSee(__('filament-bouncer::roles.record.orphans_some'));
+});
+
+test('a role with nothing to lose says so', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    grant($role, [['viewAny', Post::class]]);
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('orphans', checkComponentUsing: fn (OrphanChips $entry): bool => $entry->isClean())
+        ->assertSee(__('filament-bouncer::roles.record.orphans_none'));
 });
 
 test('a denial is shown as a denial and not as an absence', function (): void {
@@ -275,4 +334,67 @@ test('the way back in still comes off an account that is not its last holder', f
 
     expect(readHolds($role, $first))->toBeFalse()
         ->and(readHolds($role, $second))->toBeTrue();
+});
+
+test('a narrowed rule names the record it reaches, and the one it owns says so', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    $post = Post::query()->create(['title' => 'Quipu']);
+
+    Bouncer::allow($role)->to('view', $post);
+    Bouncer::allow($role)->toOwn(Post::class)->to('update');
+    Bouncer::refresh();
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
+            $narrowed = array_column($entry->getNarrowed(), null, 'action');
+
+            return array_column($narrowed['view']['records'] ?? [], 'title') === ['Quipu']
+                && ($narrowed['update']['owned'] ?? false) === true
+                && ($narrowed['update']['records'] ?? null) === [];
+        })
+        ->assertSee(__('filament-bouncer::roles.record.narrowed_heading'))
+        ->assertSee(__('filament-bouncer::roles.record.owned'));
+});
+
+test('a narrowed rule whose record is gone says so instead of hiding it', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    $post = Post::query()->create(['title' => 'Quipu']);
+
+    Bouncer::allow($role)->to('view', $post);
+    Bouncer::refresh();
+
+    $post->delete();
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
+            $records = array_merge([], ...array_column($entry->getNarrowed(), 'records'));
+
+            return count($records) === 1 && ($records[0]['missing'] ?? false) === true;
+        })
+        ->assertSee(__('filament-bouncer::roles.record.record_gone'));
+});
+
+test('an entry has nothing to draw before it is put in a schema', function (): void {
+    signInAsRoleManager();
+
+    expect(AbilityTags::make('abilities')->getRows())->toBeEmpty()
+        ->and(AbilityTags::make('abilities')->getNarrowed())->toBeEmpty()
+        ->and(AbilityTags::make('abilities')->getStances())->toBeEmpty()
+        ->and(OrphanChips::make('orphans')->getDoomed())->toBeEmpty()
+        ->and(OrphanChips::make('orphans')->getGroups())->toBeEmpty();
+});
+
+test('what the role is silent about is spelled out while the names still fit', function (): void {
+    signInAsRoleManager();
+
+    $role = readRole();
+    grant($role, [['viewAny', Post::class], ['viewAny', Models::classname(Role::class)]]);
+
+    livewire(ViewRole::class, ['record' => $role->getKey()])
+        ->assertSchemaComponentExists('abilities', checkComponentUsing: fn (AbilityTags $entry): bool => $entry->spellsSilent())
+        ->assertSee(__('filament-bouncer::roles.record.and'));
 });

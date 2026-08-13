@@ -27,24 +27,8 @@ return [
         'cancel' => 'Cancelar',
     ],
 
-    'wizard' => [
-        'subtitle' => 'Tres pasos: identidad, permisos y revisión. Nada se guarda hasta el final.',
-        'identity' => 'El rol',
-        'identity_hint' => 'Cómo se llama, y cómo se le nombra.',
-        'identity_heading' => 'Identidad del rol',
-        'identity_note' => 'El nombre es el identificador interno; el título es lo que ven las personas.',
-        'abilities' => 'Habilidades',
-        'abilities_heading' => 'Permisos',
-        'abilities_note' => 'El catálogo deriva de las Policies. Para cada acción: concédela (✓), abstente (–) o prohíbela (✗). Una prohibición gana a cualquier concesión que llegue por otro rol.',
-        'abilities_hint' => 'Lo que podrá hacer quien lo tenga.',
-        'review' => 'Revisión',
-        'review_heading' => 'Revisión',
-        'review_note' => 'Lo que se va a escribir, sujeto a sujeto.',
-        'review_hint' => 'Lo que está a punto de escribirse.',
-    ],
-
-    'review' => [
-        'silent' => 'Sin definir: el rol se abstiene',
+    'create' => [
+        'subtitle' => 'Ponle nombre y di lo que podrá hacer quien lo tenga. Nada se guarda hasta que lo crees.',
     ],
 
     'summary' => [
@@ -96,6 +80,23 @@ return [
     ],
 
     'record' => [
+        'abilities_heading' => 'Habilidades',
+        'abilities_note' => 'Lo que este rol concede y lo que prohíbe, y nada más.',
+        'orphans_heading' => 'Reglas huérfanas',
+        'narrowed_heading' => 'Acotadas',
+        'narrowed_note' => 'Se componen a mano en la pantalla de habilidades. La rejilla de este rol no las escribe ni las borra.',
+        'owned' => 'solo lo que le pertenece',
+        'record_gone' => 'ya no existe',
+        'silent_spelled' => 'No dice nada sobre :names.',
+        'silent_counted' => 'No dice nada sobre otros :count sujetos.',
+        'silent_more' => 'Ver cuáles',
+        'and' => 'y',
+        'tags_empty' => 'Este rol no concede ni prohíbe nada.',
+        'orphans_loose' => 'Sin sujeto',
+        'orphans_none' => 'Nada por perder',
+        'orphans_some' => 'Se perderán',
+        'orphans_note_none' => 'Ninguna regla de este rol apunta a una habilidad que el código haya dejado de declarar.',
+        'orphans_note_some' => 'El próximo sync con --prune se las lleva, y con ellas lo que concedían.',
         'identity' => 'Identidad',
         'name' => 'Nombre',
         'title' => 'Título',

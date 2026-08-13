@@ -6,4 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Tests\Fixtures\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-final class Post extends Model {}
+final class Post extends Model
+{
+    protected $guarded = [];
+}

@@ -8,77 +8,43 @@ use ElPandaPe\FilamentBouncer\Filament\Concerns\SavesRoleAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\View;
-use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Composing a role, one question at a time.
+ * Composing a role: naming it and saying what it may do, on one screen.
  *
- * Three steps rather than one page, because the middle one is the whole catalogue and a
- * name field above it reads as an afterthought. Naming, choosing and reading back what
- * is about to be written are three different jobs, and the last of them is the point:
- * handing out abilities is the sort of thing that should be read once before it is done.
+ * It used to be three steps, and they were the answer to a catalogue laid out as a card
+ * per subject with a row per action — a page long enough that a name field above it read
+ * as an afterthought. Drawn as a matrix the whole catalogue fits, and the alta is the same
+ * screen as the edit: two ways of composing the same thing is one more than anybody needs
+ * to learn.
  *
- * The review step is drawn from the form state and not from the store, because there is
- * nothing in the store yet.
+ * What went with the steps was the review, the last screen before abilities were handed
+ * out. That is a real loss and it is taken knowingly: the matrix shows at once what the
+ * list made people walk through, and the role's record page reads it back the moment it
+ * exists.
  */
 final class CreateRole extends CreateRecord
 {
-    use HasWizard {
-        getWizardComponent as makeWizardComponent;
-    }
     use SavesRoleAbilities;
 
     protected static string $resource = RoleResource::class;
 
     public function getSubheading(): string
     {
-        return __('filament-bouncer::roles.wizard.subtitle');
+        return __('filament-bouncer::roles.create.subtitle');
     }
 
     /**
-     * The class is what lets the package's stylesheet reorder the footer the way the
-     * approved design has it — moving is left to the CSS, walking is left to Filament.
+     * The grid refuses a state saying nothing about anything, which only makes sense here:
+     * a role granting nothing and forbidding nothing answers no question, and there is
+     * nothing about it worth writing down. Clearing one back to neutral is how what an
+     * existing role holds is taken away, so the edit screen asks for no such thing.
      */
-    public function getWizardComponent(): Component
+    public function form(Schema $schema): Schema
     {
-        return $this->makeWizardComponent()->extraAttributes(['class' => 'fb-wizard']);
-    }
-
-    /**
-     * @return array<int, Step>
-     */
-    public function getSteps(): array
-    {
-        return [
-            Step::make(__('filament-bouncer::roles.wizard.identity'))
-                ->description(__('filament-bouncer::roles.wizard.identity_hint'))
-                ->schema([
-                    Section::make(__('filament-bouncer::roles.wizard.identity_heading'))
-                        ->description(__('filament-bouncer::roles.wizard.identity_note'))
-                        ->schema(RoleForm::identity(protectedNotice: true))
-                        ->columns(1),
-                ]),
-            Step::make(__('filament-bouncer::roles.wizard.abilities'))
-                ->description(__('filament-bouncer::roles.wizard.abilities_hint'))
-                ->schema([
-                    Section::make(__('filament-bouncer::roles.wizard.abilities_heading'))
-                        ->description(__('filament-bouncer::roles.wizard.abilities_note'))
-                        ->schema([RoleForm::grid(requiresAStance: true)]),
-                ]),
-            Step::make(__('filament-bouncer::roles.wizard.review'))
-                ->description(__('filament-bouncer::roles.wizard.review_hint'))
-                ->schema([
-                    Section::make(__('filament-bouncer::roles.wizard.review_heading'))
-                        ->description(__('filament-bouncer::roles.wizard.review_note'))
-                        ->schema([$this->reviewComponent()]),
-                ]),
-        ];
+        return RoleForm::configure($schema, requiresAStance: true);
     }
 
     /**
@@ -101,22 +67,5 @@ final class CreateRole extends CreateRecord
         if ($role instanceof Model) {
             $this->writeStances($role);
         }
-    }
-
-    /**
-     * What is about to be written, drawn by a view of the package's own.
-     *
-     * The analyser works out `view-string` by looking for the file among the paths the
-     * application renders from, and a package's namespaced view is never among them: it
-     * would have to be called `roles.review` in the consuming application to be found at
-     * all. The annotation says what it has no way of working out; the test that reads
-     * the last step is what proves the file is really there.
-     */
-    private function reviewComponent(): View
-    {
-        /** @var view-string $view */
-        $view = 'filament-bouncer::roles.review';
-
-        return View::make($view)->viewData(fn (Get $get): array => RoleForm::reviewData($get));
     }
 }
