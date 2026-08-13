@@ -63,14 +63,14 @@ return [
     ],
 
     'table' => [
+        'title' => 'Título',
+        'created' => 'Creado',
         'name' => 'Rol',
-        'coverage' => 'Alcance',
         'reaches_all' => 'Todo, por el comodín',
         'holders' => 'Cuentas',
         'updated' => 'Cambiado',
         'empty' => 'Todavía no hay ningún rol compuesto.',
         'search' => 'Buscar por nombre o título',
-        'legend' => 'cobertura sobre las :total habilidades del catálogo',
         'locked' => 'Este rol no se trabaja desde aquí: es la vía de vuelta, o uno que tú tienes.',
     ],
 

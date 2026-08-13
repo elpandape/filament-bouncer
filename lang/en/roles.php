@@ -63,14 +63,14 @@ return [
     ],
 
     'table' => [
+        'title' => 'Title',
+        'created' => 'Created',
         'name' => 'Role',
-        'coverage' => 'Reach',
         'reaches_all' => 'Everything, through the wildcard',
         'holders' => 'Accounts',
         'updated' => 'Changed',
         'empty' => 'No role has been composed yet.',
         'search' => 'Search by name or title',
-        'legend' => 'coverage over the :total abilities of the catalogue',
         'locked' => 'This role is not worked on from here: it is the way back in, or one you hold.',
     ],
 
