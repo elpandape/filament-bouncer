@@ -86,7 +86,7 @@ return [
         'scope_global' => 'Global',
         'abilities_heading' => 'Abilities',
         'abilities_note' => 'What this role grants and what it forbids, and nothing else.',
-        'orphans_heading' => 'Orphan rules',
+        'orphans_heading' => 'Orphan abilities',
         'narrowed_heading' => 'Narrowed',
         'narrowed_note' => 'Composed by hand on the abilities screen. The grid of this role neither writes nor removes them.',
         'owned' => 'only what it owns',

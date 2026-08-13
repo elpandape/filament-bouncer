@@ -50,14 +50,6 @@ final class ViewRole extends ViewRecord
         $this->fillForm();
     }
 
-    public function getSubheading(): ?string
-    {
-        /** @var string|null $title */
-        $title = $this->getRecord()->getAttribute('title');
-
-        return $title;
-    }
-
     public function content(Schema $schema): Schema
     {
         return $schema->components([
@@ -132,6 +124,7 @@ final class ViewRole extends ViewRecord
     {
         return Section::make(__('filament-bouncer::roles.record.abilities_heading'))
             ->description(__('filament-bouncer::roles.record.abilities_note'))
+            ->icon('heroicon-o-key')
             ->schema([AbilityTags::make('abilities')->hiddenLabel()])
             ->columnSpanFull();
     }
@@ -152,10 +145,10 @@ final class ViewRole extends ViewRecord
             ->schema([
                 TextEntry::make('created_at')
                     ->label(__('filament-bouncer::roles.record.created'))
-                    ->since(),
+                    ->isoDate('lll'),
                 TextEntry::make('updated_at')
                     ->label(__('filament-bouncer::roles.record.updated'))
-                    ->since(),
+                    ->isoDate('lll'),
             ]);
     }
 

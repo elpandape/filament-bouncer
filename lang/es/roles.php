@@ -86,7 +86,7 @@ return [
         'scope_global' => 'Global',
         'abilities_heading' => 'Habilidades',
         'abilities_note' => 'Lo que este rol concede y lo que prohíbe, y nada más.',
-        'orphans_heading' => 'Reglas huérfanas',
+        'orphans_heading' => 'Habilidades huérfanas',
         'narrowed_heading' => 'Acotadas',
         'narrowed_note' => 'Se componen a mano en la pantalla de habilidades. La rejilla de este rol no las escribe ni las borra.',
         'owned' => 'solo lo que le pertenece',

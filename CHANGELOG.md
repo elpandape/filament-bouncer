@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.2.1] - 2026-08-13
+
+### Changed
+
+- The record page's sections carry the same icons, the same heading for orphan abilities and
+  the same date format as the screen this one is matched against, and the role's title is no
+  longer repeated under the page heading — its identity card already says it.
+
 ## [6.2.0] - 2026-08-13
 
 ### Changed
