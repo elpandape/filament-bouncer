@@ -4,45 +4,41 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Tables;
 
-use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
+use ElPandaPe\FilamentBouncer\Store\AbilityStore;
+use ElPandaPe\FilamentBouncer\Store\Ailment;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
-use ElPandaPe\FilamentBouncer\Store\Reach;
-use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
-use ElPandaPe\FilamentBouncer\Store\Stance;
-use ElPandaPe\FilamentBouncer\Support\Labels;
+use ElPandaPe\FilamentBouncer\Store\Diagnosis;
+use ElPandaPe\FilamentBouncer\Support\Tenancy;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontFamily;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Grouping\Group;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
-use Silber\Bouncer\Database\Models;
 
 /**
- * Every rule the store holds, gathered under the thing it decides about.
+ * Every rule the store holds, with what only this screen can say about them.
  *
- * A flat list of ability names is unreadable past about thirty rows, because the name is
- * the least distinguishing part: a dozen models all have a `view`. Grouping by model puts
- * the answer to "what may be decided about a post" in one place, which is the question
- * somebody arriving at this screen actually has. The grouping is fixed — the picker that
- * offered to regroup by anything else is hidden, because there is nothing else worth
- * grouping by — and the group's own heading carries the model: its label, how many rules
- * it holds, and the class in monospace, so no column has to repeat it row after row.
+ * The health column is the reason the workbench exists: it reports four things that are true in the
+ * store, that nothing else detects, and that can only be mended from here. It is **one icon** with
+ * three states and the whole account in its tooltip — a row broken three ways stacked three badges
+ * in a cell and widened the table to say something you have to open the record page to act on
+ * anyway. The listing answers "is there anything, and how bad"; the record page answers "what
+ * exactly".
  *
- * Two columns carry what no name can say. The reconciliation's answer, in three states
- * rather than two, because a row nobody declares is on its way out and a row that was
- * never the reconciliation's business is in no danger at all — and a warning shown over
- * both is a warning nobody reads. And the holders, with what each of them says — the
- * grant in green and the denial in red, read off the pivot's own `forbidden` column,
- * because a denial and a grant are the same row seen from two roles and a grey chip
- * would flatten the one difference that matters.
+ * The declaration column stays from the screen this one replaces, and it earns its place for the
+ * same reason it did there: **it is what stands in for a delete button**. Knowing whether a row is
+ * declared, adrift, or was never the reconciliation's business says far more about how it will end
+ * than a button that would take every grant pointing at it along in one click.
  *
- * There is no delete, here or anywhere on this screen. A row goes when the code stops
- * declaring it and `--prune` takes it, which reports how many it swept; a button would
- * take every grant pointing at the row along with it, in one click and without a second
- * question.
+ * The model and the record are one column, because separately they have to be combined in the
+ * reader's head — "User" and "all" say nothing on their own. And the reach only speaks when it is
+ * not the ordinary one: saying "all records" under nine rows in ten drowns the two that are fenced.
  */
 final class AbilitiesTable
 {
@@ -53,147 +49,157 @@ final class AbilitiesTable
                 TextColumn::make('name')
                     ->label(__('filament-bouncer::abilities.table.name'))
                     ->badge()
+                    ->fontFamily(FontFamily::Mono)
                     ->searchable()
-                    ->sortable()
-                    ->description(self::title(...)),
-                TextColumn::make('reach')
+                    ->sortable(),
+
+                TextColumn::make('title')
+                    ->label(__('filament-bouncer::abilities.table.title'))
+                    ->searchable()
+                    ->placeholder(__('filament-bouncer::abilities.table.title_empty')),
+
+                TextColumn::make('entity_type')
                     ->label(__('filament-bouncer::abilities.table.reach'))
-                    ->badge()
-                    ->state(static fn (Model $record): string => Reach::reading($record))
-                    ->color(static fn (Model $record): string => Reach::of($record) === Reach::All ? 'gray' : 'info'),
+                    ->searchable()
+                    ->formatStateUsing(self::basename(...))
+                    ->description(self::reach(...))
+                    ->tooltip(fn (Model $record): ?string => self::text($record->getAttribute('entity_type')))
+                    ->placeholder(__('filament-bouncer::abilities.table.model_none')),
+
+                IconColumn::make('only_owned')
+                    ->label(__('filament-bouncer::abilities.table.owned'))
+                    ->boolean()
+                    // The default "no" is a red cross, and almost every rule says no: the whole
+                    // column read as a wall of errors and drowned the one that does warn.
+                    ->falseIcon('heroicon-m-minus')
+                    ->falseColor('gray'),
+
                 TextColumn::make('declared')
                     ->label(__('filament-bouncer::abilities.declared.label'))
                     ->badge()
                     ->state(static fn (Model $record): string => Declaration::of($record)->label())
                     ->color(static fn (Model $record): string => Declaration::of($record)->color()),
-                TextColumn::make('holders')
-                    ->label(__('filament-bouncer::abilities.table.holders'))
-                    ->badge()
-                    ->state(self::holders(...))
-                    ->color(self::holderColor(...)),
+
+                IconColumn::make('health')
+                    ->label(__('filament-bouncer::abilities.health.column'))
+                    ->alignCenter()
+                    ->state(fn (Model $record): string => resolve(Diagnosis::class)->severity($record))
+                    // These receive `$state`, not a parameter named to taste: Filament resolves
+                    // closures by parameter name, so one badly christened takes the table down.
+                    ->icon(fn (string $state): string => match ($state) {
+                        Diagnosis::SEVERE => 'heroicon-m-exclamation-circle',
+                        Diagnosis::HIDDEN => 'heroicon-m-eye-slash',
+                        default => 'heroicon-m-check-circle',
+                    })
+                    ->color(fn (string $state): string => $state === Diagnosis::HEALTHY ? 'gray' : $state)
+                    ->tooltip(fn (Model $record): string => self::ailmentNotes($record)
+                        ?? __('filament-bouncer::abilities.health.clean')),
+
+                TextColumn::make('scope')
+                    ->label(__('filament-bouncer::abilities.form.scope'))
+                    ->numeric()
+                    ->sortable()
+                    ->placeholder(__('filament-bouncer::abilities.form.scope_global'))
+                    ->visible(fn (): bool => resolve(Tenancy::class)->inUse()),
+
+                TextColumn::make('created_at')
+                    ->label(__('filament-bouncer::abilities.form.created'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('updated_at')
+                    ->label(__('filament-bouncer::abilities.form.updated'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->groups([
-                Group::make('entity_type')
-                    ->label(__('filament-bouncer::abilities.table.entity'))
-                    ->getTitleFromRecordUsing(self::groupTitle(...))
-                    ->getDescriptionFromRecordUsing(self::groupClass(...)),
-            ])
-            ->defaultGroup('entity_type')
-            ->groupingSettingsHidden()
-            ->recordActions([
-                ViewAction::make()
-                    ->link()
-                    ->icon(null),
-                EditAction::make()
-                    ->link()
-                    ->icon(null),
+            ->filters([
+                SelectFilter::make('health')
+                    ->label(__('filament-bouncer::abilities.health.column'))
+                    ->options(Ailment::class)
+                    ->query(self::onlyAiling(...)),
             ])
             ->defaultSort('name')
-            ->emptyStateHeading(__('filament-bouncer::abilities.table.empty'));
-    }
-
-    private static function title(Model $record): ?string
-    {
-        /** @var string|null $title */
-        $title = $record->getAttribute('title');
-
-        return $title;
+            ->recordActions([
+                // The long label ate a third of the width repeated on every row. What it means fits
+                // in the tooltip, which is only paid for by pointing at it.
+                Action::make('narrow')
+                    ->label(__('filament-bouncer::abilities.table.narrow'))
+                    ->tooltip(__('filament-bouncer::abilities.table.narrow_note'))
+                    ->icon('heroicon-m-viewfinder-circle')
+                    ->url(self::narrowUrl(...)),
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->emptyStateHeading(__('filament-bouncer::abilities.table.empty'))
+            ->emptyStateDescription(__('filament-bouncer::abilities.table.empty_note'));
     }
 
     /**
-     * What the rule decides about, in the words the panel uses for it.
-     *
-     * The store keeps the morph class, so an application with a morph map has names here
-     * the catalogue never keyed anything under. Falling back to the stored value is right
-     * rather than merely safe: it is what the row actually says.
+     * Composing a rule starts from one that already exists, with the record left blank — the one
+     * thing whoever is fencing it came to write.
      */
-    private static function subject(Model $record): string
+    private static function narrowUrl(Model $record): string
+    {
+        return AbilityResource::getUrl('create', array_filter([
+            'name' => $record->getAttribute('name'),
+            'entity_type' => $record->getAttribute('entity_type'),
+            'only_owned' => $record->getAttribute('only_owned') ? '1' : null,
+        ], static fn (mixed $value): bool => $value !== null));
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     * @param  array<string, mixed>  $data
+     * @return Builder<Model>
+     */
+    private static function onlyAiling(Builder $query, array $data): Builder
+    {
+        $value = $data['value'] ?? null;
+        $ailment = is_string($value) ? Ailment::tryFrom($value) : null;
+
+        return $ailment instanceof Ailment
+            ? $query->whereKey(resolve(Diagnosis::class)->keysWith($ailment))
+            : $query;
+    }
+
+    /**
+     * How far the rule reaches inside the model it names, and only when that is not the ordinary
+     * thing. Silence means "all of them", the same convention as the dash under "only owned".
+     */
+    private static function reach(Model $record): ?string
     {
         $type = $record->getAttribute('entity_type');
+        $id = $record->getAttribute('entity_id');
 
-        if (! is_string($type)) {
-            return __('filament-bouncer::abilities.form.no_entity');
-        }
+        return match (true) {
+            $id !== null => (string) __('filament-bouncer::abilities.table.reach_record', ['id' => self::text($id) ?? '']),
+            $type === AbilityStore::WILDCARD => (string) __('filament-bouncer::abilities.table.reach_any'),
+            default => null,
+        };
+    }
 
-        $subject = app(CatalogRegistry::class)->current()->subject(Subject::keyFor($type));
-
-        return $subject instanceof Subject ? $subject->label : $type;
+    private static function basename(?string $state): ?string
+    {
+        return $state === null ? null : basename(str_replace('\\', '/', $state));
     }
 
     /**
-     * The group's heading: the model, and how many rules the group gathers.
+     * Everything wrong with the row, whole, for the icon's tooltip. The icon sums up; this tells.
      */
-    private static function groupTitle(Model $record): string
+    private static function ailmentNotes(Model $record): ?string
     {
-        $type = $record->getAttribute('entity_type');
+        $notes = array_map(
+            static fn (Ailment $ailment): string => $ailment->note(),
+            resolve(Diagnosis::class)->of($record),
+        );
 
-        $query = Models::ability()->newQuery();
-
-        $count = (is_string($type) ? $query->where('entity_type', $type) : $query->whereNull('entity_type'))->count();
-
-        return self::subject($record).' — '.trans_choice('filament-bouncer::abilities.table.group_count', $count, ['count' => $count]);
+        return $notes === [] ? null : implode(' ', $notes);
     }
 
-    /**
-     * The class under the group's heading, in monospace, only where the heading itself
-     * is not already the class: a model the catalogue never keyed puts its class in the
-     * title, and repeating it below would say the same thing twice.
-     */
-    private static function groupClass(Model $record): ?HtmlString
+    private static function text(mixed $value): ?string
     {
-        $type = $record->getAttribute('entity_type');
-
-        if (! is_string($type)) {
-            return null;
-        }
-
-        if (! app(CatalogRegistry::class)->current()->subject(Subject::keyFor($type)) instanceof Subject) {
-            return null;
-        }
-
-        return new HtmlString('<span class="fb-code">'.e($type).'</span>');
-    }
-
-    /**
-     * Which roles say something about the rule, and which of the two things they say.
-     *
-     * Asked of the store one role at a time rather than joined by hand, so that this
-     * column and the cell on the roles screen cannot come to disagree: they are the same
-     * question of the same row, and only one of them is allowed to know how to answer it.
-     *
-     * @return array<int, string>
-     */
-    private static function holders(Model $record): array
-    {
-        $abilities = app(RoleAbilities::class);
-        $labels = app(Labels::class);
-        $holders = [];
-
-        foreach (Models::role()->newQuery()->orderBy('name')->get() as $role) {
-            $stance = $abilities->stanceOnRow($role, $record);
-
-            if ($stance === Stance::Neutral) {
-                continue;
-            }
-
-            /** @var string $name */
-            $name = $role->getAttribute('name');
-
-            $holders[] = __('filament-bouncer::abilities.table.holder', [
-                'role' => $name,
-                'stance' => $labels->stance($stance),
-            ]);
-        }
-
-        return $holders;
-    }
-
-    /**
-     * The colour a holder's chip wears, told apart by the suffix the chip itself was
-     * composed with two methods up — the pivot's `forbidden` in red, the grant in green.
-     */
-    private static function holderColor(string $state): string
-    {
-        return str_ends_with($state, app(Labels::class)->stance(Stance::Forbidden)) ? 'danger' : 'success';
+        return is_scalar($value) ? (string) $value : null;
     }
 }

@@ -57,6 +57,17 @@ function holds(Illuminate\Database\Eloquent\Model $authority, string $ability, ?
 }
 
 /**
+ * A model's key as text. `getKey()` declares `mixed`, which is true, so it cannot be
+ * concatenated or compared as a string without being narrowed first.
+ */
+function keyOf(Illuminate\Database\Eloquent\Model $model): string
+{
+    $key = $model->getKey();
+
+    return is_scalar($key) ? (string) $key : '';
+}
+
+/**
  * Signs in somebody who may work the roles screen.
  *
  * That screen is governed by abilities like everything else, so reaching it at all takes

@@ -10,13 +10,16 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\EditAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ListAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ViewAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityInfolist;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Tables\AbilitiesTable;
+use ElPandaPe\FilamentBouncer\Support\Tenancy;
 use Filament\Panel;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Database\Ability;
 use Silber\Bouncer\Database\Models;
@@ -118,17 +121,39 @@ final class AbilityResource extends Resource
     }
 
     /**
-     * One schema for reading and for changing, so that whoever learns where a thing is
-     * on one screen finds it in the same place on the other.
+     * Reading and changing keep the same sections in the same order, so that whoever learns where a
+     * thing is on one screen finds it in the same place on the other.
      */
     public static function form(Schema $schema): Schema
     {
         return AbilityForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return AbilityInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return AbilitiesTable::configure($table);
+    }
+
+    /**
+     * Reads past the tenant scope only where the installation does not use it.
+     *
+     * There a scoped row is an anomaly that nothing else can even see — the roles grid does not draw
+     * it and the Gate does not answer it — so this screen is the one place it can be found and
+     * mended. Where tenancy *is* used, reading past the scope would put another tenant's rows on
+     * screen, which is the one thing a package must not do on anybody's behalf.
+     *
+     * @return Builder<Model>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        return app(Tenancy::class)->inUse() ? $query : $query->withoutGlobalScopes();
     }
 
     /**

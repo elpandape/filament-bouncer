@@ -4,29 +4,21 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages;
 
-use ElPandaPe\FilamentBouncer\Filament\Concerns\PresentsAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Actions\ProbeAbility;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
+use ElPandaPe\FilamentBouncer\Store\Diagnosis;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Changing what a rule says, which is the title and who holds it — and nothing else.
- *
- * There is no delete action, and none is to be added. The resource refuses the answer to
- * every question Filament asks about deleting one of these, so an action put here would
- * be a button that leads to a wall; and a wall is the right end for a request typed at
- * the URL, not for something the screen offered.
- *
- * The stances are written after the record is saved, through the store, so that a cell
- * set here is the same row the roles screen writes — including the refresh, which nothing
- * in Bouncer does on its own and without which the screen repaints the state it just
- * changed.
+ * There is no delete action here, and none is to be added. The resource refuses the answer to every
+ * question Filament asks about deleting one of these, so a button put here would lead to a wall.
  */
 final class EditAbility extends EditRecord
 {
-    use PresentsAbility;
-
     protected static string $resource = AbilityResource::class;
 
     public function getSubheading(): string
@@ -35,42 +27,28 @@ final class EditAbility extends EditRecord
     }
 
     /**
-     * The parent's content with the rule's sentence standing above the form.
+     * @return array<int, Action>
      */
-    public function content(Schema $schema): Schema
+    protected function getHeaderActions(): array
     {
-        return $schema->components([
-            $this->phraseHero(),
-            $this->getFormContentComponent(),
-            $this->getRelationManagersContentComponent(),
-        ]);
+        return [
+            ProbeAbility::make(),
+            ViewAction::make(),
+        ];
     }
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
-    protected function mutateFormDataBeforeFill(array $data): array
+    protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        return $this->fillFacts($data, $this->getRecord());
-    }
+        // Why `forceFill` is in CreateAbility.
+        $record->forceFill($data)->save();
 
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        return $this->takeHolders($data);
-    }
+        // What was saved may have made or unmade a twin, and the diagnosis remembers within the
+        // request.
+        resolve(Diagnosis::class)->forget();
 
-    protected function afterSave(): void
-    {
-        $this->writeHolders($this->getRecord());
-    }
-
-    protected function getSavedNotificationTitle(): string
-    {
-        return __('filament-bouncer::abilities.saved');
+        return $record;
     }
 }
