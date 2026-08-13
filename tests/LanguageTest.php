@@ -36,7 +36,7 @@ function languageFile(string $locale, string $file): array
 
 test('a file ships the same keys in both tongues', function (string $file): void {
     expect(languageFile('es', $file))->toEqualCanonicalizing(languageFile('en', $file));
-})->with(['roles', 'abilities', 'actions', 'scopes', 'stances', 'console']);
+})->with(['roles', 'abilities', 'actions', 'scopes', 'stances', 'console', 'titles']);
 
 test('the grid says everything it needs to, in both tongues', function (): void {
     $keys = [

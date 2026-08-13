@@ -20,8 +20,6 @@ return [
         'reserved' => 'That name belongs to the role that holds everything, which the reconciliation writes and this screen does not.',
         'name_placeholder' => 'e.g. support',
         'name_help' => 'Lowercase and dashes. It is the role name in Bouncer, the one written in the code.',
-        'title_placeholder' => 'User support',
-        'title_help' => 'How it is shown in listings and record pages. Left blank on creation, Bouncer derives it from the name.',
         'protected_notice' => '<b>:name</b> is the protected role: only somebody who already holds it hands it out, and nobody takes it off its last holder. No new role may bear the name.',
         'save' => 'Save changes',
         'cancel' => 'Cancel',

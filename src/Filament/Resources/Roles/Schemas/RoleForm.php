@@ -8,6 +8,7 @@ use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
+use ElPandaPe\FilamentBouncer\Filament\Forms\DerivedTitle;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
@@ -17,10 +18,13 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Silber\Bouncer\Database\Models;
+use Silber\Bouncer\Database\Titles\RoleTitle;
 
 /**
  * What a role is called, and everything it is allowed to say.
@@ -99,6 +103,8 @@ final class RoleForm
         $fields = [
             TextInput::make('name')
                 ->label(__('filament-bouncer::roles.form.name'))
+                ->live(onBlur: true)
+                ->afterStateUpdated(DerivedTitle::follow(self::titleFromState(...)))
                 ->placeholder(__('filament-bouncer::roles.form.name_placeholder'))
                 ->helperText(new HtmlString(__('filament-bouncer::roles.form.name_help')))
                 ->required()
@@ -114,11 +120,10 @@ final class RoleForm
                         $fail(__('filament-bouncer::roles.form.reserved'));
                     }
                 }),
-            TextInput::make('title')
-                ->label(__('filament-bouncer::roles.form.title'))
-                ->placeholder(__('filament-bouncer::roles.form.title_placeholder'))
-                ->helperText(__('filament-bouncer::roles.form.title_help'))
-                ->maxLength(150),
+            ...DerivedTitle::make(
+                fromState: self::titleFromState(...),
+                fromRecord: self::titleOf(...),
+            ),
         ];
 
         $reserved = app(PrivilegedRole::class)->name();
@@ -158,6 +163,26 @@ final class RoleForm
         }
 
         return $grid;
+    }
+
+    /**
+     * The title the name on screen composes right now, asked of Bouncer's own generator on a row
+     * that is never saved — which is what the model itself does on `creating`.
+     */
+    private static function titleFromState(Get $get): string
+    {
+        $role = Models::role();
+
+        $role->forceFill(['name' => is_scalar($get('name')) ? (string) $get('name') : '']);
+
+        return self::titleOf($role);
+    }
+
+    private static function titleOf(Model $role): string
+    {
+        return filled($role->getAttribute('name'))
+            ? RoleTitle::from($role)->toString()
+            : '';
     }
 
     /**

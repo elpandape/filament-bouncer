@@ -20,8 +20,6 @@ return [
         'reserved' => 'Ese nombre es el del rol que lo tiene todo, que escribe la reconciliación y no esta pantalla.',
         'name_placeholder' => 'p. ej. soporte',
         'name_help' => 'Minúsculas y guiones. Es el nombre del rol en Bouncer, el que se escribe en el código.',
-        'title_placeholder' => 'Atención a usuarios',
-        'title_help' => 'Cómo se muestra en listados y fichas. Si se deja en blanco al crearlo, Bouncer lo deriva del nombre.',
         'protected_notice' => '<b>:name</b> es el rol protegido: solo lo entrega quien ya lo tiene y a su último titular no se le puede quitar. Ningún rol nuevo puede llamarse así.',
         'save' => 'Guardar cambios',
         'cancel' => 'Cancelar',
