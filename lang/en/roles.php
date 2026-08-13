@@ -27,10 +27,6 @@ return [
         'cancel' => 'Cancel',
     ],
 
-    'create' => [
-        'subtitle' => 'Name it and say what whoever holds it may do. Nothing is saved until you create it.',
-    ],
-
     'summary' => [
         'granted' => '{1} 1 granted|[2,*] :count granted',
         'forbidden' => '{1} 1 forbidden|[2,*] :count forbidden',

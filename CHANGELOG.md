@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.3.2] - 2026-08-13
+
+### Removed
+
+- The sentence under the heading of the create screen. The screen it is matched against does
+  not carry one, and what it said the form says on its own.
+
 ## [6.3.1] - 2026-08-13
 
 ### Changed

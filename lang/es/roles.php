@@ -27,10 +27,6 @@ return [
         'cancel' => 'Cancelar',
     ],
 
-    'create' => [
-        'subtitle' => 'Ponle nombre y di lo que podrá hacer quien lo tenga. Nada se guarda hasta que lo crees.',
-    ],
-
     'summary' => [
         'granted' => '{1} 1 concedida|[2,*] :count concedidas',
         'forbidden' => '{1} 1 prohibida|[2,*] :count prohibidas',

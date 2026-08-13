@@ -31,11 +31,6 @@ final class CreateRole extends CreateRecord
 
     protected static string $resource = RoleResource::class;
 
-    public function getSubheading(): string
-    {
-        return __('filament-bouncer::roles.create.subtitle');
-    }
-
     /**
      * The grid refuses a state saying nothing about anything, which only makes sense here:
      * a role granting nothing and forbidding nothing answers no question, and there is
