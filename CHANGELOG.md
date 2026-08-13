@@ -7,6 +7,30 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [6.3.0] - 2026-08-13
+
+### Changed
+
+- **The form is laid out the way the screen it is matched against lays it out**: identity
+  wide on the left with its heading, its icon and a sentence under it, what is known about
+  the role on the right, and the catalogue across the width below. Composing a role leaves
+  nothing on the right — there is no record yet to say when it was created — so the identity
+  takes the width there instead of leaving a quarter of the screen empty.
+- **The tenant is read on the form as well as on the record page.** It is the store's own
+  column: writing it by hand makes rows the rest of the system does not expect, and lets two
+  roles share a name, so it is drawn as an entry and never as an input.
+- **The save and the way out are Filament's own buttons, below the section.** They used to
+  live inside the grid's summary bar, floating over the catalogue.
+
+### Removed
+
+- **The figures above the listing**, the sentence under its heading, and the header of the
+  edit screen with its facts and its reach bar. None of them are in the design this screen
+  is matched against — and the edit header was showing a translation key where a word
+  belonged.
+- The stylesheet lost the fifty-odd rules those pieces used, along with the widget, its
+  view and its test.
+
 ## [6.2.1] - 2026-08-13
 
 ### Changed

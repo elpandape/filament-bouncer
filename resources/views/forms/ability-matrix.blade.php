@@ -43,16 +43,6 @@
                 </div>
             @endforeach
 
-            @if ($doesSubmitFromSummary())
-                <div class="fb-summary">
-                    <a href="{{ $getSummaryCancelUrl() }}" class="fb-btn fb-btn-out">{{ __('filament-bouncer::roles.form.cancel') }}</a>
-                    <button type="button" class="fb-btn fb-btn-pri fb-summary-save" x-on:click="$wire.call('save')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
-                        {{ __('filament-bouncer::roles.form.save') }}
-                    </button>
-                </div>
-            @endif
-
             <p class="fb-hint">{{ __('filament-bouncer::roles.grid.hint') }}</p>
 
             @if ($notes !== [])

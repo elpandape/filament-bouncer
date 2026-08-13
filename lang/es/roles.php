@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
 
     'form' => [
+        'abilities_note' => 'Todo lo que el panel declara. Quien puede trabajar esta pantalla reparte cualquiera de ellas, incluso a sí mismo.',
         'role' => 'Rol',
         'name' => 'Nombre',
         'title' => 'Título',
@@ -19,9 +20,9 @@ return [
         'requires_stance' => 'Concede o prohíbe al menos una habilidad antes de continuar.',
         'reserved' => 'Ese nombre es el del rol que lo tiene todo, que escribe la reconciliación y no esta pantalla.',
         'name_placeholder' => 'p. ej. soporte',
-        'name_help' => 'Minúsculas y guiones. Es el <code>name</code> del rol en Bouncer.',
-        'title_placeholder' => 'p. ej. Atención a usuarios',
-        'title_help' => 'Cómo se muestra en listados y fichas.',
+        'name_help' => 'Minúsculas y guiones. Es el nombre del rol en Bouncer, el que se escribe en el código.',
+        'title_placeholder' => 'Atención a usuarios',
+        'title_help' => 'Cómo se muestra en listados y fichas. Si se deja en blanco al crearlo, Bouncer lo deriva del nombre.',
         'protected_notice' => '<b>:name</b> es el rol protegido: solo lo entrega quien ya lo tiene y a su último titular no se le puede quitar. Ningún rol nuevo puede llamarse así.',
         'save' => 'Guardar cambios',
         'cancel' => 'Cancelar',
@@ -58,10 +59,6 @@ return [
         'plural' => 'Roles',
     ],
 
-    'list' => [
-        'subtitle' => 'La postura de seguridad del panel de un vistazo: quién puede qué, y qué está prohibido.',
-    ],
-
     'table' => [
         'scope' => 'Tenant',
         'title' => 'Título',
@@ -72,10 +69,6 @@ return [
         'empty' => 'Todavía no hay ningún rol compuesto.',
         'search' => 'Buscar por nombre o título',
         'locked' => 'Este rol no se trabaja desde aquí: es la vía de vuelta, o uno que tú tienes.',
-    ],
-
-    'edit' => [
-        'updated' => 'actualizado :when',
     ],
 
     'record' => [
@@ -121,13 +114,6 @@ return [
         'forbidden' => '{1} prohibida|prohibidas',
         'neutral' => 'sin definir',
         'of' => 'de :total',
-    ],
-
-    'stats' => [
-        'roles' => 'Roles',
-        'abilities' => 'Habilidades declaradas',
-        'forbidden' => 'Prohibiciones vigentes',
-        'unassigned' => 'Cuentas sin ningún rol',
     ],
 
     'relation' => [

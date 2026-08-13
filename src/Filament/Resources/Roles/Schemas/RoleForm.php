@@ -8,13 +8,14 @@ use Closure;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
-use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Store\Restriction;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
@@ -39,20 +40,55 @@ final class RoleForm
      */
     public const string ABILITIES = 'abilities';
 
-    public static function configure(Schema $schema, bool $submitsFromSummary = false, bool $requiresAStance = false): Schema
+    public static function configure(Schema $schema, bool $requiresAStance = false): Schema
     {
-        return $schema->components([
-            Section::make(__('filament-bouncer::roles.form.role'))
-                ->schema(self::identity(protectedNotice: $requiresAStance))
-                ->columns(2)
-                ->columnSpanFull(),
-            // Headless on purpose. The catalogue names itself on every line of it, so a
-            // heading and a sentence above would push the first subject a screenful
-            // down to say what the rows underneath already say.
-            Section::make()
-                ->schema([self::grid($submitsFromSummary, $requiresAStance)])
-                ->columnSpanFull(),
-        ]);
+        return $schema
+            ->columns(4)
+            ->components([
+                Group::make()
+                    ->schema([
+                        Section::make(__('filament-bouncer::roles.form.role'))
+                            ->description(__('filament-bouncer::roles.record.identity_note'))
+                            ->icon('heroicon-o-shield-check')
+                            ->schema(self::identity(protectedNotice: $requiresAStance)),
+                    ])
+                    // Composing a role has nothing on the right yet — there is no record to
+                    // say when it was created — so the identity takes the width instead of
+                    // leaving a quarter of the screen empty.
+                    ->columnSpan(fn (?Model $record): array => ['lg' => $record instanceof Model ? 3 : 4]),
+
+                Group::make()
+                    ->schema([
+                        // The tenant is read and not set: it is the store's own column, and
+                        // writing it by hand makes rows the rest of the system does not
+                        // expect — and lets two roles share a name.
+                        Section::make(__('filament-bouncer::roles.record.scope'))
+                            ->schema([
+                                TextEntry::make('scope')
+                                    ->hiddenLabel()
+                                    ->numeric()
+                                    ->placeholder(__('filament-bouncer::roles.record.scope_global')),
+                            ]),
+
+                        Section::make(__('filament-bouncer::roles.record.metadata'))
+                            ->schema([
+                                TextEntry::make('created_at')
+                                    ->label(__('filament-bouncer::roles.record.created'))
+                                    ->isoDate('lll'),
+
+                                TextEntry::make('updated_at')
+                                    ->label(__('filament-bouncer::roles.record.updated'))
+                                    ->isoDate('lll'),
+                            ]),
+                    ])
+                    ->hidden(fn (?Model $record): bool => ! $record instanceof Model),
+
+                Section::make(__('filament-bouncer::roles.record.abilities_heading'))
+                    ->description(__('filament-bouncer::roles.form.abilities_note'))
+                    ->icon('heroicon-o-key')
+                    ->schema([self::grid($requiresAStance)])
+                    ->columnSpanFull(),
+            ]);
     }
 
     /**
@@ -110,16 +146,12 @@ final class RoleForm
      * second answer to a question the policy has already answered: whoever may work
      * this screen hands out all of it, including to themselves.
      */
-    public static function grid(bool $submitsFromSummary = false, bool $requiresAStance = false): AbilityGrid
+    public static function grid(bool $requiresAStance = false): AbilityGrid
     {
         $grid = AbilityGrid::make(self::ABILITIES)
             ->hiddenLabel()
             ->catalog(app(CatalogRegistry::class)->current())
             ->notes(self::notes(...));
-
-        if ($submitsFromSummary) {
-            $grid->submitsFromSummary(RoleResource::getUrl('index'));
-        }
 
         if ($requiresAStance) {
             $grid->requiresAStance();

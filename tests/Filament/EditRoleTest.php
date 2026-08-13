@@ -10,9 +10,10 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Tag;
-use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Field;
+use Filament\Schemas\Components\Component;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
@@ -194,30 +195,12 @@ test('the header no longer offers deleting, which lives behind the kebab of the 
         ->assertOk();
 });
 
-test('the save lives inside the summary bar and the page adds no button row below', function (): void {
+test('the screen reads what is known about the role beside what it may do', function (): void {
     signInAsRoleManager();
 
     livewire(EditRole::class, ['record' => editedRole()->getKey()])
-        ->assertSeeHtml('fb-summary-save')
-        ->assertSeeHtml('x-on:click="$wire.call(\'save\')"');
-});
-
-test('the header reads the facts on one side and the reach bar on the other', function (): void {
-    signInAsRoleManager();
-
-    $role = editedRole();
-    $holder = User::forceCreate([
-        'name' => 'Killa',
-        'email' => 'killa@example.test',
-        'password' => 'irrelevant',
-    ]);
-
-    grant($role, [['viewAny', Post::class]]);
-    Bouncer::assign('editor')->to($holder);
-    Bouncer::refresh();
-
-    livewire(EditRole::class, ['record' => $role->getKey()])
-        ->assertSeeHtml('fb-edit-heading')
-        ->assertSee(trans_choice('filament-bouncer::roles.edit.holders', 1, ['count' => 1]))
-        ->assertSee(__('filament-bouncer::roles.coverage.catalog', ['total' => editedCatalogCells()]));
+        ->assertSee(__('filament-bouncer::roles.record.scope'))
+        ->assertSee(__('filament-bouncer::roles.record.metadata'))
+        ->assertSchemaComponentExists('scope', checkComponentUsing: fn (Component $component): bool => ! $component instanceof Field)
+        ->assertOk();
 });

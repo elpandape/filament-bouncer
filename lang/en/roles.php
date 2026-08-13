@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
 
     'form' => [
+        'abilities_note' => 'Everything the panel declares. Whoever may work this screen hands out any of them, including to themselves.',
         'role' => 'Role',
         'name' => 'Name',
         'title' => 'Title',
@@ -19,9 +20,9 @@ return [
         'requires_stance' => 'Grant or forbid at least one ability before continuing.',
         'reserved' => 'That name belongs to the role that holds everything, which the reconciliation writes and this screen does not.',
         'name_placeholder' => 'e.g. support',
-        'name_help' => 'Lowercase and dashes. It is the role\'s <code>name</code> in Bouncer.',
-        'title_placeholder' => 'e.g. Customer support',
-        'title_help' => 'How it reads on listings and record pages.',
+        'name_help' => 'Lowercase and dashes. It is the role name in Bouncer, the one written in the code.',
+        'title_placeholder' => 'User support',
+        'title_help' => 'How it is shown in listings and record pages. Left blank on creation, Bouncer derives it from the name.',
         'protected_notice' => '<b>:name</b> is the protected role: only somebody who already holds it hands it out, and nobody takes it off its last holder. No new role may bear the name.',
         'save' => 'Save changes',
         'cancel' => 'Cancel',
@@ -58,10 +59,6 @@ return [
         'plural' => 'Roles',
     ],
 
-    'list' => [
-        'subtitle' => 'The panel\'s security posture at a glance: who may do what, and what is forbidden.',
-    ],
-
     'table' => [
         'scope' => 'Tenant',
         'title' => 'Title',
@@ -72,10 +69,6 @@ return [
         'empty' => 'No role has been composed yet.',
         'search' => 'Search by name or title',
         'locked' => 'This role is not worked on from here: it is the way back in, or one you hold.',
-    ],
-
-    'edit' => [
-        'updated' => 'updated :when',
     ],
 
     'record' => [
@@ -121,13 +114,6 @@ return [
         'forbidden' => '{1} forbidden|forbidden',
         'neutral' => 'not defined',
         'of' => 'of :total',
-    ],
-
-    'stats' => [
-        'roles' => 'Roles',
-        'abilities' => 'Abilities declared',
-        'forbidden' => 'Denials in force',
-        'unassigned' => 'Accounts without a role',
     ],
 
     'relation' => [

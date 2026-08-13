@@ -48,10 +48,6 @@ final class AbilityGrid extends Field
 
     private ?Closure $notes = null;
 
-    private bool $submitsFromSummary = false;
-
-    private ?string $summaryCancelUrl = null;
-
     public function catalog(Catalog $catalog): static
     {
         $this->catalog = $catalog;
@@ -97,32 +93,6 @@ final class AbilityGrid extends Field
         $this->notes = $notes;
 
         return $this;
-    }
-
-    /**
-     * Put the save and the way out inside the summary bar, instead of a button row of
-     * the page's own below it.
-     *
-     * The page that wants this asks for it; the creation wizard never does, because
-     * there the save belongs to the wizard's last step. The buttons also stay away from
-     * a disabled grid — a record page reads, it does not save.
-     */
-    public function submitsFromSummary(string $cancelUrl): static
-    {
-        $this->submitsFromSummary = true;
-        $this->summaryCancelUrl = $cancelUrl;
-
-        return $this;
-    }
-
-    public function doesSubmitFromSummary(): bool
-    {
-        return $this->submitsFromSummary && ! $this->isDisabled();
-    }
-
-    public function getSummaryCancelUrl(): ?string
-    {
-        return $this->summaryCancelUrl;
     }
 
     /**

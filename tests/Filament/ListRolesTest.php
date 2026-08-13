@@ -112,12 +112,10 @@ test('the rows nobody works on from here say so with a padlock', function (): vo
         ->assertActionHidden(TestAction::make('locked')->table($ordinary));
 });
 
-test('the listing announces itself and offers searching by name or title', function (): void {
+test('the listing offers searching by name or title', function (): void {
     signInAsRoleManager();
 
-    livewire(ListRoles::class)
-        ->assertSee(__('filament-bouncer::roles.list.subtitle'))
-        ->assertSee(__('filament-bouncer::roles.table.search'));
+    livewire(ListRoles::class)->assertSee(__('filament-bouncer::roles.table.search'));
 });
 
 test('a row still offers being read when it may not be changed', function (): void {
@@ -144,12 +142,6 @@ test('the screen offers composing a role of its own', function (): void {
 
     livewire(ListRoles::class)
         ->assertActionVisible(TestAction::make('create'));
-});
-
-test('the screen carries the figures its rows cannot show', function (): void {
-    signInAsRoleManager();
-
-    livewire(ListRoles::class)->assertSeeHtml('filament.widgets.role-stats');
 });
 
 test('a delete armed by hand takes away the role whose row offers one', function (): void {
