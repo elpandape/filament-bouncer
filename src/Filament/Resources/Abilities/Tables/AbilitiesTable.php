@@ -130,7 +130,17 @@ final class AbilitiesTable
                     ->icon('heroicon-m-viewfinder-circle')
                     ->url(self::narrowUrl(...)),
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(static fn (Model $record): bool => AbilityResource::canEdit($record)),
+                // The same padlock the roles screen shows over the role that is the way back in,
+                // and for the same reason: this row is what makes that role hold everything.
+                Action::make('locked')
+                    ->hiddenLabel()
+                    ->iconButton()
+                    ->icon('heroicon-o-lock-closed')
+                    ->disabled()
+                    ->tooltip(__('filament-bouncer::abilities.table.locked'))
+                    ->visible(static fn (Model $record): bool => AbilityResource::isLocked($record)),
             ])
             ->emptyStateHeading(__('filament-bouncer::abilities.table.empty'))
             ->emptyStateDescription(__('filament-bouncer::abilities.table.empty_note'));

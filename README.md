@@ -216,6 +216,15 @@ another role wins, the wildcard grants what nobody wrote down, and a fenced rule
 the record it fences. The record page will ask Bouncer, for any role or account, what it answers
 right now — which beats the alternative of handing the rule out and watching.
 
+### The wildcard row is not worked on from here
+
+`*` over `*` is what makes the role that holds everything hold it: the package asks Bouncer's
+clipboard for exactly that pair to know whether the role still reaches everything, and writes
+that very row back to restore it. Renaming it, or pointing it at a model, takes that role's
+reach away without the role being touched — so the row carries a padlock instead of a way of
+editing it, the same as the privileged role on the other screen. Only that pair: `*` over one
+model grants a great deal, but nothing depends on it to get back in.
+
 ### There is no delete, here or anywhere on this screen
 
 A row is pointed at by every grant ever made from it, and taking the row away takes all of them with

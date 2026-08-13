@@ -10,6 +10,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\EditAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ListAbilities;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ViewAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
+use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\Ailment;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
 use ElPandaPe\FilamentBouncer\Store\Diagnosis;
@@ -443,4 +444,30 @@ test('the probe says so instead of asking when the model cannot be loaded', func
     livewire(ViewAbility::class, ['record' => $ghost->getRouteKey()])
         ->mountAction(TestAction::make('probe'))
         ->assertSchemaComponentDoesNotExist(ProbeAbility::HOLDER);
+});
+
+test('the row that makes the privileged role privileged is not worked on from here', function (): void {
+    // The very pair `PrivilegedRole` asks the clipboard about, and writes back to restore that
+    // role's reach: renaming it or pointing it at a model takes the reach away without the role
+    // being touched.
+    $wildcard = stored(['name' => AbilityStore::WILDCARD, 'entity_type' => AbilityStore::WILDCARD]);
+
+    expect(AbilityResource::canEdit($wildcard))->toBeFalse()
+        ->and(AbilityResource::isLocked($wildcard))->toBeTrue()
+        ->and(AbilityResource::canEdit(declaredAbility()))->toBeTrue()
+        ->and(AbilityResource::isLocked(declaredAbility()))->toBeFalse();
+
+    livewire(ListAbilities::class)
+        ->searchTable(AbilityStore::WILDCARD)
+        ->assertActionVisible(TestAction::make('locked')->table($wildcard))
+        ->assertActionHidden(TestAction::make('edit')->table($wildcard));
+});
+
+test('a rule reaching every model of one action is still worked on from here', function (): void {
+    // The wildcard on one half only: it grants a great deal, but nothing depends on it to get
+    // back in, so locking it would be locking a row this screen exists to correct.
+    $sweep = stored(['name' => 'sweep', 'entity_type' => AbilityStore::WILDCARD]);
+
+    expect(AbilityResource::canEdit($sweep))->toBeTrue()
+        ->and(AbilityResource::isLocked($sweep))->toBeFalse();
 });

@@ -12,6 +12,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Pages\ViewAbility;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityForm;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Schemas\AbilityInfolist;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\Tables\AbilitiesTable;
+use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Support\Tenancy;
 use Filament\Panel;
 use Filament\Resources\Pages\PageRegistration;
@@ -169,6 +170,23 @@ final class AbilityResource extends Resource
         ];
     }
 
+    public static function canEdit(Model $record): bool
+    {
+        return ! self::isWildcard($record) && parent::canEdit($record);
+    }
+
+    /**
+     * Whether the row shows the padlock instead of a way of working on it.
+     *
+     * Deliberately not the policy's answer, the same as on the roles screen: the padlock
+     * explains why a row that could otherwise be worked on is out of reach, and a reader the
+     * policy refuses everything to would see it lie on every row.
+     */
+    public static function isLocked(Model $record): bool
+    {
+        return self::isWildcard($record);
+    }
+
     public static function canDelete(Model $record): bool
     {
         return false;
@@ -177,5 +195,20 @@ final class AbilityResource extends Resource
     public static function canDeleteAny(): bool
     {
         return false;
+    }
+
+    /**
+     * The one row nobody works on from here: the wildcard over the wildcard.
+     *
+     * It is the way back in. `PrivilegedRole` asks the clipboard for exactly this pair to know
+     * whether the role that holds everything still holds it, and writes this very row to restore
+     * it — so renaming this row, or pointing it at a model, takes that role's reach away without
+     * touching the role. A way back in that can be edited is not one, which is the same reason
+     * the roles screen refuses to edit the privileged role.
+     */
+    private static function isWildcard(Model $record): bool
+    {
+        return $record->getAttribute('name') === AbilityStore::WILDCARD
+            && $record->getAttribute('entity_type') === AbilityStore::WILDCARD;
     }
 }

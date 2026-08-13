@@ -63,6 +63,7 @@ return [
         'reach_any' => 'Any model',
         'model_none' => 'No model',
         'owned' => 'Only what is owned',
+        'locked' => 'This row is not worked on from here: it is what makes the role that holds everything hold it.',
         'narrow' => 'Fence',
         'narrow_note' => 'Compose another rule like this one, fenced to a record',
         'empty' => 'The catalogue has written no abilities yet',

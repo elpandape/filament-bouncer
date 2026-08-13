@@ -63,6 +63,7 @@ return [
         'reach_any' => 'Cualquier modelo',
         'model_none' => 'Ningún modelo',
         'owned' => 'Solo lo propio',
+        'locked' => 'Esta fila no se trabaja desde aquí: es lo que hace que el rol que lo puede todo lo pueda.',
         'narrow' => 'Acotar',
         'narrow_note' => 'Componer otra regla igual que esta, acotada a un registro',
         'empty' => 'El catálogo todavía no ha escrito ninguna habilidad',
