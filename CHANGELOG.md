@@ -7,6 +7,21 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [9.1.0] - 2026-08-13
+
+### Added
+
+- **Forbidding a whole model now draws the columns it reaches**, hollow and in the colour of a
+  denial. Granting one already did; forbidding it drew nothing at all, which was the worse of
+  the two silences — a denial reaches further than a grant, since it beats a grant arriving
+  from any other role.
+
+### Fixed
+
+- **The checkbox no longer drops a pixel on the first click of every cell.** It is aligned by
+  its baseline, which is its own bottom edge while it is empty and the icon's baseline the
+  moment one is drawn.
+
 ## [9.0.0] - 2026-08-13
 
 The two policies swap names, because they were the wrong way round: the one named after the

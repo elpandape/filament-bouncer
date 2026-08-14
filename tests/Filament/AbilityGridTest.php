@@ -328,6 +328,15 @@ test('a cell holding a rule the grid cannot write is marked', function (): void 
         ->assertSeeHtml('class="fb-narrowed"');
 });
 
+test('a cell says which of the two broader rules reaches it, not merely that one does', function (): void {
+    // Forbidding the whole model reaches every column just as granting it does, and reaches
+    // further — a denial beats a grant arriving from any other role. Drawing the two alike, or
+    // the denial not at all, is the worse of the two lies.
+    livewire(GridHost::class)
+        ->assertSeeHtml("' fb-box-broader fb-box-broader-'")
+        ->assertSeeHtml('saysBroader(');
+});
+
 test('a cell reads the manage box live, and not only what the role already holds', function (): void {
     // The whole-model grant stores one row and never the columns beside it, so the hollow tick over
     // those columns has to be worked out in the browser: the server only knows what was saved.

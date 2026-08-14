@@ -40,13 +40,31 @@ says(entity, action) {
      read here as well and live, because granting a whole model is a rule composed on this
      very screen: it stores one row, `*` over that model, and never the columns beside it —
      so without this those columns stay blank until the form is saved and opened again,
-     which is exactly when it is too late to check what was about to be handed out. --}}
+     which is exactly when it is too late to check what was about to be handed out.
+
+     It answers which of the two, not whether: forbidding the whole model reaches every
+     column just as granting it does, and it reaches further — a denial beats a grant
+     arriving from any other role — so drawing the two the same way, or drawing the denial
+     not at all, would be the worse of the two lies. --}}
 inherits(entity, action, reached) {
     if (this.at(entity, action) !== @js($getNeutral())) {
-        return false
+        return ''
     }
 
-    return reached || (action !== @js($columns['manage']['action']) && this.at(entity, @js($columns['manage']['action'])) === 'granted')
+    if (action !== @js($columns['manage']['action'])) {
+        const whole = this.at(entity, @js($columns['manage']['action']))
+
+        if (whole === 'granted' || whole === 'forbidden') {
+            return whole
+        }
+    }
+
+    {{-- What the server worked out is a grant: it asks the clipboard, which answers no to
+         a denial and to an abstention alike. --}}
+    return reached ? 'granted' : ''
+},
+saysBroader(stance) {
+    return stance === '' ? '' : @js($broaderSays)[stance]
 },
 {{-- A shortcut leaves the row saying exactly what it names: it grants its own and
      silences the rest. Adding without taking away would turn "read only" into "reading on

@@ -258,6 +258,10 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
     background-color: transparent;
     color: transparent;
     cursor: pointer;
+    /* Without this the box is aligned by its baseline, which is its own bottom edge while it
+       is empty and the icon's baseline the moment one is drawn: the box drops a pixel or two
+       on the first click of every cell. */
+    vertical-align: middle;
     transition: border-color 75ms, background-color 75ms, color 75ms;
 }
 
@@ -288,12 +292,21 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
 }
 
 /* What arrives through a broader rule is drawn hollow: it is there and this role did not
-   write it. */
+   write it. Which of the two it is keeps its own colour, because a denial arriving this way
+   reaches further than a grant does — it beats a grant from any other role. */
 .fb-box-broader {
     border-style: dashed;
-    border-color: var(--fb-yes);
     background-color: transparent;
+}
+
+.fb-box-broader-granted {
+    border-color: var(--fb-yes);
     color: color-mix(in oklab, var(--fb-yes) 55%, transparent);
+}
+
+.fb-box-broader-forbidden {
+    border-color: var(--fb-no);
+    color: color-mix(in oklab, var(--fb-no) 55%, transparent);
 }
 
 /* The dot marks a rule this screen neither writes nor removes, so the box would otherwise

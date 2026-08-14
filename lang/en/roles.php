@@ -10,6 +10,7 @@ return [
         'title' => 'Title',
         'empty' => 'You hold no abilities of your own, so there is nothing here to hand on.',
         'inherited' => 'Held through a broader rule, not granted here.',
+        'inherited_no' => 'Refused through a broader rule, not forbidden here.',
         'overruled' => 'Granted here, but a broader rule forbids it.',
         'restricted_owned' => 'It also holds a rule here for only what it owns, which the grid leaves untouched.',
         'restricted_records' => 'It also holds a rule here about one record, which the grid leaves untouched.|It also holds rules here about :count records, which the grid leaves untouched.',

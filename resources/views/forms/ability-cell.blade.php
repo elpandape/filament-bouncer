@@ -26,7 +26,6 @@
     $bare ??= false;
     $reached = $broader[$row['key']][$action] ?? false;
     $note = $notes[$row['key']][$action] ?? null;
-    $inherited = ' · '.__('filament-bouncer::roles.form.inherited');
     $says = $note === null ? '' : ' · '.$note;
 @endphp
 
@@ -47,23 +46,23 @@
         data-entity="{{ $row['key'] }}"
         data-action="{{ $action }}"
         x-on:click="cycle(@js($row['key']), @js($action), $event.shiftKey)"
-        x-bind:class="'fb-box-' + at(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? ' fb-box-broader' : '')"
-        x-bind:title="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? @js($inherited) : '') + @js($says)"
-        x-bind:aria-label="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? @js($inherited) : '') + @js($says)"
+        x-bind:class="'fb-box-' + at(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? ' fb-box-broader fb-box-broader-' + inherits(@js($row['key']), @js($action), @js($reached)) : '')"
+        x-bind:title="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + saysBroader(inherits(@js($row['key']), @js($action), @js($reached))) + @js($says)"
+        x-bind:aria-label="@js($describes) + ' · ' + says(@js($row['key']), @js($action)) + saysBroader(inherits(@js($row['key']), @js($action), @js($reached))) + @js($says)"
     >
         @if ($note !== null)
             <span class="fb-narrowed" aria-hidden="true"></span>
         @endif
 
         <svg
-            x-show="at(@js($row['key']), @js($action)) === 'granted' || inherits(@js($row['key']), @js($action), @js($reached))"
+            x-show="at(@js($row['key']), @js($action)) === 'granted' || inherits(@js($row['key']), @js($action), @js($reached)) === 'granted'"
             x-cloak
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
         ><path d="M20 6 9 17l-5-5" /></svg>
 
         <svg
-            x-show="at(@js($row['key']), @js($action)) === 'forbidden'"
+            x-show="at(@js($row['key']), @js($action)) === 'forbidden' || inherits(@js($row['key']), @js($action), @js($reached)) === 'forbidden'"
             x-cloak
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
             stroke-linecap="round" aria-hidden="true"

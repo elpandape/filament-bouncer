@@ -5,6 +5,10 @@
     $stances = $getStances();
     $notes = $getNotes();
     $broader = $getBroader();
+    $broaderSays = [
+        'granted' => ' · '.__('filament-bouncer::roles.form.inherited'),
+        'forbidden' => ' · '.__('filament-bouncer::roles.form.inherited_no'),
+    ];
     $disabled = $isDisabled();
     $offered = [$columns['manage']['action'], ...array_column(array_merge([], ...array_column($columns['groups'], 'actions')), 'action')];
 @endphp
