@@ -10,14 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * How a role stands against the whole catalogue, counted once.
  *
- * Four screens ask the same question — the grid's own summary, the table, the record page
- * and the header widget — and each of them counting it again would walk the catalogue
- * four times over for a single row.
+ * Counted once because four screens ask it, and each counting again would walk the catalogue four
+ * times for a single row.
  *
- * What is reached without a rule of its own is carried apart rather than folded into the
- * grants. A role holding the wildcard holds no row for any cell here, so a bar drawn from
- * the grants alone would report that it can do nothing at all, which is the opposite of
- * true.
+ * What is reached without a rule of its own is carried apart: a role holding the wildcard holds no
+ * row for any cell, so a figure drawn from the grants alone would report it can do nothing.
  */
 final readonly class RoleCoverage
 {

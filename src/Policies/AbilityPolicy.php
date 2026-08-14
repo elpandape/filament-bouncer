@@ -11,20 +11,13 @@ use Silber\Bouncer\Database\Models;
 /**
  * Who may read the abilities screen, rename what it lists, and narrow an ability.
  *
- * `create` makes exactly one kind of row: a narrowed one, about a single record or about
- * what its holder owns. Those are the rows the reconciliation deliberately never speaks
- * for, so `--check` does not fail on them and `--prune` does not take them away. The
- * plain row stays out of reach, because that one the catalogue owns: it is a method on a
- * policy, a page, a widget or a name in configuration, and `filament-bouncer:reconcile`
- * is what writes it.
+ * `create` makes one kind of row: a narrowed one, which the reconciliation never speaks for. The
+ * plain row belongs to the catalogue and `filament-bouncer:reconcile` writes it.
  *
- * There is deliberately no `delete`. A row is only ever removed by the reconciliation
- * that stopped declaring it, and taking one away here would take every grant pointing at
- * it with no second question asked.
+ * There is deliberately no `delete`: a row goes only when the reconciliation stops declaring it,
+ * and taking one away here would take every grant pointing at it with no second question.
  *
- * `update` is offered because exactly one field is the reader's: the title. The name the
- * code asks the Gate and the model it asks about are declarations, and the form shows
- * them without letting them be touched.
+ * `update` is offered because one field is the reader's — the title.
  */
 final class AbilityPolicy extends BouncerPolicy
 {

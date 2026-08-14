@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas;
 
 use Closure;
-use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Filament\Forms\AbilityGrid;
 use ElPandaPe\FilamentBouncer\Filament\Forms\DerivedTitle;
@@ -190,17 +189,11 @@ final class RoleForm
     /**
      * What a cell says once its stance has said all it can.
      *
-     * Three things a stance cannot express on its own, and each of them is a way for a
-     * grid read at face value to be wrong about the role in front of it:
-     *
-     * - the role answers yes to an ability it holds no rule for, because something
-     *   broader reaches it — the wildcard being the obvious one;
-     * - the role was granted the ability right here and still answers no, because a
-     *   denial beats every grant reaching the same ability;
-     * - the role holds rules the grid neither writes nor removes: the ones about a
-     *   single record and the ones covering only what their holder owns. Saying
-     *   nothing about those would leave the cell reading "not granted" about a role
-     *   that can plainly delete its own posts.
+     * Three things a stance cannot express, each of them a way for the grid to be wrong at
+     * face value: the role answers yes through something broader, it answers no because a
+     * denial beats every grant, or it holds a narrowed rule the grid neither writes nor
+     * removes — which would leave the cell reading "not granted" about a role that can
+     * plainly delete its own posts.
      *
      * @return array<string, array<string, string>>
      */

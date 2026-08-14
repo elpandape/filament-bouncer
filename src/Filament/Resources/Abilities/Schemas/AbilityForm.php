@@ -32,27 +32,13 @@ use Silber\Bouncer\Database\Models;
 use Silber\Bouncer\Database\Titles\AbilityTitle;
 
 /**
- * Every column of an ability, all of them writable.
+ * Every column of an ability, all of them writable: this screen is the store's workbench, so a row
+ * the catalogue does not declare can be composed here — one `--check` reports and `--prune` sweeps.
  *
- * This screen is the store's workbench, so none of the refusals the rest of the package makes about
- * composing a rule are here: the name and the model are declarations that
- * `filament-bouncer:reconcile` writes, and from here they can be composed by hand. What comes of
- * that is a row the catalogue does not declare — one `--check` reports and `--prune` sweeps.
- *
- * Deleting is the one thing it will not do, here or anywhere on this screen. A row is pointed at by
- * every grant ever made from it, and taking the row away takes all of them with it, silently. The
- * way a row is meant to go is that the code stops declaring it and `--prune` sweeps it, saying how
- * many it swept — which is what the declaration column reports.
- *
- * Two fields are offered as pickers rather than as free text, and the asymmetry between them is
- * deliberate:
- *
- * - **The name can be taken out of the list**, because composing a rule the catalogue does not yet
- *   declare is the one thing this screen is for. Filament will not let a value be typed into a
- *   `Select`, so those are two components over the same state key with one visible at a time.
- * - **The model cannot.** A model the panel does not declare is exactly the ailment the health
- *   column reports as a ghost, and typing one by hand would be composing what the other half of the
- *   screen exists to detect.
+ * The name can be taken out of its pull-down and the model cannot, which is not symmetry lost.
+ * Composing a rule the catalogue does not yet declare is what this screen is for; naming a model
+ * the panel does not declare is the very ailment the health column reports as a ghost. Filament
+ * will not let a value be typed into a `Select`, so the name is two components over one state key.
  */
 final class AbilityForm
 {
@@ -256,10 +242,9 @@ final class AbilityForm
     /**
      * The actions the panel declares today, as a list.
      *
-     * They come from the catalogue and not from a list in configuration: here they are the methods
-     * of each policy, so an action added this morning is on the list this afternoon and a retired
-     * one leaves it. The reading leads and the identifier follows in brackets — the reading is what
-     * the list is scanned by, and the identifier is what gets stored and what goes in a policy.
+     * From the catalogue and not from configuration, so an action added this morning is on the
+     * list this afternoon. The reading leads and the identifier follows in brackets: the reading
+     * is what the list is scanned by, the identifier is what gets stored.
      *
      * @return array<string, string>
      */
@@ -282,9 +267,8 @@ final class AbilityForm
     /**
      * The models by their name, never by their class.
      *
-     * The other way round from the actions, where the identifier is shown because it is what the
-     * code asks and what has to be known: here the class is written by nobody and searched by
-     * nobody, and repeated in every option it turns the list into a wall of paths.
+     * The other way round from the actions: a class is written by nobody and searched by nobody,
+     * and repeated in every option it turns the list into a wall of paths.
      *
      * @return array<string, string>
      */

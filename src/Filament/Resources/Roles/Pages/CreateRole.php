@@ -14,16 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Composing a role: naming it and saying what it may do, on one screen.
  *
- * It used to be three steps, and they were the answer to a catalogue laid out as a card
- * per entity with a row per action — a page long enough that a name field above it read
- * as an afterthought. Drawn as a matrix the whole catalogue fits, and the alta is the same
- * screen as the edit: two ways of composing the same thing is one more than anybody needs
- * to learn.
- *
- * What went with the steps was the review, the last screen before abilities were handed
- * out. That is a real loss and it is taken knowingly: the matrix shows at once what the
- * list made people walk through, and the role's record page reads it back the moment it
- * exists.
+ * One screen and not a wizard: composing is the same screen as editing, and two ways of composing
+ * the same thing is one more than anybody needs to learn. What goes with the steps is the review
+ * before abilities are handed out — taken knowingly, since the matrix shows at once what the steps
+ * made people walk through.
  */
 final class CreateRole extends CreateRecord
 {

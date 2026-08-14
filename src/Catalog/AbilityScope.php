@@ -17,9 +17,8 @@ enum AbilityScope: string
     /**
      * The scope an action falls into, according to the given map.
      *
-     * Anything the map does not name is a write: an unclassified action is far more
-     * likely to change something than to merely read it, and the grid has to err on
-     * the side that makes a cell look more dangerous than it is, never less.
+     * Anything the map does not name is a write: the grid has to err on the side that makes a
+     * cell look more dangerous than it is, never less.
      *
      * @param  array<string, array<int, string>>  $map
      */

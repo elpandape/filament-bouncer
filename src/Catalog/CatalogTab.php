@@ -7,11 +7,9 @@ namespace ElPandaPe\FilamentBouncer\Catalog;
 /**
  * How the catalogue is divided on screen.
  *
- * An entity that carries a policy answers a handful of actions and belongs in a grid;
- * a page, a widget or an ability declared in configuration answers exactly one, and a
- * grid one column wide is a worse way to read a list than a list is. The division is
- * therefore not decoration: it is the difference between an entity that has actions
- * and one that only has a door.
+ * An entity with a policy answers a handful of actions and belongs in a grid; a page, a widget or
+ * an ability declared in configuration answers one, and a grid one column wide reads worse than a
+ * list. The division is the difference between an entity that has actions and one with only a door.
  */
 enum CatalogTab: string
 {

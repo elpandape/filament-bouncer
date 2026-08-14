@@ -15,14 +15,11 @@ use ReflectionMethod;
 /**
  * Refuses to let a panel finish booting with a page or a widget that decides nothing.
  *
- * It throws in production too, and that is the decision rather than an oversight. A
- * component nobody authorises is open to everybody who reaches the panel at all, and
- * nothing about the screen says so: it looks exactly like a component that was meant to
- * be open. A deployment that falls over loudly gets reverted within the hour; a hole of
- * this kind is found by whoever goes looking for it, and they are not on your side.
+ * It throws in production too, deliberately: a component nobody authorises is open to everybody
+ * and looks exactly like one meant to be open. A deployment that falls over loudly gets reverted
+ * within the hour; this kind of hole is found by whoever goes looking for it.
  *
- * The way to say "this one really is for everybody" is the ignore list, which is a
- * decision written down where the next reader will find it.
+ * The way to say "this one really is for everybody" is the ignore list.
  */
 final readonly class PanelGuard
 {
@@ -64,11 +61,9 @@ final readonly class PanelGuard
     /**
      * The resources whose model has no policy at all.
      *
-     * Filament falls open here: with no policy it asks nobody and lets everybody
-     * through, so this is the quietest hole of the three. It is reported by the
-     * reconcile command rather than thrown at boot, because unlike a page that decides
-     * nothing, writing the missing policy is real work and a deploy that stops dead in
-     * the middle of it helps no one.
+     * Filament falls open here, which makes it the quietest hole of the three. Reported by the
+     * reconcile command rather than thrown at boot: writing the missing policy is real work, and
+     * a deploy that stops dead in the middle of it helps no one.
      *
      * @return array<int, class-string<FilamentResource>>
      */

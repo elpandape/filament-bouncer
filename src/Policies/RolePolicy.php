@@ -16,16 +16,12 @@ use Silber\Bouncer\Database\Role;
  * model now has a policy, "manage roles" appears in the grid as an ordinary row. Nothing
  * about it is special-cased, and nobody is quietly exempt.
  *
- * Two consequences worth knowing before this is switched on. Nobody reaches the screen
- * until somebody grants them these abilities, which is what the role named in
- * `privileged_role` is for. And handing them on is still entity to the same rule as
- * everything else: you cannot give away what you do not hold.
+ * Nobody reaches the screen until somebody grants them these abilities, which is what the
+ * role named in `privileged_role` is for.
  *
- * There is deliberately no `deleteAny`. Filament authorises a bulk delete once for the
- * whole selection, and the two refusals that keep the privileged role and your own role
- * out of reach live on the resource rather than here — so a bulk delete would walk past
- * both. The roles table offers no bulk actions, and an ability nothing ever asks about
- * has no business being on the grid.
+ * There is deliberately no `deleteAny`: Filament authorises a bulk delete once for the whole
+ * selection, and the two refusals keeping the privileged role and your own out of reach live
+ * on the resource, so a bulk delete would walk past both.
  *
  * An application that wants its own answer registers a policy for the role model from a
  * provider of its own, which boots after this one and wins.

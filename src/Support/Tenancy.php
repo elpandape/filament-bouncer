@@ -11,22 +11,14 @@ use Throwable;
 /**
  * Whether this installation scopes Bouncer's rows to a tenant.
  *
- * It decides one thing: whether the tenant is part of the abilities screen's vocabulary — a column,
- * a field, an entry — or something that simply is not there. That is a question about intent, so it
- * is answered by configuration and not by data: a column that comes and goes with the first scoped
- * row cannot be learnt.
+ * It decides whether the tenant is part of the screens' vocabulary — a column, a field, an entry —
+ * or something that is not there at all. A question about intent, so it is answered by
+ * configuration: a column that comes and goes with the first scoped row cannot be learnt.
  *
- * Three ways to ask were considered and two were wrong:
- *
- * - **Whether a tenancy package is installed.** It answers a different question. An application
- *   using a database per tenant never needs Bouncer's scope, and one can set that scope by hand
- *   with no package at all. Wrong in both directions.
- * - **Whether a scope is set right now.** Bouncer's scope is a *global static*, not a per-request
- *   value: it is whatever the application last set, which is no basis for deciding that a column
- *   exists.
- *
- * What is left is configuration, with a default that asks the one thing that is both about this
- * panel and settled at boot: whether Filament's own tenancy is turned on for it.
+ * Neither of the two things it could have read instead would do. Whether a tenancy package is
+ * installed answers a different question, wrong in both directions; and Bouncer's scope is a global
+ * static, whatever the application last set. The default asks the one thing both about this panel
+ * and settled at boot: whether Filament's own tenancy is turned on for it.
  */
 final readonly class Tenancy
 {

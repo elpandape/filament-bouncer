@@ -16,23 +16,18 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Silber\Bouncer\BouncerFacade as Bouncer;
 
 /**
  * What a role says, read in the shape it is written in.
  *
- * The identity is entries rather than disabled inputs, because nothing on a record page
- * is waiting to be typed into. Below them the same grid as the edit screen, disabled:
- * chips or a list of names would have made reading and changing two different pictures
- * of the same thing, and somebody who learns where a cell is here would then have to
- * find it again over there.
+ * The same grid as the edit screen, disabled: chips or a list of names would make reading and
+ * changing two different pictures of the same thing.
  *
- * The denials get a card of their own even when there are none, because a denial beats
- * any grant arriving through another role: knowing there is none is worth a card.
+ * The denials get a card even when there are none, since a denial beats any grant arriving through
+ * another role and knowing there is none is worth saying.
  *
- * And the people holding the role are on the page too, with the one way this screen may
- * change anything: taking the role off one of them. That write goes through Bouncer and
- * refuses the last holder of the way back in — in the writing, not only in the drawing.
+ * Taking the role off a holder is the one write here, and it refuses the last holder of the way
+ * back in — in the writing, not only in the drawing.
  */
 final class ViewRole extends ViewRecord
 {
@@ -90,9 +85,8 @@ final class ViewRole extends ViewRecord
     /**
      * The way in, offered only where there is one.
      *
-     * The resource refuses to edit your own role and the way back in, and this asks it
-     * rather than the policy: a record page that offered a door onto a page which aborts
-     * would be worse than one that offers none.
+     * Asked of the resource and not the policy: a record page offering a door onto a page that
+     * aborts is worse than one offering none.
      *
      * @return array<int, Action>
      */

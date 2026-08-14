@@ -130,9 +130,8 @@ final readonly class CatalogBuilder
     /**
      * The actions a model's policy is prepared to answer.
      *
-     * A model with no policy contributes nothing on purpose. Its abilities would be
-     * ones no code ever consults, and handing an administrator a switch that decides
-     * nothing is worse than showing no switch at all.
+     * A model with no policy contributes nothing on purpose: its abilities would be ones no
+     * code ever consults, and a switch that decides nothing is worse than no switch.
      *
      * @param  class-string<Model>  $model
      * @return array<int, string>

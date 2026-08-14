@@ -15,21 +15,13 @@ use Silber\Bouncer\Database\Models;
 /**
  * What this role is about to lose to the next `--prune`.
  *
- * It counts only the doomed ones. `Declaration` has three states, and a list showing all
- * three puts under the same alarm the narrowed rules — which are healthy, which `--prune`
- * does not touch and which the record page already names one by one. Reading the same
- * warning over a row on its way out and over one in no danger is how people learn to
- * ignore the warning.
+ * Only the doomed ones: `Declaration` has three states, and listing all three puts the narrowed
+ * rules under the same alarm, which is how people learn to ignore it.
  *
- * The entity is looked up in the catalogue even though the rule has left it: what stopped
- * being declared is the action, not the model, so there is nearly always a label to read
- * and the class name with its namespace is the last resort rather than the first.
- *
- * The action, on the other hand, is said raw. Its readable label would come from
- * humanising the name — nobody translated an action that no longer exists — and that
- * invented title reads as if somebody had written it, when the only certain thing is the
- * identifier stored on the row, which is also what anybody has to search for to find where
- * it came from.
+ * The entity is looked up in the catalogue even though the rule has left it — what stopped being
+ * declared is the action, not the model — while the action is said raw. Humanising a name nobody
+ * translated invents a title that reads as if somebody had written it, when the only certain thing
+ * is the identifier stored on the row, which is also what has to be searched for.
  */
 trait ReadsDoomedRules
 {
@@ -75,9 +67,8 @@ trait ReadsDoomedRules
     /**
      * Every ability row this role holds, catalogued or not.
      *
-     * The pivot is joined by hand rather than read through the relation because the role
-     * model is whichever the application configured, and nothing promises the analyser it
-     * carries Bouncer's traits.
+     * The pivot is joined by hand because the role model is whichever the application
+     * configured, and nothing promises the analyser it carries Bouncer's traits.
      *
      * @return EloquentCollection<int, StoredAbility>
      */

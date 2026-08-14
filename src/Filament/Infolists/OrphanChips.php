@@ -9,14 +9,12 @@ use ElPandaPe\FilamentBouncer\Filament\Infolists\Concerns\ReadsDoomedRules;
 /**
  * What the role is about to lose, worn as the chips the rest of the page is read in.
  *
- * It goes in the narrow column beside the metadata: a warning does not need the width of
- * the content, it needs to be where people look. Each rule is a chip carrying the raw
- * identifier and nothing else, grouped by the entity it points at, with a group of its own
- * for the ones pointing at none — a loose ability belongs to nobody, and pretending it
- * belongs to a model would hide it among that model's.
+ * In the narrow column beside the metadata: a warning does not need the width of the content, it
+ * needs to be where people look. Each chip carries the raw identifier and nothing else, grouped by
+ * the entity it points at and apart where it points at none.
  *
- * It says there is nothing to lose when there is nothing to lose. Blank space reads as if
- * nobody had looked, and half the worth of a warning is knowing it was switched on.
+ * It says there is nothing to lose when there is nothing to lose: blank space reads as if nobody
+ * had looked.
  */
 final class OrphanChips extends Entry
 {

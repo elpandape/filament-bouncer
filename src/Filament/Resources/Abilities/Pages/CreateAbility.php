@@ -40,9 +40,8 @@ final class CreateAbility extends CreateRecord
     /**
      * Written with `forceFill` rather than through the parent's constructor.
      *
-     * Three of these columns are not fillable on Bouncer's own model, and under strict Eloquent an
-     * assignment naming them throws rather than dropping them quietly — while an application that
-     * unguards its models would write them either way. Neither is something a package can assume.
+     * Three of these columns are not fillable on Bouncer's model, and under strict Eloquent an
+     * assignment naming them throws rather than dropping them.
      *
      * @param  array<string, mixed>  $data
      */

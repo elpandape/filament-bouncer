@@ -15,37 +15,21 @@ use Silber\Bouncer\Database\Models;
 /**
  * What is wrong with a row of the abilities table.
  *
- * A service with a memory rather than a bag of static methods, and the reason is the price. Asked
- * row by row it costs a query each to know whether a row has a twin, and the listing's column asks
- * twice per row — once for the icon and once for its tooltip — so a page of ten cost twenty
- * queries and the widget two whole passes over the table. Thirty rows never notice; a table is
- * (models × policy methods) + pages + widgets + custom, and a panel of thirty resources is past
- * two hundred.
+ * A service with a memory, not a bag of static methods: asked row by row the twins cost a query
+ * each, and the listing's column asks twice per row. The twins come back in one query grouped by
+ * the quintuple, which works because `GROUP BY` groups nulls together where `=` does not.
  *
- * Two things fix it:
- *
- * - **The twins come back in one query**, grouped by the quintuple. It is expressible in SQL
- *   because `GROUP BY` *does* group nulls together, unlike `=` — which is exactly what makes it
- *   look impossible at first.
- * - **What it looks up, it remembers for the request**: the set of twins, whether each fenced
- *   record is there, and the census.
- *
- * The price of remembering is that a write inside the same request leaves the memory stale, and
- * that is what `forget()` is for; the screens call it after they write. Bound as `scoped`, so the
- * memory lasts exactly one request.
+ * Bound as `scoped`, so the memory lasts one request; a write inside that request leaves it stale,
+ * which is what `forget()` is for.
  */
 final class Diagnosis
 {
     public const string HEALTHY = 'healthy';
 
-    /**
-     * Out of sight, not broken: the row is not lying, nobody else can simply see it.
-     */
+    /** Out of sight, not broken. */
     public const string HIDDEN = 'warning';
 
-    /**
-     * Already answering wrongly today.
-     */
+    /** Already answering wrongly today. */
     public const string SEVERE = 'danger';
 
     /**
@@ -66,7 +50,7 @@ final class Diagnosis
     public function __construct(private readonly Tenancy $tenancy) {}
 
     /**
-     * Forgets what it looked up. Goes after any write that can change a diagnosis.
+     * Goes after any write that can change a diagnosis.
      */
     public function forget(): void
     {
@@ -111,10 +95,8 @@ final class Diagnosis
     }
 
     /**
-     * What is wrong with the row in a single word, for the listing's icon.
-     *
-     * The listing answers "is there anything, and how bad"; the record page answers "what exactly",
-     * where there is room for the four questions and for what to do about each.
+     * What is wrong with the row in a single word: the listing answers "is there anything, and how
+     * bad", the record page answers "what exactly".
      */
     public function severity(Model $ability): string
     {
@@ -134,14 +116,9 @@ final class Diagnosis
     }
 
     /**
-     * The four checks with their answer, and the answer with the fact inside.
-     *
-     * "Twin" without saying *which* one sends the reader off to look for it, and "ghost model"
-     * without saying *which class* hides the first thing needed to mend it.
-     *
-     * This is the only place that asks which the twin is rather than merely whether there is one,
-     * and it can afford to: a record page reads one row, while the listing reads ten and makes do
-     * with the set.
+     * The four checks with the fact inside each answer: "twin" without saying which one sends the
+     * reader off to look for it. The only place that asks *which* the twin is, which it can afford
+     * because a record page reads one row where the listing reads ten.
      *
      * @return array<int, array{ailment: Ailment, failed: bool, reading: string}>
      */
@@ -247,10 +224,8 @@ final class Diagnosis
     }
 
     /**
-     * Whether writing these columns would put a second row saying what another already says.
-     *
-     * It lives here and not on the form because what makes two rows identical is already written
-     * here, and two spellings of it are how the refusal and the report come to disagree.
+     * Whether writing these columns would repeat a row. Here and not on the form because two
+     * spellings of what makes rows identical are how the refusal and the report come to disagree.
      *
      * @param  array<string, mixed>  $columns
      */
@@ -271,8 +246,6 @@ final class Diagnosis
     }
 
     /**
-     * The rows suffering that ailment, for the filter.
-     *
      * @return array<int, mixed>
      */
     public function keysWith(Ailment $ailment): array
@@ -294,8 +267,6 @@ final class Diagnosis
     }
 
     /**
-     * The repeated quintuples, in one query.
-     *
      * @return array<string, true>
      */
     private function duplicateSignatures(): array
@@ -322,10 +293,8 @@ final class Diagnosis
     }
 
     /**
-     * What makes two rows identical, as one string.
-     *
-     * Composed with `json_encode` rather than by concatenation, so that a null and an empty string
-     * are not written the same — Bouncer tells them apart.
+     * Encoded rather than concatenated, so a null and an empty string are not written the same:
+     * Bouncer tells them apart.
      */
     private function signature(Model $ability): string
     {
@@ -361,10 +330,8 @@ final class Diagnosis
     }
 
     /**
-     * Reads past the tenant scope only where the installation does not use it.
-     *
-     * There it can reveal nothing but anomalies, because no row should carry a tenant at all. Where
-     * tenancy *is* used, reading past the scope would put another tenant's rows on screen.
+     * Reads past the tenant scope only where the installation does not use it: there it can reveal
+     * nothing but anomalies, whereas under tenancy it would put another tenant's rows on screen.
      *
      * @return Builder<Ability>
      */
@@ -411,8 +378,7 @@ final class Diagnosis
             return false;
         }
 
-        // Remembered because several rows can fence the same record, and because the listing's
-        // column asks twice per row.
+        // Several rows can fence the same record, and the listing's column asks twice per row.
         $key = $class.'|'.$this->text($id);
 
         return ! ($this->records[$key] ??= $class::query()->whereKey($id)->exists());

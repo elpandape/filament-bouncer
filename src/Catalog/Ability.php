@@ -132,10 +132,8 @@ final readonly class Ability
     /**
      * The row this ability is, as the store keeps it.
      *
-     * `entity_id` and `only_owned` are pinned to their empty values because the
-     * catalogue only ever describes blanket abilities. Rows that carry either are
-     * about one record or one owner, so they belong to the application and the
-     * reconciliation has no business touching them.
+     * `entity_id` and `only_owned` are pinned empty because the catalogue only describes
+     * blanket abilities: a row carrying either belongs to the application.
      *
      * @return array<string, mixed>
      */

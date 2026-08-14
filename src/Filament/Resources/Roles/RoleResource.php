@@ -27,14 +27,10 @@ use UnitEnum;
 /**
  * The screen roles are composed on.
  *
- * Two refusals live here rather than on the table, and they are the reason this class is
- * worth reading before it is changed. Filament asks the resource whether a record may be
- * edited or deleted from three places at once — the row's buttons, the page it opens and
- * the request that page receives — so an answer given here is given to all three, and an
- * armed request meets the same wall a hidden button does.
- *
- * Hiding the buttons alone would be theatre: the edit page is a URL, and a role is a name
- * away from granting itself everything.
+ * The two refusals live here and not on the table: Filament asks the resource from three places
+ * at once — the row's buttons, the page they open and the request that page receives — so an
+ * armed request meets the same wall a hidden button does. Hiding the buttons alone would be
+ * theatre, since the edit page is a URL away.
  */
 final class RoleResource extends Resource
 {
@@ -82,11 +78,8 @@ final class RoleResource extends Resource
     /**
      * The icon, whatever shape the application named it in.
      *
-     * Deliberately as wide as Filament's own signature rather than narrowed to a string:
-     * an icon set shipped as a backed enum is the ordinary way to name one, and an
-     * application handing one through configuration would otherwise meet a type error
-     * from inside the sidebar, with the whole panel down and nothing on this screen to
-     * explain why.
+     * As wide as Filament's own signature rather than narrowed to a string: an icon shipped as a
+     * backed enum would otherwise meet a type error from inside the sidebar, with the panel down.
      */
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
     {
@@ -166,13 +159,8 @@ final class RoleResource extends Resource
     /**
      * The two roles nobody works on from here, whatever their abilities say.
      *
-     * Your own, because everything you may hand out you may hand to yourself, and a role
-     * you hold is the shortest way there: one save and the account at the keyboard has
-     * whatever it just wrote. Somebody else's account is another matter — that is the
-     * screen doing its job.
-     *
-     * And the privileged one, because it is the way back in when a mistake leaves nobody
-     * able to hand anything out. A way back in that can be edited is not one.
+     * Your own, because a role you hold is the shortest way to handing yourself whatever you
+     * just wrote. And the privileged one, because a way back in that can be edited is not one.
      */
     private static function mayBeChanged(Model $record): bool
     {

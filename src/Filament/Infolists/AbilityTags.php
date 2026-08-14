@@ -21,18 +21,13 @@ use Silber\Bouncer\Database\Models;
 /**
  * What the role says, and only what it says.
  *
- * A grid answers cell by cell and so has to draw them all: over a catalogue of four
- * entities that is nearly thirty boxes to answer three things, and the three that matter
- * read as faintly as the twenty-odd that say nothing. Here a row carries only the actions
- * holding a stance, so the answer is read at a glance and its length grows with what the
- * role does rather than with what the panel declares — which is what saves it from the
- * grid, whose columns are the union of whatever any policy declares and grow on their own.
+ * A row carries only the actions holding a stance, so its length grows with what the role does
+ * rather than with what the panel declares — where a grid has to draw every cell, and the three
+ * that matter read as faintly as the twenty-odd that say nothing.
  *
- * What it loses is just as real and worth knowing: without a grid nobody can ask "and
- * creating?" and find the box, because an action with no stance simply is not there. The
- * foot makes up for half of that by naming the entities it says nothing about; what this
- * page can no longer say is which actions existed and went unused. The form is for that,
- * and it draws them all because there they have to be settable.
+ * The loss is real: an action with no stance is simply not there, so nobody can ask "and creating?"
+ * and find the box. The foot makes up half of it by naming the entities this says nothing about;
+ * the form draws them all, because there they have to be settable.
  */
 final class AbilityTags extends Entry
 {
@@ -81,10 +76,8 @@ final class AbilityTags extends Entry
     /**
      * The doors holding a stance, grouped by their tab.
      *
-     * A page, a widget or an ability declared in configuration answers one action, so its
-     * row is the tag and nothing else: there is no list to trim. They go apart from the
-     * entities because their action is none of the ones the others declare, and mixing
-     * them would suggest they share it.
+     * They go apart from the entities because their one action is none of the ones the others
+     * declare, and mixing them would suggest they share it.
      *
      * @return list<array{tab: string, label: string, rows: list<array{key: string, label: string, tags: list<array{action: string, label: string, stance: string}>}>}>
      */
@@ -118,16 +111,11 @@ final class AbilityTags extends Entry
     /**
      * The narrowed rules, grouped by the ability they hem in.
      *
-     * They live in a block of their own inside the abilities, and not in a section apart,
-     * because they are the same as the rest with a fence around them: the same action over
-     * the same entity, reaching one record or only what its holder owns. What sets them
-     * apart is who writes them — they are composed by hand on the abilities screen and the
-     * grid does not touch them — not what they are about.
+     * Inside the abilities and not in a section apart: they are the same action over the same
+     * entity with a fence around it, and what sets them apart is who writes them.
      *
-     * The record is named rather than counted: "over 1 record" does not say which, and
-     * with that nobody can review the rule or take it away. If the record is gone that is
-     * said too, because the rule is still there pointing at nothing and no screen gives it
-     * away.
+     * The record is named rather than counted — "over 1 record" does not say which — and a
+     * record that is gone is said to be gone, since the rule still points at it.
      *
      * @return list<array{entity: string, action: string, label: string, owned: bool, records: list<array{title: string, missing: bool}>}>
      */
@@ -176,10 +164,9 @@ final class AbilityTags extends Entry
     /**
      * The entities and doors the role says nothing about, split by their group.
      *
-     * They are named rather than simply left out: a row missing because the role is silent
-     * and a row missing because the panel does not declare it are two different things and
-     * would read the same on screen. What changes with the size of the catalogue is *how*
-     * they are named, not whether they are.
+     * Named rather than left out: a row missing because the role is silent and one missing
+     * because the panel does not declare it would read the same. The size of the catalogue
+     * changes how they are named, not whether they are.
      *
      * @return list<array{tab: string, label: string, names: list<string>}>
      */
@@ -247,9 +234,9 @@ final class AbilityTags extends Entry
     /**
      * What the record a rule points at is called.
      *
-     * It is asked of the panel's resource, which already knows how to title a row of that
-     * model; with no resource the key is left, which at least identifies. A deleted record
-     * leaves the rule standing and pointing at nothing, so that is said rather than hidden.
+     * Asked of the panel's resource, which already knows how to title a row of that model; with
+     * no resource the key at least identifies. A deleted record leaves the rule pointing at
+     * nothing, so that is said rather than hidden.
      *
      * @return array{title: string, missing: bool}
      */
@@ -276,11 +263,9 @@ final class AbilityTags extends Entry
     /**
      * The ability rows of this role carrying a fence.
      *
-     * The pivot is joined by hand rather than read through the relation because the role
-     * model is whichever the application configured, and nothing promises the analyser it
-     * carries Bouncer's traits. Both tables have an `entity_id` column and they mean
-     * different things — one is the role, the other the narrowed record — so they are
-     * prefixed.
+     * The pivot is joined by hand because the role model is whichever the application
+     * configured, and nothing promises the analyser it carries Bouncer's traits. Both tables
+     * have an `entity_id` meaning different things, so they are prefixed.
      *
      * @return EloquentCollection<int, StoredAbility>
      */

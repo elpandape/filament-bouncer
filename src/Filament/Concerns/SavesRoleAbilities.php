@@ -11,14 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Takes the grid out of the data, and writes it once there is a record to write it to.
  *
- * Two halves, and both are needed. The grid's state is not a column of the role, so
- * leaving it in the data hands a key nobody can fill to a mass assignment: the role model
- * declares `name` and `title` fillable and nothing else, and an application running
- * Eloquent strictly throws rather than quietly dropping it.
+ * Leaving the grid's state in the data hands a key nobody can fill to a mass assignment: the role
+ * model declares `name` and `title` fillable and nothing else, and Eloquent run strictly throws
+ * rather than dropping it.
  *
- * And the stances can only be written afterwards, because a creation screen has no record
- * to write them against until the record has been saved. So they are held here between
- * the two hooks rather than read out of the form twice.
+ * The stances can only be written afterwards, because a creation screen has no record to write
+ * them against until it has been saved.
  */
 trait SavesRoleAbilities
 {

@@ -23,10 +23,9 @@ final class AbilityStore
     /**
      * The stored abilities the catalogue describes, keyed by identity.
      *
-     * Three kinds of row are deliberately left out, because the catalogue does not
-     * declare them and therefore must never offer to delete them: abilities about one
-     * record, abilities restricted to what their holder owns, and the wildcards that
-     * a blanket grant such as `everything()` creates.
+     * Three kinds of row are left out, because the catalogue does not declare them and must
+     * never offer to delete them: abilities about one record, abilities restricted to what
+     * their holder owns, and the wildcards a blanket grant leaves behind.
      *
      * @return array<string, StoredAbility>
      */
@@ -81,11 +80,8 @@ final class AbilityStore
     /**
      * Whether the reconciliation speaks for this row at all.
      *
-     * Three answers hide behind one question on the screen, and only this one separates
-     * them: a row the catalogue declares, a row it does not — which is drift, and which
-     * `--prune` takes away — and a row that was never the catalogue's to declare. The
-     * query is asked rather than the four conditions being spelled out a second time,
-     * because a second spelling is how the two would come to disagree.
+     * The query is asked rather than the four conditions spelled out a second time, because a
+     * second spelling is how the two would come to disagree.
      */
     public function speaksFor(Model $ability): bool
     {

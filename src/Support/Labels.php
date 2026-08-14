@@ -13,15 +13,9 @@ use Illuminate\Support\Str;
 /**
  * The words the grid is read in.
  *
- * Three sources, asked in this order, and the order is the whole design. What the
- * consuming application put in its configuration wins, because it knows what its own
- * people call these things and it should not have to publish a language file to say so.
- * Failing that, the package's own translations. Failing those — an action nobody has a
- * word for, which is any action an application invented on its own policy — the name of
- * the method, made readable.
- *
- * The last step matters more than it looks: it means a policy method added this morning
- * shows up on the screen this afternoon reading sensibly, with nothing to translate first.
+ * Configuration first, so an application can say what its own people call these things without
+ * publishing a language file; then the package's translations; then the method name made readable,
+ * which is what lets a policy method added this morning read sensibly this afternoon.
  */
 final readonly class Labels
 {

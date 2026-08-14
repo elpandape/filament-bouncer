@@ -20,25 +20,14 @@ use Illuminate\Support\Facades\Gate;
 /**
  * The whole catalogue as one field, laid out as sections of rows.
  *
- * Filament's own components cannot express this screen. Three stances have to be offered
- * side by side and written without a round trip, and `ToggleButtons` would need a field
- * per cell: a catalogue of thirty resources would mount a hundred and eighty Livewire
- * components and spend a request on every click. So the package ships a view of its own,
- * and this is the field that feeds it.
+ * A view of the package's own because `ToggleButtons` would need a field per cell: thirty resources
+ * would mount a hundred and eighty Livewire components and spend a request on every click. The
+ * nested state — entity, action, stance — is the shape the store reads and writes, so rewriting the
+ * view cannot break the save.
  *
- * The entire nested state lives here under one path — entity, action, stance — rather
- * than a field per cell. That path is not a decision of this screen's: it is the shape
- * the store reads and writes, so a rewrite of the view cannot break the save.
- *
- * An entity is a row and an action is a column. That is what makes the screen answerable:
- * the question somebody comes here with is whether this role may delete, and reading it
- * down a column across every entity is the only layout that answers it without scrolling
- * back and forth. The price is that a cell has room for one control instead of three, so
- * the stance became a box that cycles rather than three buttons side by side.
- *
- * The columns are the union of the actions any policy declares, so they grow on their own.
- * The entity column is therefore pinned and the table scrolls: a row whose entity has
- * left the screen cannot be read.
+ * The columns are the union of the actions any policy declares, so they grow on their own; the
+ * entity column is pinned and the table scrolls, since a row whose entity has left the screen
+ * cannot be read.
  */
 final class AbilityGrid extends Field
 {
@@ -98,10 +87,8 @@ final class AbilityGrid extends Field
     /**
      * The catalogue, ready to draw: a section per tab, a row per entity.
      *
-     * Only the first tab is a grid. A page, a widget or an ability declared in
-     * configuration answers exactly one action, and a grid one column wide reads worse
-     * than a list does — so those sections carry the action on the row and are drawn as
-     * lines.
+     * Only the first tab is a grid: a page, a widget or an ability declared in configuration
+     * answers one action, and a grid one column wide reads worse than a list.
      *
      * @return array<string, array{label: string, grid: bool, rows: list<array{key: string, label: string, class: string|null, policy: string|null, icon: string|null, action: string|null, cells: array<string, bool>}>}>
      */
@@ -144,8 +131,8 @@ final class AbilityGrid extends Field
      * The columns, in the order they are read: the one granting the whole entity first,
      * then every action under the scope it belongs to.
      *
-     * They come only from the entities the grid draws. Without that filter the single
-     * action of a page would open a column every row of the matrix answers with a dash.
+     * Only from the entities the grid draws: without that filter the single action of a page
+     * would open a column every row answers with a dash.
      *
      * @return array{manage: array{action: string, label: string}, groups: list<array{scope: string, label: string, actions: list<array{action: string, label: string}>}>}
      */
@@ -218,13 +205,11 @@ final class AbilityGrid extends Field
     /**
      * The shortcut an entity's row offers.
      *
-     * Only reading. "Everything" and "nothing" need no list, because they answer for
-     * whatever the entity happens to declare, and a shortcut for withdrawing or for the
-     * irreversible is a shortcut nobody should have.
+     * Only reading: "everything" and "nothing" need no list, and a shortcut for withdrawing or
+     * for the irreversible is one nobody should have.
      *
-     * It is exclusive: it grants what it names and silences the rest of that row. Adding
-     * without taking away would make "read only" mean "reading on top of whatever was
-     * already there", which is the opposite of what its name promises.
+     * Exclusive — it grants what it names and silences the rest of the row. Adding without taking
+     * away would make "read only" mean "reading on top of whatever was there".
      *
      * @return list<array{key: string, label: string, actions: list<string>}>
      */
@@ -289,9 +274,8 @@ final class AbilityGrid extends Field
     /**
      * The rows the role answers yes to without holding a rule that names the ability.
      *
-     * A role holding nothing but the wildcard has no row of its own for any of these, so
-     * a grid reading only its own rows would draw the dash everywhere and say the role
-     * can do nothing at all.
+     * A role holding nothing but the wildcard has no row of its own for any of these, so a grid
+     * reading only its own rows would say it can do nothing at all.
      *
      * @return array<string, array<string, bool>>
      */

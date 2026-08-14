@@ -14,22 +14,12 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 /**
  * How many rows of the abilities table are broken right now, and in what way.
  *
- * It answers what the listing cannot without being walked: the health column says whether **one**
- * row has something, and it takes every page to know whether the store as a whole is sound. And it
- * says it from outside the screen, which is where somebody finds out that something happened
- * without having gone to look.
+ * A count per ailment and not one number, because each is mended differently, so "7 problems" does
+ * not say where to start. Zero goes muted: an alarm that always sounds stops being read.
  *
- * - **A count per ailment rather than one number**, because each is mended differently — a twin is
- *   decided, a ghost model is rewritten, an invisible row is uncovered — so "7 problems" does not
- *   say where to start.
- * - **Zero goes muted.** A zero in red is a permanent alarm, and an alarm that always sounds stops
- *   being read.
- * - **Every figure opens its rows**, with the listing already filtered by that ailment.
- *
- * **This widget is not registered by the plugin, and that is deliberate.** Registering it would put
- * it on every consumer's dashboard and — because the package refuses to boot a panel whose widgets
- * declare nobody — add an entity to their catalogue, turning `--check` red until they reconcile.
- * Whoever wants it says so; the README explains how.
+ * **The plugin does not register this widget.** Doing so would put it on every consumer's dashboard
+ * and — since a panel refuses to boot with a widget that declares nobody — add an entity to their
+ * catalogue, turning `--check` red until they reconcile. The README explains how to add it.
  */
 final class AbilityHealth extends StatsOverviewWidget
 {

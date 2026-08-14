@@ -14,21 +14,15 @@ use Silber\Bouncer\Database\Models;
 /**
  * Handing an account its roles on the form that creates it.
  *
- * A relation manager needs a record to hang a row off, and on a creation screen there is
- * none: the account does not exist until the form is submitted. So the roles are chosen
- * here and written afterwards, by `assign()`, once there is something to assign them to.
+ * A relation manager needs a record to hang a row off and a creation screen has none, so the roles
+ * are chosen here and written by `assign()` once there is something to assign them to.
  *
- * The privileged role is shown to everybody and ticked by only some, which is the one
- * decision worth reading twice. Leaving it off the list entirely would be the tidier
- * screen and the worse one — somebody would compose an account, hand it what they could,
- * and never learn that the role holding everything exists at all. Shown and locked, the
- * screen says both things at once: here is the way back in, and it is not yours to give.
+ * The privileged role is shown to everybody and ticked by only some: left off the list, somebody
+ * would compose an account and never learn that the role holding everything exists.
  *
- * Locking it is not the guard, though. The guard is `assign()`, the only thing here that
- * writes, and it hands a request nothing the screen would not have offered: neither a
- * name nobody may hand out, nor a name no role has. That second refusal is not caution
- * either — Bouncer's `assign` creates the role it cannot find, so a name let through
- * unchecked is not a failed write but a new empty role, silently.
+ * The lock is not the guard — `assign()` is, and it refuses both a name nobody may hand out and a
+ * name no role has. The second is not caution: Bouncer's `assign` creates the role it cannot find,
+ * so an unchecked name is not a failed write but a new empty role.
  */
 final class RolesField extends CheckboxList
 {
@@ -67,10 +61,8 @@ final class RolesField extends CheckboxList
      * Writes the roles the account was given, refusing whatever the screen would not
      * have offered.
      *
-     * Through Bouncer rather than through the relation, because the relation's own
-     * `attach` writes a pivot row Bouncer does not recognise. And followed by a refresh,
-     * which nothing in Bouncer does on its own: without it the very next question about
-     * this account in this request is answered out of the cache from before the write.
+     * Through Bouncer, since the relation's `attach` writes a pivot row Bouncer does not
+     * recognise; and followed by a refresh, which nothing in Bouncer does on its own.
      *
      * @param  array<array-key, mixed>  $roles
      */

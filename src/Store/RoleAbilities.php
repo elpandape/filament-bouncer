@@ -46,14 +46,13 @@ final readonly class RoleAbilities
      * Whether the role answers yes to an ability once every rule it holds is taken
      * into account, and not merely the row that names the ability exactly.
      *
-     * A role granted `everything()` holds no row for `view` on anything, and yet
-     * answers yes to all of them. The grid reads the exact rows, because those are
-     * what it writes back; this reads what Bouncer would actually answer, so the two
-     * together can say the one thing a grid alone cannot: that a role holds something
-     * nobody handed it.
+     * A role granted `everything()` holds no row for `view` on anything and yet answers yes to
+     * all of them. The grid reads the exact rows because those are what it writes back; this
+     * reads what Bouncer would answer, which is how the two together say that a role holds
+     * something nobody handed it.
      *
-     * The clipboard is asked rather than the identifiers being matched here by hand,
-     * so that the answer on screen and the answer at the Gate come from the same code.
+     * The clipboard is asked rather than the identifiers matched by hand, so the answer on
+     * screen and the answer at the Gate come from the same code.
      */
     public function holds(Model $role, Ability $ability): bool
     {
@@ -63,9 +62,8 @@ final readonly class RoleAbilities
     /**
      * The rules the grid never offers, counted per ability.
      *
-     * These are the rows the stances deliberately skip: the ones naming a single record
-     * and the ones covering only what their holder owns. The grid cannot write them and
-     * must not remove them, so the one thing left to do is say they are there.
+     * The rows the stances skip: the grid cannot write them and must not remove them, so the
+     * one thing left is to say they are there.
      *
      * @return array<string, Restriction>
      */
@@ -164,14 +162,11 @@ final readonly class RoleAbilities
     /**
      * Bring the role's stances in line with what the form was saved holding.
      *
-     * The incoming state is never walked. Everything is driven off the catalogue, so a
-     * cell smuggled into the request for something the panel does not declare has
-     * nothing to match against and changes nothing.
+     * The incoming state is never walked: everything is driven off the catalogue, so a cell
+     * smuggled into the request has nothing to match against.
      *
-     * Who may be here at all is the policy's question, and the only one. Somebody the
-     * policy lets work this screen hands out every ability the panel declares, whether
-     * or not they hold it themselves — including the wildcard, and including to
-     * themselves.
+     * Who may be here at all is the policy's question and the only one — somebody it lets in
+     * hands out every ability the panel declares, whether or not they hold it themselves.
      *
      * @param  array<string, array<string, string>>  $state
      */
@@ -233,9 +228,8 @@ final readonly class RoleAbilities
     /**
      * What the role says about each ability it has a row for.
      *
-     * The pivot is joined by hand rather than read through the role's own relation,
-     * because the role model is whatever the application configured and nothing
-     * promises the analyser that it carries Bouncer's traits.
+     * The pivot is joined by hand because the role model is whatever the application
+     * configured, and nothing promises the analyser it carries Bouncer's traits.
      *
      * @return array<string, Stance>
      */
@@ -286,9 +280,8 @@ final readonly class RoleAbilities
     /**
      * Every ability row this role has a permission for.
      *
-     * The pivot is joined by hand rather than read through the role's own relation,
-     * because the role model is whatever the application configured and nothing
-     * promises the analyser that it carries Bouncer's traits.
+     * The pivot is joined by hand because the role model is whatever the application
+     * configured, and nothing promises the analyser it carries Bouncer's traits.
      *
      * @return Builder<StoredAbility>
      */

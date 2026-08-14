@@ -15,8 +15,8 @@ use InvalidArgumentException;
  * A command runs with no panel of its own, so the one to walk is either named on the
  * command line, named in configuration, or the panel the application marked default.
  *
- * The registry is asked directly rather than through the `Filament` facade, whose
- * annotation for this call promises a panel and whose implementation returns null.
+ * The registry is asked directly and not through the `Filament` facade, whose annotation for this
+ * call promises a panel and whose implementation returns null.
  */
 final readonly class PanelResolver
 {

@@ -14,11 +14,9 @@ use Silber\Bouncer\Bouncer;
 /**
  * Whether the person signed into the panel may reach a page or see a widget.
  *
- * The ability's name is read off the catalogue rather than composed here. That keeps the
- * one place that decides how an ability is named the only one, and it gives the ignore
- * list its meaning for free: a component the catalogue was told to leave out has no
- * ability to ask about, and a component nobody can be granted has to be open, or the
- * escape hatch would be a way of closing the door for good.
+ * The name is read off the catalogue and not composed here, which keeps one place deciding how an
+ * ability is named and gives the ignore list its meaning for free: a component left out of the
+ * catalogue has no ability to ask about, so it has to be open.
  */
 final readonly class ComponentAccess
 {

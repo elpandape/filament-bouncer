@@ -14,18 +14,12 @@ use Filament\Schemas\Schema;
 /**
  * Changing what a role says.
  *
- * The two refusals the resource makes are asked here before anything is drawn, and that
- * is deliberate rather than incidental: `EditRecord::mount()` and `hydrate()` both call
- * `authorizeAccess()`, which aborts unless `RoleResource::canEdit()` says yes. A request
- * typed straight at the URL of your own role, or of the way back in, meets the same wall
- * the hidden button does — hiding the button alone would be theatre, since the page is
- * one address away.
+ * `EditRecord::mount()` and `hydrate()` both call `authorizeAccess()`, so the resource's two
+ * refusals are asked before anything is drawn: a URL typed by hand meets the same wall the hidden
+ * button does.
  *
- * Deleting is not offered here at all: the destructive way lives behind the kebab of the
- * listing, and its two refusals stand there.
- *
- * The grid is filled and saved by the two concerns, because it is not a column of the
- * role and Filament has no way of knowing that.
+ * The grid is filled and saved by the two concerns, because it is not a column of the role and
+ * Filament has no way of knowing that.
  */
 final class EditRole extends EditRecord
 {

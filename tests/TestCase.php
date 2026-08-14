@@ -34,16 +34,10 @@ use Orchestra\Testbench\TestCase as ApplicationTestCase;
 use Silber\Bouncer\BouncerServiceProvider;
 
 /**
- * El arranque que comparte toda la suite. Cada archivo de test se lo pide con una sola
- * línea en su cabecera:
+ * The boot every test file asks for with `pest()->extend(TestCase::class)`, which resolves the
+ * file calling it — hence no `->in(...)` anywhere in `tests/Pest.php`.
  *
- *     pest()->extend(TestCase::class);
- *
- * `pest()` resuelve el archivo que la llama, así que no hace falta ningún `->in(...)` en
- * `tests/Pest.php` — y de hecho no hay ninguno.
- *
- * Casi todo lo que hay aquí abajo son trampas ya pagadas: cada comentario explica un
- * síntoma que costó encontrar. Antes de simplificar cualquiera de ellas, léela.
+ * What follows are traps already paid for: read the comment before simplifying the line.
  */
 abstract class TestCase extends ApplicationTestCase
 {
@@ -74,10 +68,9 @@ abstract class TestCase extends ApplicationTestCase
     }
 
     /**
-     * Un test que ejercita la rama de producción deja el entorno cambiado. El teardown de
-     * testbench lanza entonces un comando `migrate`, y `ConfirmableTrait` pide confirmación
-     * en producción contra un `OutputStyle` simulado, matando el test con
-     * `BadMethodCallException`.
+     * A test exercising the production branch leaves the environment changed, and testbench's
+     * teardown then runs `migrate`: `ConfirmableTrait` asks for confirmation against a mocked
+     * `OutputStyle` and kills the test with `BadMethodCallException`.
      */
     protected function tearDown(): void
     {
@@ -91,10 +84,9 @@ abstract class TestCase extends ApplicationTestCase
     }
 
     /**
-     * El orden importa: Filament tiene que registrarse antes que Livewire.
-     * `SupportServiceProvider` liga `DataStore` con un `bind()` no compartido que pisa la
-     * instancia de Livewire, así que cada `store($component)->set(...)` se pierde y el
-     * render muere con una bolsa de errores nula.
+     * Filament has to register before Livewire: `SupportServiceProvider` binds `DataStore` with
+     * an unshared `bind()` that overwrites Livewire's instance, so every
+     * `store($component)->set(...)` is lost and the render dies on a null error bag.
      *
      * @param  Application  $app
      * @return array<int, class-string>
@@ -157,31 +149,24 @@ abstract class TestCase extends ApplicationTestCase
         $config->set('filament-bouncer.models', [Tag::class, Comment::class]);
         $config->set('filament-bouncer.custom', ['impersonate-users' => 'write']);
 
-        // `app_path()` se deja a propósito apuntando al esqueleto de testbench. Moverlo con
-        // `useAppPath()` hace que `Application::getNamespace()` lance `Unable to detect
-        // application namespace`, con lo que tropieza el compilador de Blade al resolver las
-        // etiquetas `<x-filament::…>`.
+        // `app_path()` is left pointing at testbench's skeleton on purpose: moving it with
+        // `useAppPath()` makes `Application::getNamespace()` throw `Unable to detect application
+        // namespace`, which the Blade compiler trips over resolving `<x-filament::…>` tags.
     }
 
     /**
-     * Las tablas de Bouncer se levantan haciendo `require` de su archivo de migración y
-     * llamando a `up()` a mano. No hay atajo, y conviene saber por qué antes de intentar uno:
+     * Bouncer's tables are raised by requiring its migration file and calling `up()` by hand.
+     * There is no shortcut: Bouncer registers only `bouncer:clean`, and plain `migrate` does not
+     * reach it either, since nothing calls `loadMigrationsFrom()` — the file only comes out
+     * through `vendor:publish`, which here has nowhere to publish to.
      *
-     * - **No existe un comando `bouncer:migrations`.** Bouncer v1.0.4 registra un único
-     *   comando artisan, `bouncer:clean` (`src/Console/` tiene un solo archivo). Llamar a
-     *   cualquier otro muere con `CommandNotFoundException`.
-     * - **Y `migrate` a secas tampoco basta**, porque Bouncer no llama a `loadMigrationsFrom()`
-     *   en ningún sitio: su migración solo sale por `vendor:publish --tag=bouncer.migrations`,
-     *   que aquí no tiene dónde publicar.
+     * The hook is `defineDatabaseMigrationsAfterDatabaseRefreshed()` and not
+     * `defineDatabaseMigrations()`: testbench calls the second *before* refreshing the database,
+     * and with sqlite in memory the refresh raises an empty one over everything created there.
+     * The symptom is a `no such table` halfway through the suite.
      *
-     * El hook es `defineDatabaseMigrationsAfterDatabaseRefreshed()` y **no**
-     * `defineDatabaseMigrations()`: testbench llama al segundo *antes* de refrescar la base, y
-     * con sqlite en memoria el refresco levanta una vacía y se lleva por delante todo lo creado
-     * ahí. El síntoma es un `no such table` a mitad de la suite.
-     *
-     * La ruta al archivo queda cableada, que es el precio de esta vía: se rompe el día que
-     * Bouncer lo renombre. El test de humo que comprueba que las tablas existen es lo que
-     * convierte esa rotura en un fallo inmediato en vez de en un misterio.
+     * The path is hard-wired, which breaks the day Bouncer renames the file; the smoke test on
+     * the tables is what turns that into an immediate failure rather than a mystery.
      */
     protected function defineDatabaseMigrationsAfterDatabaseRefreshed(): void
     {

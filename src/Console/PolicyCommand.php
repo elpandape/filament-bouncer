@@ -15,11 +15,9 @@ use Illuminate\Support\Str;
 /**
  * Writes the policy a resource needs before any of its abilities can exist.
  *
- * The generated methods are the declaration: the catalogue reads them back, so what an
- * administrator is offered for a model is exactly what its policy is prepared to answer.
- * That is why this writes a file with six methods in it rather than a base class with
- * twelve — a policy that answers questions the model has no business being asked puts
- * switches on the screen that decide nothing.
+ * The generated methods are the declaration: the catalogue reads them back, so what is offered
+ * for a model is exactly what its policy answers. Hence a file with six methods rather than a base
+ * class with twelve, which would put switches on the screen that decide nothing.
  */
 final class PolicyCommand extends Command
 {

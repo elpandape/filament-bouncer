@@ -24,21 +24,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Every rule the store holds, with what only this screen can say about them.
  *
- * The health column is the reason the workbench exists: it reports four things that are true in the
- * store, that nothing else detects, and that can only be mended from here. It is **one icon** with
- * three states and the whole account in its tooltip — a row broken three ways stacked three badges
- * in a cell and widened the table to say something you have to open the record page to act on
- * anyway. The listing answers "is there anything, and how bad"; the record page answers "what
- * exactly".
+ * The health column is one icon with the whole account in its tooltip: the listing answers "is
+ * there anything, and how bad", the record page answers "what exactly".
  *
- * The declaration column stays from the screen this one replaces, and it earns its place for the
- * same reason it did there: **it is what stands in for a delete button**. Knowing whether a row is
- * declared, adrift, or was never the reconciliation's business says far more about how it will end
- * than a button that would take every grant pointing at it along in one click.
+ * The declaration column stands in for a delete button — whether a row is declared, adrift or never
+ * the reconciliation's business says more about how it will end than a button would.
  *
- * The model and the record are one column, because separately they have to be combined in the
- * reader's head — "User" and "all" say nothing on their own. And the reach only speaks when it is
- * not the ordinary one: saying "all records" under nine rows in ten drowns the two that are fenced.
+ * The reach speaks only when it is not the ordinary one: saying "all records" under nine rows in
+ * ten drowns the two that are fenced.
  */
 final class AbilitiesTable
 {

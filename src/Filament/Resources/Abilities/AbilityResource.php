@@ -29,20 +29,12 @@ use UnitEnum;
 /**
  * The other end of the roles screen: not what a role may do, but what may be done.
  *
- * One refusal lives here, and it is a refusal to offer something rather than to allow it.
- * Filament asks the resource whether a record may be deleted from the row, the record
- * page and the request that page receives, so answering once here answers all three — and
- * the answer is no, always, whoever is asking and whatever they hold.
+ * Deleting is refused here, always and for everybody: a row is pointed at by every grant ever made
+ * from it, and deleting it takes all of them silently. A row goes when the code stops declaring it
+ * and `--prune` sweeps it, saying how many it swept.
  *
- * That is not caution. A row of this table is pointed at by every grant that was ever
- * made from it, and deleting the row takes all of them with it silently. The way a row is
- * meant to go is that the code stops declaring it and `filament-bouncer:reconcile --prune`
- * sweeps it, saying how many it swept. Leaving the button off is what keeps the two from
- * being one click apart.
- *
- * Saying so out loud matters more than it looks: Filament falls open on a policy method
- * that is not there, and `AbilityPolicy` deliberately declares no `delete`. Left to the
- * policy alone, the button would be offered to everybody.
+ * Saying so out loud matters: Filament falls open on a policy method that is not there, and
+ * `AbilityPolicy` deliberately declares no `delete`.
  */
 final class AbilityResource extends Resource
 {
@@ -91,11 +83,8 @@ final class AbilityResource extends Resource
     /**
      * The icon, whatever shape the application named it in.
      *
-     * Deliberately as wide as Filament's own signature rather than narrowed to a string:
-     * an icon set shipped as a backed enum is the ordinary way to name one, and an
-     * application handing one through configuration would otherwise meet a type error
-     * from inside the sidebar, with the whole panel down and nothing on this screen to
-     * explain why.
+     * As wide as Filament's own signature rather than narrowed to a string: an icon shipped as a
+     * backed enum would otherwise meet a type error from inside the sidebar, with the panel down.
      */
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
     {
@@ -143,10 +132,8 @@ final class AbilityResource extends Resource
     /**
      * Reads past the tenant scope only where the installation does not use it.
      *
-     * There a scoped row is an anomaly that nothing else can even see — the roles grid does not draw
-     * it and the Gate does not answer it — so this screen is the one place it can be found and
-     * mended. Where tenancy *is* used, reading past the scope would put another tenant's rows on
-     * screen, which is the one thing a package must not do on anybody's behalf.
+     * There a scoped row is an anomaly nothing else can see, so this screen is the one place it
+     * can be mended; under tenancy the same read would put another tenant's rows on screen.
      *
      * @return Builder<Model>
      */
@@ -200,11 +187,9 @@ final class AbilityResource extends Resource
     /**
      * The one row nobody works on from here: the wildcard over the wildcard.
      *
-     * It is the way back in. `PrivilegedRole` asks the clipboard for exactly this pair to know
-     * whether the role that holds everything still holds it, and writes this very row to restore
-     * it — so renaming this row, or pointing it at a model, takes that role's reach away without
-     * touching the role. A way back in that can be edited is not one, which is the same reason
-     * the roles screen refuses to edit the privileged role.
+     * `PrivilegedRole` asks the clipboard for exactly this pair to know whether the role that
+     * holds everything still holds it, and writes this row back to restore it: renaming it takes
+     * that role's reach away without the role being touched.
      */
     private static function isWildcard(Model $record): bool
     {

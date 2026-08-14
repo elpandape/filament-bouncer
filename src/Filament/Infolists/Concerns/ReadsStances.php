@@ -38,9 +38,8 @@ trait ReadsStances
     /**
      * The stance of every cell, already worked out.
      *
-     * "Broader" is the fourth: it neither grants here nor truly abstains, but answers yes
-     * through a wider rule. Without it a role holding the wildcard would read as one that
-     * can do nothing at all.
+     * "Broader" is the fourth: neither granting here nor truly abstaining, but answering yes
+     * through a wider rule. Without it the wildcard reads as a role that can do nothing.
      *
      * @return array<string, array<string, 'broader'|'forbidden'|'granted'|'neutral'>>
      */

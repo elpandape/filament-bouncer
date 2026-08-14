@@ -19,27 +19,15 @@ use Silber\Bouncer\Database\Models;
 /**
  * What one account may do, read and changed from the account's own screen.
  *
- * Two actions of this package's own where Filament's `AttachAction` and `DetachAction`
- * would have done, and the reason is not taste: both write straight onto the relation,
- * and the pivot row Bouncer keeps carries a scope column that an `attach` never fills in.
- * A role handed out that way is a row in the right table that answers no to everything.
- * Both actions here go through `Bouncer::assign()` and `Bouncer::retract()`, and both are
- * followed by a refresh — nothing in Bouncer clears its own cache, so without it the
- * table repaints from what was true before the click.
+ * Actions of this package's own rather than Filament's `AttachAction` and `DetachAction`: both
+ * write straight onto the relation, and Bouncer's pivot carries a scope column an `attach` never
+ * fills in, leaving a row in the right table that answers no to everything. Every write goes
+ * through Bouncer and is followed by a refresh, since nothing in Bouncer clears its own cache.
  *
- * The privileged role is the way back in when a mistake leaves nobody able to hand
- * anything out, and two things keep it that way from here. It is offered by nobody who does not
- * already hold it — unlike the creation form, which shows it locked, because a checklist
- * that quietly loses an entry teaches nothing while a pull-down of things to do next is
- * only made worse by an entry nobody may choose. And it is never taken off its last
- * holder, by anybody, since a way back in nobody holds is not one.
- *
- * Neither guard is decoration, and neither is asked twice. A pull-down refuses whatever
- * it never offered, and an action that is not visible is not mounted, so the refusal the
- * screen shows is the refusal a request typed by hand meets — asking again inside the
- * action would be a branch nothing could ever reach, which is a guard nobody can prove.
- * What holds them up instead is a pair of tests that arm both requests by hand: they are
- * the only thing standing between this comment and a screen that merely looks careful.
+ * The privileged role is the way back in: it is offered by nobody who does not already hold it,
+ * and never taken off its last holder. Neither guard is asked twice — a pull-down refuses what it
+ * never offered and an invisible action is never mounted — so what holds them up is the pair of
+ * tests that arm both requests by hand.
  */
 final class RolesRelationManager extends RelationManager
 {

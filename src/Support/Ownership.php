@@ -13,15 +13,12 @@ use Silber\Bouncer\BouncerFacade as Bouncer;
  * Who owns what, which Bouncer asks on every check it answers about a record — whether or
  * not a single ability was ever held down to what its holder owns.
  *
- * Told nothing about a model it guesses a column named after whoever is asking, `user_id`,
- * and reads it through the model. Under `Model::shouldBeStrict()` that read throws for a
- * column the record does not carry, from inside a view, naming a column nobody ever wrote.
- * So the catch-all is registered last and answers no, which puts the guess out of reach:
- * Bouncer looks the class up first and only falls back when it finds nothing.
+ * Told nothing about a model it guesses a `user_id` column and reads it through the model, which
+ * under `Model::shouldBeStrict()` throws from inside a view naming a column nobody ever wrote. The
+ * catch-all is registered last and answers no, putting the guess out of reach.
  *
- * A named model reads its column out of the attributes the record actually carries, so
- * one loaded without it answers no rather than throwing. Absence is an answer here, not a
- * mistake.
+ * A named model reads its column out of the attributes the record carries, so one loaded without it
+ * answers no rather than throwing.
  */
 final class Ownership
 {

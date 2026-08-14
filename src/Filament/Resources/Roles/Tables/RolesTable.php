@@ -18,19 +18,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * The roles, as a listing.
  *
- * What a role can do is not answered here. It used to be, with a bar drawing the catalogue
- * to scale on every row — and a figure summing up a whole catalogue tells nobody whether
- * this role may delete accounts, which is what anybody comes to a listing to find out. The
- * record page says it entity by entity, and that is one click away.
+ * What a role can do is not answered here: a figure summing a whole catalogue tells nobody whether
+ * this role may delete accounts, and the record page says it entity by entity one click away.
  *
- * The destructive way lives behind the kebab, and the two rows nobody works on from here
- * carry a padlock in its place: an explanation where a silently missing button would read
- * as a bug.
+ * The two rows nobody works on from here carry a padlock where the actions would be, since a
+ * silently missing button reads as a bug.
  *
- * There are no bulk actions here, and there is no adding any. Filament authorises a bulk
- * delete once for the whole selection, so a single yes would walk past both refusals the
- * resource makes per record; the roles policy declares no `deleteAny` for the same
- * reason.
+ * There are no bulk actions and none are to be added: Filament authorises a bulk delete once for
+ * the whole selection, so a single yes would walk past both refusals the resource makes per record.
  */
 final class RolesTable
 {

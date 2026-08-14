@@ -18,22 +18,15 @@ use Silber\Bouncer\Database\Models;
 /**
  * What the Gate answers about this rule right now, before it is handed out.
  *
- * It is the question no other screen answers. That a role holds a rule and that the Gate says yes
- * to it are not the same thing: a denial from another role wins, the wildcard grants what nobody
- * wrote down, and a fenced rule only answers about the record it fences. Without this, the only way
- * to check that a fenced rule does what you think is to hand it out and watch — which is checking
- * it in production.
+ * Holding a rule and being allowed it are not the same thing: a denial from another role wins, the
+ * wildcard grants what nobody wrote down, and a fenced rule only answers about the record it fences.
  *
- * It asks Bouncer's clipboard and not the Gate: the Gate would resolve this very model's policy and
- * ask it the same question, and the question would never end. It is what the package's own policies
- * do, and it is the same answer the panel gives.
+ * It asks Bouncer's clipboard and not the Gate, which would resolve this very model's policy and
+ * ask it the same question for ever. There is no submit button, since nothing is written.
  *
- * There is no submit button: the verdict recomposes as the choices are made. A modal that has to be
- * submitted to learn the answer reads as though something is about to be written, and nothing is.
- *
- * `answers()`, `reading()` and `tone()` are public and decide with no screen in the way, because a
- * verdict that can only be checked by reading a modal's markup is a verdict nobody checks: the
- * markup of an action's modal does not travel in its component's.
+ * `answers()`, `reading()` and `tone()` are public and decide with no screen in the way: the markup
+ * of an action's modal does not travel in its component's, so a verdict left inside the closures
+ * would be one no test could check.
  */
 final class ProbeAbility
 {
@@ -153,9 +146,8 @@ final class ProbeAbility
     /**
      * The roles and the accounts, in two groups.
      *
-     * Both are authorities to Bouncer and the question is the same; keeping them apart is what stops
-     * "this role grants" being read as "this person can", which is the very difference the probe
-     * exists to show.
+     * Both are authorities to Bouncer, and keeping them apart is what stops "this role grants"
+     * being read as "this person can" — the difference the probe exists to show.
      *
      * @return array<string, array<string, string>>
      */

@@ -40,11 +40,10 @@ final readonly class PrivilegedRole
     /**
      * Whether the person at the keyboard may hand this role on.
      *
-     * Only somebody who already holds it. Refusing it to everybody would protect nothing
-     * — whoever may work the roles screen can compose a role holding everything and hand
-     * that out instead — but it keeps the way back in from being one careless click away
-     * for somebody who never held it. Asked of the role and not of its abilities, so the
-     * answer does not change with what the catalogue happens to declare today.
+     * Only somebody who already holds it. That protects nothing absolutely — whoever works the
+     * roles screen can compose a role holding everything instead — but it keeps the way back in
+     * from being one careless click away. Asked of the role and not of its abilities, so the
+     * answer does not change with what the catalogue declares today.
      */
     public function mayBeHandedOutBy(?Model $editor): bool
     {

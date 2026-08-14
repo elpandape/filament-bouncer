@@ -12,18 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * The questions this screen asks about a row, with their answers, always.
  *
- * It sits at the foot, under the restrictions: read last it stops being an alarm that interrupts
- * and becomes the closing note — "and this row, is it sound?".
+ * At the foot and under the restrictions, so it reads as the closing note rather than as an alarm.
+ * Asked always, and not only where something failed: the question says what is being looked at, so
+ * a sound row shows four ticks with their fact instead of a blank that teaches nobody what was
+ * checked. The price is four lines on every record page.
  *
- * It was chosen against the alternative, which showed only what failed and carried the button that
- * mends it. What decided it is that **this one explains itself**: the question already says what is
- * being looked at, so no paragraph per ailment is needed, and a sound row stops being a blank —
- * four ticks with their fact rather than a "nothing wrong" that teaches nobody what was checked.
- * The price, known: four lines on every record page even when nothing is the matter.
- *
- * The answer carries the fact inside, and that is what makes it useful: "duplicate" without saying
- * **which** sends the reader off to find the other row, and "ghost model" without saying **which
- * class** hides the first thing needed to mend it.
+ * Each answer carries its fact: "duplicate" without saying which sends the reader off to find it.
  */
 final class HealthSection
 {
