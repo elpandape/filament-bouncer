@@ -7,6 +7,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [9.1.1] - 2026-08-13
+
+### Changed
+
+- Every comment in the source cut back to what has to be said: the traps and the invariants
+  stay, the narration goes — the alternatives that were weighed, the history of how a screen
+  arrived, and the sentences that restate the line beneath them. Roughly a third fewer lines.
+  Nothing about behaviour changes.
+
 ## [9.1.0] - 2026-08-13
 
 ### Added
