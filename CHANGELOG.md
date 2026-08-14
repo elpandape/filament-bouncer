@@ -7,6 +7,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [7.2.1] - 2026-08-13
+
+### Fixed
+
+- **Ticking "Manage" now shows, there and then, which cells it reaches.** Granting a whole
+  model stores one row — `*` over that model — and never the columns beside it, which is
+  correct and is why ticking it does not tick them. But the hollow tick that says "answered
+  yes through a broader rule" was worked out on the server from what the role already held,
+  so those columns stayed blank until the form was saved and opened again — exactly when it
+  is too late to check what was about to be handed out. The cell now reads the manage box
+  live as well.
+
+### Changed
+
+- The grid calls the first column **Entity** rather than "Subject", and the two other places
+  that used the word follow it.
+
 ## [7.2.0] - 2026-08-13
 
 ### Added
