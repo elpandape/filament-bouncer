@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * Composing a role: naming it and saying what it may do, on one screen.
  *
  * It used to be three steps, and they were the answer to a catalogue laid out as a card
- * per subject with a row per action — a page long enough that a name field above it read
+ * per entity with a row per action — a page long enough that a name field above it read
  * as an afterthought. Drawn as a matrix the whole catalogue fits, and the alta is the same
  * screen as the edit: two ways of composing the same thing is one more than anybody needs
  * to learn.

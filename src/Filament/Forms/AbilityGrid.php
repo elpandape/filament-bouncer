@@ -9,7 +9,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogTab;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
@@ -26,18 +26,18 @@ use Illuminate\Support\Facades\Gate;
  * components and spend a request on every click. So the package ships a view of its own,
  * and this is the field that feeds it.
  *
- * The entire nested state lives here under one path — subject, action, stance — rather
+ * The entire nested state lives here under one path — entity, action, stance — rather
  * than a field per cell. That path is not a decision of this screen's: it is the shape
  * the store reads and writes, so a rewrite of the view cannot break the save.
  *
- * A subject is a row and an action is a column. That is what makes the screen answerable:
+ * An entity is a row and an action is a column. That is what makes the screen answerable:
  * the question somebody comes here with is whether this role may delete, and reading it
- * down a column across every subject is the only layout that answers it without scrolling
+ * down a column across every entity is the only layout that answers it without scrolling
  * back and forth. The price is that a cell has room for one control instead of three, so
  * the stance became a box that cycles rather than three buttons side by side.
  *
  * The columns are the union of the actions any policy declares, so they grow on their own.
- * The subject column is therefore pinned and the table scrolls: a row whose subject has
+ * The entity column is therefore pinned and the table scrolls: a row whose entity has
  * left the screen cannot be read.
  */
 final class AbilityGrid extends Field
@@ -96,7 +96,7 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * The catalogue, ready to draw: a section per tab, a row per subject.
+     * The catalogue, ready to draw: a section per tab, a row per entity.
      *
      * Only the first tab is a grid. A page, a widget or an ability declared in
      * configuration answers exactly one action, and a grid one column wide reads worse
@@ -112,19 +112,19 @@ final class AbilityGrid extends Field
 
         $sections = [];
 
-        foreach ($this->catalog->tabs() as $value => $subjects) {
+        foreach ($this->catalog->tabs() as $value => $entities) {
             $tab = CatalogTab::from((string) $value);
             $rows = [];
 
-            foreach ($subjects as $key => $subject) {
-                $cells = array_fill_keys(array_keys($subject->cells()), true);
+            foreach ($entities as $key => $entity) {
+                $cells = array_fill_keys(array_keys($entity->cells()), true);
 
                 $rows[] = [
                     'key' => $key,
-                    'label' => $subject->label,
-                    'class' => $subject->entityType,
-                    'policy' => $this->policyName($subject),
-                    'icon' => $subject->entityType === null ? null : ($icons[$subject->entityType] ?? null),
+                    'label' => $entity->label,
+                    'class' => $entity->entityType,
+                    'policy' => $this->policyName($entity),
+                    'icon' => $entity->entityType === null ? null : ($icons[$entity->entityType] ?? null),
                     'action' => $tab->isGrid() ? null : array_key_first($cells),
                     'cells' => $cells,
                 ];
@@ -141,10 +141,10 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * The columns, in the order they are read: the one granting the whole subject first,
+     * The columns, in the order they are read: the one granting the whole entity first,
      * then every action under the scope it belongs to.
      *
-     * They come only from the subjects the grid draws. Without that filter the single
+     * They come only from the entities the grid draws. Without that filter the single
      * action of a page would open a column every row of the matrix answers with a dash.
      *
      * @return array{manage: array{action: string, label: string}, groups: list<array{scope: string, label: string, actions: list<array{action: string, label: string}>}>}
@@ -174,14 +174,14 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * Which subjects a shortcut pressed from the corner of the table reaches.
+     * Which entities a shortcut pressed from the corner of the table reaches.
      *
      * The gridded ones and no others: a page or a widget does not declare the action the
      * shortcut names, so applying it there would say nothing and wipe what they do say.
      *
      * @return list<string>
      */
-    public function getGriddedSubjects(): array
+    public function getGriddedEntities(): array
     {
         $keys = [];
 
@@ -194,9 +194,9 @@ final class AbilityGrid extends Field
         return $keys;
     }
 
-    public function getSubjectLabel(): string
+    public function getEntityLabel(): string
     {
-        return __('filament-bouncer::roles.grid.subject');
+        return __('filament-bouncer::roles.grid.entity');
     }
 
     public function getClearLabel(): string
@@ -216,10 +216,10 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * The shortcut a subject's row offers.
+     * The shortcut an entity's row offers.
      *
      * Only reading. "Everything" and "nothing" need no list, because they answer for
-     * whatever the subject happens to declare, and a shortcut for withdrawing or for the
+     * whatever the entity happens to declare, and a shortcut for withdrawing or for the
      * irreversible is a shortcut nobody should have.
      *
      * It is exclusive: it grants what it names and silences the rest of that row. Adding
@@ -307,8 +307,8 @@ final class AbilityGrid extends Field
         $state = $abilities->toFormState($record);
         $broader = [];
 
-        foreach ($this->catalog->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach ($this->catalog->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 $broader[$key][$action] = ($state[$key][$action] ?? '') === Stance::Neutral->value
                     && $abilities->holds($record, $ability);
             }
@@ -326,9 +326,9 @@ final class AbilityGrid extends Field
     {
         $offered = [];
 
-        foreach ($this->catalog->subjects as $subject) {
-            if ($subject->kind->tab()->isGrid()) {
-                $offered += array_fill_keys(array_keys($subject->cells()), true);
+        foreach ($this->catalog->entities as $entity) {
+            if ($entity->kind->tab()->isGrid()) {
+                $offered += array_fill_keys(array_keys($entity->cells()), true);
             }
         }
 
@@ -338,18 +338,18 @@ final class AbilityGrid extends Field
     }
 
     /**
-     * The policy a subject's columns come from, said under its name.
+     * The policy an entity's columns come from, said under its name.
      *
      * It is what makes the row decidable: its columns are the methods of that class and of
      * no other, so anybody wondering why a column is missing knows which file to open.
      */
-    private function policyName(Subject $subject): ?string
+    private function policyName(Entity $entity): ?string
     {
-        if ($subject->entityType === null) {
+        if ($entity->entityType === null) {
             return null;
         }
 
-        $policy = Gate::getPolicyFor($subject->entityType);
+        $policy = Gate::getPolicyFor($entity->entityType);
 
         return is_object($policy) ? class_basename($policy) : null;
     }
@@ -361,8 +361,8 @@ final class AbilityGrid extends Field
     {
         $state = [];
 
-        foreach ($catalog->subjects as $key => $subject) {
-            foreach (array_keys($subject->cells()) as $action) {
+        foreach ($catalog->entities as $key => $entity) {
+            foreach (array_keys($entity->cells()) as $action) {
                 $state[$key][$action] = Stance::Neutral->value;
             }
         }

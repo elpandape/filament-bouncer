@@ -72,7 +72,7 @@ final class ProbeAbility
         /** @var string $name */
         $name = $ability->getAttribute('name');
 
-        return Bouncer::getClipboard()->check($authority, $name, self::subject($ability, $record));
+        return Bouncer::getClipboard()->check($authority, $name, self::entity($ability, $record));
     }
 
     /**
@@ -136,7 +136,7 @@ final class ProbeAbility
                 ->default(self::text($ability->getAttribute('entity_id')))
                 ->helperText(__('filament-bouncer::abilities.probe.record_note'))
                 // With no model there is no record to ask about: the rule is a loose ability and
-                // the Gate answers it with no subject.
+                // the Gate answers it with no entity.
                 ->visible(fn (): bool => is_string($ability->getAttribute('entity_type'))),
 
             Text::make(fn (Get $get): string => self::reading(self::verdict($ability, $get)))
@@ -203,7 +203,7 @@ final class ProbeAbility
      * What is asked about: the record where one was named, the model where not, and nothing where
      * the rule speaks of no model.
      */
-    private static function subject(Model $ability, ?string $record): Model|string|null
+    private static function entity(Model $ability, ?string $record): Model|string|null
     {
         $type = $ability->getAttribute('entity_type');
 

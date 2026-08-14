@@ -6,32 +6,32 @@ disabled: @js($disabled),
 tab: @js(array_key_first($sections)),
 order: @js([$getNeutral(), 'granted', 'forbidden']),
 labels: @js($stances),
-at(subject, action) {
-    return this.state?.[subject]?.[action] ?? @js($getNeutral())
+at(entity, action) {
+    return this.state?.[entity]?.[action] ?? @js($getNeutral())
 },
-set(subject, action, stance) {
+set(entity, action, stance) {
     if (this.disabled) {
         return
     }
 
-    if (! this.state[subject]) {
-        this.state[subject] = {}
+    if (! this.state[entity]) {
+        this.state[entity] = {}
     }
 
-    this.state[subject][action] = stance
+    this.state[entity][action] = stance
 },
-cycle(subject, action, backwards) {
+cycle(entity, action, backwards) {
     if (this.disabled) {
         return
     }
 
-    const from = this.order.indexOf(this.at(subject, action))
+    const from = this.order.indexOf(this.at(entity, action))
     const step = backwards ? -1 : 1
 
-    this.set(subject, action, this.order[(from + step + this.order.length) % this.order.length])
+    this.set(entity, action, this.order[(from + step + this.order.length) % this.order.length])
 },
-says(subject, action) {
-    return this.labels[this.at(subject, action)] ?? this.at(subject, action)
+says(entity, action) {
+    return this.labels[this.at(entity, action)] ?? this.at(entity, action)
 },
 {{-- Only while the cell is still unmarked: the moment somebody puts a stance on it, the
      broader rule stops being what decides.
@@ -41,23 +41,23 @@ says(subject, action) {
      very screen: it stores one row, `*` over that model, and never the columns beside it —
      so without this those columns stay blank until the form is saved and opened again,
      which is exactly when it is too late to check what was about to be handed out. --}}
-inherits(subject, action, reached) {
-    if (this.at(subject, action) !== @js($getNeutral())) {
+inherits(entity, action, reached) {
+    if (this.at(entity, action) !== @js($getNeutral())) {
         return false
     }
 
-    return reached || (action !== @js($columns['manage']['action']) && this.at(subject, @js($columns['manage']['action'])) === 'granted')
+    return reached || (action !== @js($columns['manage']['action']) && this.at(entity, @js($columns['manage']['action'])) === 'granted')
 },
 {{-- A shortcut leaves the row saying exactly what it names: it grants its own and
      silences the rest. Adding without taking away would turn "read only" into "reading on
      top of whatever was already there", which is what its name promises it will not do. --}}
-apply(subject, actions, offered) {
+apply(entity, actions, offered) {
     for (const action of offered) {
-        this.set(subject, action, actions.includes(action) ? 'granted' : @js($getNeutral()))
+        this.set(entity, action, actions.includes(action) ? 'granted' : @js($getNeutral()))
     }
 },
-clear(subject, offered) {
-    this.apply(subject, [], offered)
+clear(entity, offered) {
+    this.apply(entity, [], offered)
 },
 {{-- What a tab has to show on itself: a group is written along with the three others in
      one save, so without this a role reaching a dangerous page reads as harmless from

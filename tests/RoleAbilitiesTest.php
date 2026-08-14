@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
@@ -16,7 +16,7 @@ use Silber\Bouncer\Database\Models;
 pest()->extend(TestCase::class);
 
 beforeEach(function (): void {
-    $this->post = Subject::keyFor(Post::class);
+    $this->post = Entity::keyFor(Post::class);
 });
 
 function editor(): Model
@@ -35,7 +35,7 @@ function editor(): Model
  */
 function postState(Model $role): array
 {
-    return app(RoleAbilities::class)->toFormState($role)[Subject::keyFor(Post::class)];
+    return app(RoleAbilities::class)->toFormState($role)[Entity::keyFor(Post::class)];
 }
 
 /**
@@ -44,7 +44,7 @@ function postState(Model $role): array
 function saveStances(Model $role, array $cells): void
 {
     app(RoleAbilities::class)->save($role, [
-        Subject::keyFor(Post::class) => array_map(static fn (Stance $stance): string => $stance->value, $cells),
+        Entity::keyFor(Post::class) => array_map(static fn (Stance $stance): string => $stance->value, $cells),
     ]);
 }
 
@@ -61,7 +61,7 @@ function roleAbilities(): RoleAbilities
 function postAbility(string $action): Ability
 {
     /** @var Ability $ability */
-    $ability = app(CatalogRegistry::class)->current()->subject(Subject::keyFor(Post::class))?->ability($action);
+    $ability = app(CatalogRegistry::class)->current()->entity(Entity::keyFor(Post::class))?->ability($action);
 
     return $ability;
 }

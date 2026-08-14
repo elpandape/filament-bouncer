@@ -11,7 +11,7 @@ use ElPandaPe\FilamentBouncer\Filament\Infolists\Concerns\ReadsDoomedRules;
  *
  * It goes in the narrow column beside the metadata: a warning does not need the width of
  * the content, it needs to be where people look. Each rule is a chip carrying the raw
- * identifier and nothing else, grouped by the subject it points at, with a group of its own
+ * identifier and nothing else, grouped by the entity it points at, with a group of its own
  * for the ones pointing at none — a loose ability belongs to nobody, and pretending it
  * belongs to a model would hide it among that model's.
  *
@@ -25,17 +25,17 @@ final class OrphanChips extends Entry
     protected string $view = 'filament-bouncer::roles.orphan-chips';
 
     /**
-     * @return list<array{subject: string, actions: list<string>}>
+     * @return list<array{entity: string, actions: list<string>}>
      */
     public function getGroups(): array
     {
         $groups = [];
 
         foreach ($this->getDoomed() as $rule) {
-            $subject = $rule['subject'] ?? __('filament-bouncer::roles.record.orphans_loose');
+            $entity = $rule['entity'] ?? __('filament-bouncer::roles.record.orphans_loose');
 
-            $groups[$subject]['subject'] = $subject;
-            $groups[$subject]['actions'][] = $rule['action'];
+            $groups[$entity]['entity'] = $entity;
+            $groups[$entity]['actions'][] = $rule['action'];
         }
 
         return array_values($groups);

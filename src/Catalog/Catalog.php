@@ -13,11 +13,11 @@ namespace ElPandaPe\FilamentBouncer\Catalog;
 final readonly class Catalog
 {
     /**
-     * @param  array<string, Subject>  $subjects  keyed by subject key, in row order
+     * @param  array<string, Entity>  $entities  keyed by entity key, in row order
      * @param  array<string, AbilityScope>  $actions  keyed by action, in column order
      */
     public function __construct(
-        public array $subjects,
+        public array $entities,
         public array $actions,
     ) {}
 
@@ -28,8 +28,8 @@ final readonly class Catalog
     {
         $abilities = [];
 
-        foreach ($this->subjects as $subject) {
-            foreach ($subject->abilities as $ability) {
+        foreach ($this->entities as $entity) {
+            foreach ($entity->abilities as $ability) {
                 $abilities[] = $ability;
             }
         }
@@ -38,12 +38,12 @@ final readonly class Catalog
     }
 
     /**
-     * The subjects grouped the way the screen reads them, in tab order.
+     * The entities grouped the way the screen reads them, in tab order.
      *
      * Only the tabs that hold something come back, so a panel with no widgets never
      * grows an empty tab for them.
      *
-     * @return array<string, array<string, Subject>> keyed by tab value, then subject key
+     * @return array<string, array<string, Entity>> keyed by tab value, then entity key
      */
     public function tabs(): array
     {
@@ -53,20 +53,20 @@ final readonly class Catalog
             $tabs[$tab->value] = [];
         }
 
-        foreach ($this->subjects as $key => $subject) {
-            $tabs[$subject->kind->tab()->value][$key] = $subject;
+        foreach ($this->entities as $key => $entity) {
+            $tabs[$entity->kind->tab()->value][$key] = $entity;
         }
 
-        return array_filter($tabs, static fn (array $subjects): bool => $subjects !== []);
+        return array_filter($tabs, static fn (array $entities): bool => $entities !== []);
     }
 
-    public function subject(string $key): ?Subject
+    public function entity(string $key): ?Entity
     {
-        return $this->subjects[$key] ?? null;
+        return $this->entities[$key] ?? null;
     }
 
     public function isEmpty(): bool
     {
-        return $this->subjects === [];
+        return $this->entities === [];
     }
 }

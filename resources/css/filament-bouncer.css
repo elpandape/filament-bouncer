@@ -100,7 +100,7 @@
     color: var(--fb-yes);
 }
 
-/* ── The matrix: subjects down, actions across ─────────────────────────────── */
+/* ── The matrix: entities down, actions across ─────────────────────────────── */
 
 /*
  * Three things hold the pinned column up and each one breaks it differently on its own:
@@ -133,7 +133,7 @@
 }
 
 .fb-corner,
-.fb-subject {
+.fb-entity {
     position: sticky;
     inset-inline-start: 0;
     z-index: 2;
@@ -182,7 +182,7 @@
 .fb-action-label { display: block; }
 
 .fb-action-name,
-.fb-subject-policy {
+.fb-entity-policy {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.6875rem;
     font-weight: 400;
@@ -204,7 +204,7 @@ th.fb-group.fb-scope-write { background-color: color-mix(in oklab, var(--info-50
 th.fb-group.fb-scope-withdraw { background-color: color-mix(in oklab, var(--warning-500) 7%, transparent); }
 th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--danger-500) 7%, transparent); }
 
-.fb-subject {
+.fb-entity {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -212,18 +212,18 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
     white-space: nowrap;
 }
 
-.fb-subject-icon {
+.fb-entity-icon {
     inline-size: 1rem;
     block-size: 1rem;
     color: var(--fb-muted);
 }
 
-.fb-subject-name {
+.fb-entity-name {
     display: block;
     font-weight: 600;
 }
 
-.fb-subject-policy { display: block; }
+.fb-entity-policy { display: block; }
 
 
 .fb-cell {
@@ -322,9 +322,9 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
 }
 
 /* Offered on pointing at the row and kept while they are being used. In a column repeated
-   once per subject, a control always on show is paid for as many times as there are rows;
+   once per entity, a control always on show is paid for as many times as there are rows;
    holding its place with the opacity keeps the row from jumping as it appears. */
-.fb-subject:hover .fb-shortcuts,
+.fb-entity:hover .fb-shortcuts,
 .fb-shortcuts:focus-within,
 .fb-shortcuts-all {
     opacity: 1;
@@ -766,7 +766,7 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
 /*
  * Two columns and not a row that wraps: with `space-between`, the moment the tags no longer
  * fit they jump whole to the line below and start against the left edge, so the row loses
- * the column to look down and every subject begins somewhere else.
+ * the column to look down and every entity begins somewhere else.
  */
 .fb-tg {
     display: flex;
@@ -799,7 +799,7 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
     .fb-tg-row .fb-tg-tags { justify-content: flex-start; }
 }
 
-.fb-tg-subject {
+.fb-tg-entity {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -807,14 +807,14 @@ th.fb-group.fb-scope-irreversible { background-color: color-mix(in oklab, var(--
     color: var(--fb-text);
 }
 
-.fb-tg-subject code,
+.fb-tg-entity code,
 .fb-tg-tag code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.6875rem;
     color: var(--fb-faint);
 }
 
-.fb-tg-subject code { display: block; }
+.fb-tg-entity code { display: block; }
 
 .fb-tg-icon {
     inline-size: 1rem;

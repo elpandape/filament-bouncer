@@ -236,7 +236,7 @@ reporting how many it swept — which is what the declaration column is for.
 `ElPandaPe\FilamentBouncer\Filament\Widgets\AbilityHealth` counts each ailment across the whole
 table, from outside the screen, with every figure opening its rows. **The plugin does not register
 it**, on purpose: doing so would put it on your dashboard uninvited and — because a panel refuses to
-boot with a widget that declares nobody — add a subject to your catalogue, turning `--check` red
+boot with a widget that declares nobody — add an entity to your catalogue, turning `--check` red
 until you reconcile. Add it yourself when you want it:
 
 ```php
@@ -267,7 +267,7 @@ Composing a role takes three steps — the name, the abilities, and one plain se
 what is about to be written — because handing out abilities deserves reading once before
 it is done.
 
-The catalogue is laid out as a section per subject and a row per action, and each row
+The catalogue is laid out as a section per entity and a row per action, and each row
 carries one control with three positions, chosen rather than cycled to: with a single cell
 that walked the three states, three buttons never fitted a column — so the stance was a
 shape the reader decoded — and reaching a denial meant passing through a grant, a rule
@@ -276,7 +276,7 @@ of its weight — read, write, withdraw, irreversible — which is what keeps "s
 "delete for good" from looking like the same decision. Pages, widgets and custom abilities
 answer exactly one question each, so they read as flat lists with the same control.
 
-A subject's own heading carries the model it decides about — not the policy that answers
+An entity's own heading carries the model it decides about — not the policy that answers
 for it, which is a fact about the code the catalogue already holds — an icon if `icons`
 names one for that model, how many of its actions are granted, how many it forbids, and
 the three presets folded behind a single control. The denial count is red and counted in
@@ -296,9 +296,9 @@ except deleting for good" survives the catalogue growing later instead of quietl
 whatever gets added.
 
 A catalogue of sixty rows or fewer opens whole, because below that the fold buys nothing
-and costs a click on every subject somebody came to change — and a screen that opens
+and costs a click on every entity somebody came to change — and a screen that opens
 showing only headings reads as broken. Past sixty it arrives folded, because three buttons
-a row would otherwise draw five hundred at once. Each subject offers three shortcuts —
+a row would otherwise draw five hundred at once. Each entity offers three shortcuts —
 reading, everything, nothing — and only reading carries a list of its own: a shortcut for
 withdrawing or for the irreversible is a shortcut nobody should have. A summary at the
 foot counts what the role adds up to — granted, forbidden, not granted — while it is being
@@ -464,7 +464,7 @@ The title Bouncer stores alongside each ability follows the locale in force when
 | `privileged_role` | The role that holds everything, and that the screen refuses to edit |
 | `ownership` | Which column says a record belongs to somebody, model by model |
 | `labels` | Your own words for the actions, scopes and stances |
-| `icons` | An icon for a subject on the roles screen, by model class. Anything unnamed is drawn without one |
+| `icons` | An icon for an entity on the roles screen, by model class. Anything unnamed is drawn without one |
 
 The navigation keys are presentation decisions that belong to the application, not to the
 package, which is why they are read from configuration rather than from a static property.

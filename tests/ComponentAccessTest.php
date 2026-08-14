@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Pages\Settings;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Widgets\Stats;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
@@ -17,7 +17,7 @@ test('a page is out of reach for somebody who was never granted it', function ()
 });
 
 test('a page opens for somebody who holds its ability', function (): void {
-    grant(signIn(), [['page:'.Subject::keyFor(Settings::class), null]]);
+    grant(signIn(), [['page:'.Entity::keyFor(Settings::class), null]]);
 
     expect(Settings::canAccess())->toBeTrue();
 });
@@ -29,7 +29,7 @@ test('a widget is out of sight for somebody who was never granted it', function 
 });
 
 test('a widget appears for somebody who holds its ability', function (): void {
-    grant(signIn(), [['widget:'.Subject::keyFor(Stats::class), null]]);
+    grant(signIn(), [['widget:'.Entity::keyFor(Stats::class), null]]);
 
     expect(Stats::canView())->toBeTrue();
 });

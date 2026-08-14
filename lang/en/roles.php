@@ -32,7 +32,7 @@ return [
     ],
 
     'grid' => [
-        'subject' => 'Entity',
+        'entity' => 'Entity',
         'clear' => 'Clear',
         'undeclared' => 'not declared',
         'preset_read' => 'Read only',
@@ -41,7 +41,7 @@ return [
     ],
 
     'tabs' => [
-        'subjects' => 'Resources & models',
+        'entities' => 'Resources & models',
         'pages' => 'Pages',
         'widgets' => 'Widgets',
         'custom' => 'Custom',

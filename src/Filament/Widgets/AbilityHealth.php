@@ -28,7 +28,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
  *
  * **This widget is not registered by the plugin, and that is deliberate.** Registering it would put
  * it on every consumer's dashboard and — because the package refuses to boot a panel whose widgets
- * declare nobody — add a subject to their catalogue, turning `--check` red until they reconcile.
+ * declare nobody — add an entity to their catalogue, turning `--check` red until they reconcile.
  * Whoever wants it says so; the README explains how.
  */
 final class AbilityHealth extends StatsOverviewWidget

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
@@ -77,10 +77,10 @@ test('it is read and changed on pages rather than in a modal', function (): void
 });
 
 test('the roles screen is itself a row of the catalogue it draws', function (): void {
-    $subject = resourceCatalog()->subject(Subject::keyFor(Models::classname(Role::class)));
+    $entity = resourceCatalog()->entity(Entity::keyFor(Models::classname(Role::class)));
 
-    expect($subject)->not->toBeNull()
-        ->and(array_keys($subject->abilities ?? []))
+    expect($entity)->not->toBeNull()
+        ->and(array_keys($entity->abilities ?? []))
         ->toBe(['create', 'delete', 'update', 'view', 'viewAny']);
 });
 

@@ -18,7 +18,7 @@ use Silber\Bouncer\Database\Role;
  *
  * Two consequences worth knowing before this is switched on. Nobody reaches the screen
  * until somebody grants them these abilities, which is what the role named in
- * `privileged_role` is for. And handing them on is still subject to the same rule as
+ * `privileged_role` is for. And handing them on is still entity to the same rule as
  * everything else: you cannot give away what you do not hold.
  *
  * There is deliberately no `deleteAny`. Filament authorises a bulk delete once for the

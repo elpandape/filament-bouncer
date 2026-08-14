@@ -369,7 +369,7 @@ test('the probe offers the roles beside the accounts, and asks about a rule with
     $loose = stored(['name' => 'export']);
     Models::role()->newQuery()->create(['name' => 'support']);
 
-    // A rule about no model is asked with no subject at all, which is the one shape the Gate
+    // A rule about no model is asked with no entity at all, which is the one shape the Gate
     // answers without anything to point at.
     $role = Models::role()->newQuery()->where('name', 'support')->sole();
 

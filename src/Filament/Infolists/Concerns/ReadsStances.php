@@ -56,8 +56,8 @@ trait ReadsStances
         $state = $abilities->toFormState($record);
         $stances = [];
 
-        foreach (app(CatalogRegistry::class)->current()->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach (app(CatalogRegistry::class)->current()->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 $stance = Stance::tryFrom($state[$key][$action] ?? '') ?? Stance::Neutral;
 
                 $stances[$key][$action] = $stance === Stance::Neutral && $abilities->holds($record, $ability)
@@ -70,7 +70,7 @@ trait ReadsStances
     }
 
     /**
-     * The subjects answering several actions, which are the only ones a table of subjects
+     * The entities answering several actions, which are the only ones a table of entities
      * against actions has room for.
      *
      * @return array<int, array{key: string, label: string, class: string|null, policy: string|null, icon: string|null, action: string|null, cells: array<string, bool>}>

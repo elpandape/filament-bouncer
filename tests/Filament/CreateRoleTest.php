@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\CreateRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -29,7 +29,7 @@ test('the catalogue is offered whole, however little the person filling it in ho
     /** @var array<string, array<string, string>> $state */
     $state = livewire(CreateRole::class)->get('data.'.RoleForm::ABILITIES);
 
-    expect($state[Subject::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Neutral->value)
+    expect($state[Entity::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Neutral->value)
         ->and(holds($editor, 'delete', Post::class))->toBeFalse();
 });
 
@@ -40,7 +40,7 @@ test('creating a role grants exactly what was ticked', function (): void {
         ->fillForm([
             'name' => 'editor',
             RoleForm::ABILITIES => [
-                Subject::keyFor(Post::class) => [
+                Entity::keyFor(Post::class) => [
                     'viewAny' => Stance::Granted->value,
                     'delete' => Stance::Neutral->value,
                 ],
@@ -61,7 +61,7 @@ test('a cell the panel does not declare is thrown away', function (): void {
     livewire(CreateRole::class)
         ->fillForm([
             'name' => 'editor',
-            RoleForm::ABILITIES => ['made-up-subject' => ['made-up-action' => Stance::Granted->value]],
+            RoleForm::ABILITIES => ['made-up-entity' => ['made-up-action' => Stance::Granted->value]],
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -96,7 +96,7 @@ test('somebody holding nothing of their own hands out just the same', function (
         ->fillForm([
             'name' => 'editor',
             RoleForm::ABILITIES => [
-                Subject::keyFor(Post::class) => ['forceDelete' => Stance::Granted->value],
+                Entity::keyFor(Post::class) => ['forceDelete' => Stance::Granted->value],
             ],
         ])
         ->call('create')
@@ -143,7 +143,7 @@ test('any other name is still free', function (): void {
     livewire(CreateRole::class)
         ->fillForm([
             'name' => 'editor',
-            'abilities' => [Subject::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
+            'abilities' => [Entity::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -168,7 +168,7 @@ test('one stance is enough to get past the refusal', function (): void {
     livewire(CreateRole::class)
         ->fillForm([
             'name' => 'lector',
-            'abilities' => [Subject::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
+            'abilities' => [Entity::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]],
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -182,7 +182,7 @@ test('a denial also counts as saying something', function (): void {
     livewire(CreateRole::class)
         ->fillForm([
             'name' => 'vetado',
-            'abilities' => [Subject::keyFor(Post::class) => ['delete' => Stance::Forbidden->value]],
+            'abilities' => [Entity::keyFor(Post::class) => ['delete' => Stance::Forbidden->value]],
         ])
         ->call('create')
         ->assertHasNoFormErrors();

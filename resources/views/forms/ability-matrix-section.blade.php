@@ -1,7 +1,7 @@
 {{--
     A group, in the shape it deserves.
 
-    Subjects answering several actions read as a matrix; the ones with a single door — a
+    Entities answering several actions read as a matrix; the ones with a single door — a
     page, a widget, an ability declared in configuration — read as a list, because a grid
     one column wide reads worse than a list does. Which is which is not this view's call:
     the catalogue says so.
@@ -12,25 +12,25 @@
             <thead>
                 <tr>
                     <th class="fb-corner" rowspan="2" scope="col">
-                        <span class="fb-corner-name">{{ $getSubjectLabel() }}</span>
+                        <span class="fb-corner-name">{{ $getEntityLabel() }}</span>
 
                         {{-- The same shortcuts a row offers, aimed at every row of the
                              grid. They live here because the corner is the only part of
-                             the table belonging to neither a subject nor an action. --}}
+                             the table belonging to neither an entity nor an action. --}}
                         @unless ($disabled)
                             <span class="fb-shortcuts fb-shortcuts-all">
                                 @foreach ($presets as $preset)
                                     <button
                                         type="button"
                                         class="fb-shortcut"
-                                        x-on:click="@js($getGriddedSubjects()).forEach(key => apply(key, @js($preset['actions']), @js($offered)))"
+                                        x-on:click="@js($getGriddedEntities()).forEach(key => apply(key, @js($preset['actions']), @js($offered)))"
                                     >{{ $preset['label'] }}</button>
                                 @endforeach
 
                                 <button
                                     type="button"
                                     class="fb-shortcut"
-                                    x-on:click="@js($getGriddedSubjects()).forEach(key => clear(key, @js($offered)))"
+                                    x-on:click="@js($getGriddedEntities()).forEach(key => clear(key, @js($offered)))"
                                 >{{ $getClearLabel() }}</button>
                             </span>
                         @endunless
@@ -54,20 +54,20 @@
             <tbody>
                 @foreach ($section['rows'] as $row)
                     <tr>
-                        <th class="fb-subject" scope="row">
+                        <th class="fb-entity" scope="row">
                             @if ($row['icon'] !== null)
-                                <x-filament::icon :icon="$row['icon']" class="fb-subject-icon" />
+                                <x-filament::icon :icon="$row['icon']" class="fb-entity-icon" />
                             @endif
 
-                            <span class="fb-subject-text">
-                                <span class="fb-subject-name">{{ $row['label'] }}</span>
+                            <span class="fb-entity-text">
+                                <span class="fb-entity-name">{{ $row['label'] }}</span>
                                 @if ($row['policy'] !== null)
-                                    <code class="fb-subject-policy">{{ $row['policy'] }}</code>
+                                    <code class="fb-entity-policy">{{ $row['policy'] }}</code>
                                 @endif
                             </span>
 
                             {{-- One shortcut per row, to the right of the name: in a column
-                                 repeated once per subject, every extra control is paid for
+                                 repeated once per entity, every extra control is paid for
                                  as many times as there are rows. Clearing belongs to the
                                  corner, which is pressed once. --}}
                             @unless ($disabled)
@@ -118,7 +118,7 @@
                     'bare' => true,
                 ])
                 <span class="fb-door-text">
-                    <span class="fb-subject-name">{{ $row['label'] }}</span>
+                    <span class="fb-entity-name">{{ $row['label'] }}</span>
                     <code class="fb-action-name">{{ $row['action'] }}</code>
                 </span>
             </li>

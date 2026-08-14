@@ -6,7 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Filament;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Bouncer;
@@ -30,7 +30,7 @@ final readonly class ComponentAccess
     public function allows(string $component): bool
     {
         $ability = $this->catalogs->current()
-            ->subject(Subject::keyFor($component))
+            ->entity(Entity::keyFor($component))
             ?->ability(Ability::ACCESS_ACTION);
 
         if (! $ability instanceof Ability) {

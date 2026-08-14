@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * One row of the grid: something the panel exposes, and what may be done with it.
  */
-final readonly class Subject
+final readonly class Entity
 {
     /**
      * @param  class-string<Model>|null  $entityType
@@ -22,7 +22,7 @@ final readonly class Subject
     public function __construct(
         public string $key,
         public string $label,
-        public SubjectKind $kind,
+        public EntityKind $kind,
         public ?string $entityType,
         public array $abilities,
         public ?Ability $manage = null,

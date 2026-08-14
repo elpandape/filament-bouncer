@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\Infolists\Concerns;
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Store\Declaration;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +21,7 @@ use Silber\Bouncer\Database\Models;
  * warning over a row on its way out and over one in no danger is how people learn to
  * ignore the warning.
  *
- * The subject is looked up in the catalogue even though the rule has left it: what stopped
+ * The entity is looked up in the catalogue even though the rule has left it: what stopped
  * being declared is the action, not the model, so there is nearly always a label to read
  * and the class name with its namespace is the last resort rather than the first.
  *
@@ -34,7 +34,7 @@ use Silber\Bouncer\Database\Models;
 trait ReadsDoomedRules
 {
     /**
-     * @return list<array{action: string, subject: string|null}>
+     * @return list<array{action: string, entity: string|null}>
      */
     public function getDoomed(): array
     {
@@ -44,7 +44,7 @@ trait ReadsDoomedRules
             return [];
         }
 
-        $subjects = app(CatalogRegistry::class)->current()->subjects;
+        $entities = app(CatalogRegistry::class)->current()->entities;
         $doomed = [];
 
         foreach ($this->doomedRows($record) as $row) {
@@ -60,7 +60,7 @@ trait ReadsDoomedRules
 
             $doomed[] = [
                 'action' => $name,
-                'subject' => $type === null ? null : ($subjects[Subject::keyFor($type)]->label ?? class_basename($type)),
+                'entity' => $type === null ? null : ($entities[Entity::keyFor($type)]->label ?? class_basename($type)),
             ];
         }
 

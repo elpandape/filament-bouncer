@@ -36,7 +36,7 @@ final readonly class CatalogBuilder
     public function build(Panel $panel): Catalog
     {
         $ignored = $this->ignored();
-        $subjects = [];
+        $entities = [];
 
         foreach ($this->reject($panel->getResources(), $ignored) as $resource) {
             // Aliased on the way in because Pint lower-cases a type inside a docblock,
@@ -46,67 +46,67 @@ final readonly class CatalogBuilder
             // Filament hands its labels back in lower case, because it capitalises them
             // at the point of display. A row heading and an ability title are both
             // points of display, so the capital has to be put back here.
-            $subject = $this->modelSubject(
+            $entity = $this->modelEntity(
                 $resource::getModel(),
                 Str::ucfirst($resource::getPluralModelLabel()),
-                SubjectKind::Resource,
+                EntityKind::Resource,
             );
 
-            if ($subject instanceof Subject) {
-                $subjects[$subject->key] = $subject;
+            if ($entity instanceof Entity) {
+                $entities[$entity->key] = $entity;
             }
         }
 
         foreach ($this->reject($this->configured('models'), $ignored) as $model) {
             /** @var class-string<Model> $model */
-            $subject = $this->modelSubject(
+            $entity = $this->modelEntity(
                 $model,
                 Str::headline(class_basename($model)),
-                SubjectKind::Model,
+                EntityKind::Model,
             );
 
-            if ($subject instanceof Subject) {
-                $subjects[$subject->key] ??= $subject;
+            if ($entity instanceof Entity) {
+                $entities[$entity->key] ??= $entity;
             }
         }
 
         foreach ($this->reject($panel->getPages(), $ignored) as $page) {
             /** @var class-string<Page> $page */
-            $key = Subject::keyFor($page);
+            $key = Entity::keyFor($page);
             $label = $page::getNavigationLabel();
 
-            $subjects[$key] = new Subject($key, $label, SubjectKind::Page, null, [
+            $entities[$key] = new Entity($key, $label, EntityKind::Page, null, [
                 Ability::ACCESS_ACTION => Ability::forPage($key, $this->title($label, Ability::ACCESS_ACTION)),
             ]);
         }
 
         foreach ($this->reject($this->widgetClasses($panel), $ignored) as $widget) {
-            $key = Subject::keyFor($widget);
+            $key = Entity::keyFor($widget);
             $label = Str::headline(class_basename($widget));
 
-            $subjects[$key] = new Subject($key, $label, SubjectKind::Widget, null, [
+            $entities[$key] = new Entity($key, $label, EntityKind::Widget, null, [
                 Ability::ACCESS_ACTION => Ability::forWidget($key, $this->title($label, Ability::ACCESS_ACTION)),
             ]);
         }
 
         foreach ($this->customAbilities() as $name => $scope) {
-            $key = Subject::keyFor($name);
+            $key = Entity::keyFor($name);
             $label = Str::headline($name);
 
-            $subjects[$key] = new Subject($key, $label, SubjectKind::Custom, null, [
+            $entities[$key] = new Entity($key, $label, EntityKind::Custom, null, [
                 Ability::CUSTOM_ACTION => Ability::custom($name, $label, AbilityScope::from($scope)),
             ]);
         }
 
-        uasort($subjects, static fn (Subject $a, Subject $b): int => [$a->kind->order(), $a->label] <=> [$b->kind->order(), $b->label]);
+        uasort($entities, static fn (Entity $a, Entity $b): int => [$a->kind->order(), $a->label] <=> [$b->kind->order(), $b->label]);
 
-        return new Catalog($subjects, $this->actions($subjects));
+        return new Catalog($entities, $this->actions($entities));
     }
 
     /**
      * @param  class-string<Model>  $model
      */
-    private function modelSubject(string $model, string $label, SubjectKind $kind): ?Subject
+    private function modelEntity(string $model, string $label, EntityKind $kind): ?Entity
     {
         $abilities = [];
 
@@ -123,7 +123,7 @@ final readonly class CatalogBuilder
             return null;
         }
 
-        return new Subject(Subject::keyFor($model), $label, $kind, $model, $abilities,
+        return new Entity(Entity::keyFor($model), $label, $kind, $model, $abilities,
             Ability::manage($model, $this->title($label, Ability::MANAGE_ACTION)));
     }
 
@@ -169,15 +169,15 @@ final readonly class CatalogBuilder
     }
 
     /**
-     * @param  array<string, Subject>  $subjects
+     * @param  array<string, Entity>  $entities
      * @return array<string, AbilityScope>
      */
-    private function actions(array $subjects): array
+    private function actions(array $entities): array
     {
         $actions = [];
 
-        foreach ($subjects as $subject) {
-            foreach ($subject->abilities as $action => $ability) {
+        foreach ($entities as $entity) {
+            foreach ($entity->abilities as $action => $ability) {
                 $actions[$action] = $ability->scope;
             }
         }

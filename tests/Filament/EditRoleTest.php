@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Schemas\RoleForm;
 use ElPandaPe\FilamentBouncer\Store\Stance;
@@ -32,8 +32,8 @@ function editedRole(string $name = 'editor'): Model
 
 function editedCatalogCells(): int
 {
-    return collect(app(CatalogRegistry::class)->current()->subjects)
-        ->sum(static fn (Subject $subject): int => count($subject->cells()));
+    return collect(app(CatalogRegistry::class)->current()->entities)
+        ->sum(static fn (Entity $entity): int => count($entity->cells()));
 }
 
 /**
@@ -56,8 +56,8 @@ test('the screen arrives holding what the role was granted', function (): void {
     /** @var array<string, array<string, string>> $state */
     $state = livewire(EditRole::class, ['record' => $role->getKey()])->get('data.'.RoleForm::ABILITIES);
 
-    expect($state[Subject::keyFor(Post::class)]['viewAny'] ?? null)->toBe(Stance::Granted->value)
-        ->and($state[Subject::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Neutral->value);
+    expect($state[Entity::keyFor(Post::class)]['viewAny'] ?? null)->toBe(Stance::Granted->value)
+        ->and($state[Entity::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Neutral->value);
 });
 
 test('saving grants what is ticked and takes away what is not', function (): void {
@@ -67,7 +67,7 @@ test('saving grants what is ticked and takes away what is not', function (): voi
     grant($role, [['viewAny', Post::class]]);
 
     editedWith($role, [
-        Subject::keyFor(Post::class) => [
+        Entity::keyFor(Post::class) => [
             'viewAny' => Stance::Neutral->value,
             'create' => Stance::Granted->value,
         ],
@@ -83,7 +83,7 @@ test('a grant nobody was asked about survives a save that never mentions it', fu
     $role = editedRole();
     grant($role, [['viewAny', Post::class]]);
 
-    editedWith($role, [Subject::keyFor(Tag::class) => ['viewAny' => Stance::Granted->value]]);
+    editedWith($role, [Entity::keyFor(Tag::class) => ['viewAny' => Stance::Granted->value]]);
 
     expect(holds($role, 'viewAny', Post::class))->toBeTrue()
         ->and(holds($role, 'viewAny', Tag::class))->toBeTrue();
@@ -94,7 +94,7 @@ test('a cell the panel does not declare changes nothing', function (): void {
 
     $role = editedRole();
 
-    editedWith($role, ['made-up-subject' => ['made-up-action' => Stance::Granted->value]]);
+    editedWith($role, ['made-up-entity' => ['made-up-action' => Stance::Granted->value]]);
 
     expect(abilityCount($role))->toBe(0);
 });
@@ -130,7 +130,7 @@ test('a cell may forbid, and forbidding is what the role then carries', function
 
     $role = editedRole();
 
-    editedWith($role, [Subject::keyFor(Post::class) => ['delete' => Stance::Forbidden->value]]);
+    editedWith($role, [Entity::keyFor(Post::class) => ['delete' => Stance::Forbidden->value]]);
 
     Bouncer::allow($role)->to('delete', Post::class);
     Bouncer::refresh();
@@ -143,7 +143,7 @@ test('a grant covering a whole model is written as the wildcard', function (): v
 
     $role = editedRole();
 
-    editedWith($role, [Subject::keyFor(Post::class) => [Ability::MANAGE_ACTION => Stance::Granted->value]]);
+    editedWith($role, [Entity::keyFor(Post::class) => [Ability::MANAGE_ACTION => Stance::Granted->value]]);
 
     expect(holds($role, Ability::MANAGE_NAME, Post::class))->toBeTrue()
         ->and(holds($role, 'forceDelete', Post::class))->toBeTrue();

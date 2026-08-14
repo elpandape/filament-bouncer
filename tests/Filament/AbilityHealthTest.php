@@ -69,7 +69,7 @@ test('declares who may see it, which the panel guard requires', function (): voi
 });
 
 /**
- * Registering it would put it on every consumer's dashboard and add a subject to their catalogue,
+ * Registering it would put it on every consumer's dashboard and add an entity to their catalogue,
  * turning `--check` red until they reconcile. Whoever wants it says so.
  */
 test('is not registered by the plugin, so nobody gets it without asking', function (): void {

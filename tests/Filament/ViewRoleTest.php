@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\AbilityTags;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\OrphanChips;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ViewRole;
@@ -80,7 +80,7 @@ test('an action nobody said anything about is left off the reading', function ()
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
             $rows = array_column($entry->getRows(), 'tags', 'key');
-            $actions = array_column($rows[Subject::keyFor(Post::class)] ?? [], 'action');
+            $actions = array_column($rows[Entity::keyFor(Post::class)] ?? [], 'action');
 
             return $actions === ['viewAny'];
         });
@@ -141,7 +141,7 @@ test('a denial is shown as a denial and not as an absence', function (): void {
     /** @var array<string, array<string, string>> $state */
     $state = livewire(ViewRole::class, ['record' => $role->getKey()])->get('data.'.RoleForm::ABILITIES);
 
-    expect($state[Subject::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Forbidden->value);
+    expect($state[Entity::keyFor(Post::class)]['delete'] ?? null)->toBe(Stance::Forbidden->value);
 });
 
 test('the record of a role nobody may work on offers no way in', function (): void {
@@ -292,19 +292,19 @@ test('what the role is silent about is spelled out while the names still fit', f
         ->assertSee(__('filament-bouncer::roles.record.and'));
 });
 
-test('a door the role reaches is read apart from the subjects', function (): void {
+test('a door the role reaches is read apart from the entities', function (): void {
     signInAsRoleManager();
 
     $role = readRole();
 
-    Bouncer::allow($role)->to('page:'.Subject::keyFor(Settings::class));
+    Bouncer::allow($role)->to('page:'.Entity::keyFor(Settings::class));
     Bouncer::refresh();
 
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
             $doors = array_column($entry->getDoors(), 'rows', 'tab');
 
-            return array_column($doors['pages'] ?? [], 'key') === [Subject::keyFor(Settings::class)];
+            return array_column($doors['pages'] ?? [], 'key') === [Entity::keyFor(Settings::class)];
         })
         ->assertSee(__('filament-bouncer::roles.tabs.pages'));
 });
@@ -319,7 +319,7 @@ test('what the role reaches through a broader rule is read as reached', function
 
     livewire(ViewRole::class, ['record' => $role->getKey()])
         ->assertSchemaComponentExists('abilities', checkComponentUsing: function (AbilityTags $entry): bool {
-            $stances = $entry->getStances()[Subject::keyFor(Post::class)] ?? [];
+            $stances = $entry->getStances()[Entity::keyFor(Post::class)] ?? [];
 
             return ($stances['viewAny'] ?? '') === 'broader';
         });

@@ -7,7 +7,7 @@
 
         @foreach ($getGroups() as $group)
             <div class="fb-or-group">
-                <p class="fb-or-group-name">{{ $group['subject'] }}</p>
+                <p class="fb-or-group-name">{{ $group['entity'] }}</p>
 
                 <div class="fb-or-tags">
                     @foreach ($group['actions'] as $action)

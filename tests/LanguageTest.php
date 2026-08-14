@@ -42,7 +42,7 @@ test('a file ships the same keys in both tongues', function (string $file): void
 test('the grid says everything it needs to, in both tongues', function (): void {
     $keys = [
         'form.forbidden_count', 'form.model_count', 'form.manage',
-        'grid.subject', 'grid.clear', 'grid.undeclared', 'grid.preset_read',
+        'grid.entity', 'grid.clear', 'grid.undeclared', 'grid.preset_read',
         'grid.note_legend', 'grid.hint',
         'summary.granted', 'summary.forbidden', 'summary.neutral',
     ];

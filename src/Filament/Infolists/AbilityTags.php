@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Infolists;
 
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Infolists\Concerns\ReadsStances;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Labels;
@@ -22,7 +22,7 @@ use Silber\Bouncer\Database\Models;
  * What the role says, and only what it says.
  *
  * A grid answers cell by cell and so has to draw them all: over a catalogue of four
- * subjects that is nearly thirty boxes to answer three things, and the three that matter
+ * entities that is nearly thirty boxes to answer three things, and the three that matter
  * read as faintly as the twenty-odd that say nothing. Here a row carries only the actions
  * holding a stance, so the answer is read at a glance and its length grows with what the
  * role does rather than with what the panel declares — which is what saves it from the
@@ -30,7 +30,7 @@ use Silber\Bouncer\Database\Models;
  *
  * What it loses is just as real and worth knowing: without a grid nobody can ask "and
  * creating?" and find the box, because an action with no stance simply is not there. The
- * foot makes up for half of that by naming the subjects it says nothing about; what this
+ * foot makes up for half of that by naming the entities it says nothing about; what this
  * page can no longer say is which actions existed and went unused. The form is for that,
  * and it draws them all because there they have to be settable.
  */
@@ -51,7 +51,7 @@ final class AbilityTags extends Entry
     protected string $view = 'filament-bouncer::roles.ability-tags';
 
     /**
-     * A row per subject the role says something about, its actions in catalogue order so
+     * A row per entity the role says something about, its actions in catalogue order so
      * that no two rows sort the same thing differently.
      *
      * @return list<array{key: string, label: string, policy: string|null, icon: string|null, tags: list<array{action: string, label: string, stance: string}>}>
@@ -83,7 +83,7 @@ final class AbilityTags extends Entry
      *
      * A page, a widget or an ability declared in configuration answers one action, so its
      * row is the tag and nothing else: there is no list to trim. They go apart from the
-     * subjects because their action is none of the ones the others declare, and mixing
+     * entities because their action is none of the ones the others declare, and mixing
      * them would suggest they share it.
      *
      * @return list<array{tab: string, label: string, rows: list<array{key: string, label: string, tags: list<array{action: string, label: string, stance: string}>}>}>
@@ -120,7 +120,7 @@ final class AbilityTags extends Entry
      *
      * They live in a block of their own inside the abilities, and not in a section apart,
      * because they are the same as the rest with a fence around them: the same action over
-     * the same subject, reaching one record or only what its holder owns. What sets them
+     * the same entity, reaching one record or only what its holder owns. What sets them
      * apart is who writes them — they are composed by hand on the abilities screen and the
      * grid does not touch them — not what they are about.
      *
@@ -129,7 +129,7 @@ final class AbilityTags extends Entry
      * said too, because the rule is still there pointing at nothing and no screen gives it
      * away.
      *
-     * @return list<array{subject: string, action: string, label: string, owned: bool, records: list<array{title: string, missing: bool}>}>
+     * @return list<array{entity: string, action: string, label: string, owned: bool, records: list<array{title: string, missing: bool}>}>
      */
     public function getNarrowed(): array
     {
@@ -140,7 +140,7 @@ final class AbilityTags extends Entry
         }
 
         $labels = app(Labels::class);
-        $subjects = array_column($this->gridRows(), 'label', 'key');
+        $entities = array_column($this->gridRows(), 'label', 'key');
         $narrowed = [];
 
         foreach ($this->narrowedRows($record) as $row) {
@@ -155,7 +155,7 @@ final class AbilityTags extends Entry
             $key = $name.'|'.($type ?? '').'|'.($owned ? '1' : '0');
 
             $narrowed[$key] ??= [
-                'subject' => $type === null ? '—' : ($subjects[Subject::keyFor($type)] ?? $type),
+                'entity' => $type === null ? '—' : ($entities[Entity::keyFor($type)] ?? $type),
                 'action' => $name,
                 'label' => $labels->action($name),
                 'owned' => $owned,
@@ -174,7 +174,7 @@ final class AbilityTags extends Entry
     }
 
     /**
-     * The subjects and doors the role says nothing about, split by their group.
+     * The entities and doors the role says nothing about, split by their group.
      *
      * They are named rather than simply left out: a row missing because the role is silent
      * and a row missing because the panel does not declare it are two different things and
@@ -224,7 +224,7 @@ final class AbilityTags extends Entry
      *
      * The figure can stand alone because the detail is not lost — the whole list is right
      * below, split by group and folded away — and a line already splitting by group would
-     * do the disclosure's job while taking the room it saves. "Subjects" covers them all:
+     * do the disclosure's job while taking the room it saves. "Entities" covers them all:
      * in the catalogue a model, a page and a loose ability are equally one.
      */
     public function getSilentLabel(): string
@@ -301,7 +301,7 @@ final class AbilityTags extends Entry
     }
 
     /**
-     * A subject's tags: the actions holding a stance, and none other.
+     * An entity's tags: the actions holding a stance, and none other.
      *
      * @param  list<string>  $actions
      * @return list<array{action: string, label: string, stance: string}>

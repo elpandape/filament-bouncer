@@ -113,7 +113,7 @@ return [
     ],
 
     /*
-     * An icon for each subject on the roles screen, keyed by model class. A subject
+     * An icon for each entity on the roles screen, keyed by model class. An entity
      * named here is drawn with it; anything else is drawn without one. Names only —
      * this file is cached, and `config:cache` throws on a closure.
      */

@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * What a role can do is not answered here. It used to be, with a bar drawing the catalogue
  * to scale on every row — and a figure summing up a whole catalogue tells nobody whether
  * this role may delete accounts, which is what anybody comes to a listing to find out. The
- * record page says it subject by subject, and that is one click away.
+ * record page says it entity by entity, and that is one click away.
  *
  * The destructive way lives behind the kebab, and the two rows nobody works on from here
  * carry a padlock in its place: an explanation where a silently missing button would read

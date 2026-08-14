@@ -39,8 +39,8 @@ final readonly class RoleCoverage
         $total = 0;
         $reached = 0;
 
-        foreach ($catalog->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach ($catalog->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 $total++;
 
                 $stance = Stance::tryFrom((string) ($state[$key][$action] ?? '')) ?? Stance::Neutral;

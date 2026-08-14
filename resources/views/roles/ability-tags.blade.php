@@ -22,7 +22,7 @@
             <ul class="fb-tg">
                 @foreach ($rows as $row)
                     <li class="fb-tg-row">
-                        <span class="fb-tg-subject">
+                        <span class="fb-tg-entity">
                             @if ($row['icon'] !== null)
                                 <x-filament::icon :icon="$row['icon']" class="fb-tg-icon" />
                             @endif
@@ -46,7 +46,7 @@
 
                 @foreach ($door['rows'] as $row)
                     <li class="fb-tg-row">
-                        <span class="fb-tg-subject"><b>{{ $row['label'] }}</b></span>
+                        <span class="fb-tg-entity"><b>{{ $row['label'] }}</b></span>
                         @include('filament-bouncer::roles.ability-tag-list', ['tags' => $row['tags']])
                     </li>
                 @endforeach
@@ -59,9 +59,9 @@
 
                 @foreach ($narrowed as $rule)
                     <li class="fb-tg-row">
-                        <span class="fb-tg-subject">
+                        <span class="fb-tg-entity">
                             <span>
-                                <b>{{ $rule['label'] }}</b> · {{ $rule['subject'] }}
+                                <b>{{ $rule['label'] }}</b> · {{ $rule['entity'] }}
                                 <code>{{ $rule['action'] }}</code>
                             </span>
                         </span>

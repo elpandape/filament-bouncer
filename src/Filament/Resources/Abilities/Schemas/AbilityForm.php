@@ -292,9 +292,9 @@ final class AbilityForm
     {
         $options = [];
 
-        foreach (resolve(CatalogRegistry::class)->current()->subjects as $subject) {
-            if ($subject->entityType !== null) {
-                $options[$subject->entityType] = $subject->label;
+        foreach (resolve(CatalogRegistry::class)->current()->entities as $entity) {
+            if ($entity->entityType !== null) {
+                $options[$entity->entityType] = $entity->label;
             }
         }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Catalog;
 
-enum SubjectKind: string
+enum EntityKind: string
 {
     case Resource = 'resource';
 
@@ -25,7 +25,7 @@ enum SubjectKind: string
     public function tab(): CatalogTab
     {
         return match ($this) {
-            self::Resource, self::Model => CatalogTab::Subjects,
+            self::Resource, self::Model => CatalogTab::Entities,
             self::Page => CatalogTab::Pages,
             self::Widget => CatalogTab::Widgets,
             self::Custom => CatalogTab::Custom,

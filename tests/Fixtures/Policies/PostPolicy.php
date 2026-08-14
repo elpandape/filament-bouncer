@@ -56,8 +56,8 @@ final readonly class PostPolicy
         return $this->allows($user, 'forceDelete', $post);
     }
 
-    private function allows(Model $user, string $action, Post|string $subject): bool
+    private function allows(Model $user, string $action, Post|string $entity): bool
     {
-        return $this->bouncer->getClipboard()->check($user, $action, $subject);
+        return $this->bouncer->getClipboard()->check($user, $action, $entity);
     }
 }

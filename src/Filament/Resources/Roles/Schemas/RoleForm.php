@@ -211,8 +211,8 @@ final class RoleForm
         $restrictions = $abilities->restrictions($role);
         $notes = [];
 
-        foreach (app(CatalogRegistry::class)->current()->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach (app(CatalogRegistry::class)->current()->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 $stance = $state[$key][$action] ?? Stance::Neutral->value;
                 $holds = $abilities->holds($role, $ability);
 

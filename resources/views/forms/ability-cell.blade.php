@@ -44,7 +44,7 @@
         type="button"
         @disabled($disabled)
         class="fb-box"
-        data-subject="{{ $row['key'] }}"
+        data-entity="{{ $row['key'] }}"
         data-action="{{ $action }}"
         x-on:click="cycle(@js($row['key']), @js($action), $event.shiftKey)"
         x-bind:class="'fb-box-' + at(@js($row['key']), @js($action)) + (inherits(@js($row['key']), @js($action), @js($reached)) ? ' fb-box-broader' : '')"

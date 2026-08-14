@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
-use ElPandaPe\FilamentBouncer\Catalog\Subject;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Tables\RolesTable;
@@ -43,8 +43,8 @@ function stillStanding(Model $role): bool
 
 function listedCatalogCells(): int
 {
-    return collect(app(CatalogRegistry::class)->current()->subjects)
-        ->sum(static fn (Subject $subject): int => count($subject->cells()));
+    return collect(app(CatalogRegistry::class)->current()->entities)
+        ->sum(static fn (Entity $entity): int => count($entity->cells()));
 }
 
 test('the screen lists the roles that exist', function (): void {

@@ -7,6 +7,27 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [8.0.0] - 2026-08-13
+
+One word, carried all the way through. What the catalogue holds a row for is now called an
+**entity**, everywhere: the screens, the classes, the state and the stylesheet. Nothing that
+is stored changes — no ability is renamed, no row is touched, and the reconciliation behaves
+exactly as before.
+
+### Changed
+
+- `Catalog\Subject` → `Catalog\Entity`, and `Catalog\SubjectKind` → `Catalog\EntityKind` with
+  its case `Subjects` → `Entities`.
+- `Catalog::$subjects` → `Catalog::$entities`, and every method named after the old word with
+  it — `Catalog::subject()`, `AbilityGrid::getGriddedSubjects()` and
+  `AbilityGrid::getSubjectLabel()` among them. **If your application names any of these, that
+  is the upgrade.**
+- Two translation keys: `roles.grid.subject` → `roles.grid.entity` and `roles.form.subjects` →
+  `roles.form.entities`. Only matters if you published the language files.
+- The grid's CSS classes and data attributes follow: `.fb-subject*` → `.fb-entity*`,
+  `data-subject` → `data-entity`. **Run `php artisan filament:assets` after upgrading**, as
+  after any release that touches the stylesheet.
+
 ## [7.2.1] - 2026-08-13
 
 ### Fixed

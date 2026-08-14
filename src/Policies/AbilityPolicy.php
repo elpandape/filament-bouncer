@@ -25,8 +25,8 @@ abstract class AbilityPolicy
      * Going through the Gate would resolve this very policy and ask it the same
      * question, and the question would never end.
      */
-    protected function allows(Model $authority, string $action, Model|string $subject): bool
+    protected function allows(Model $authority, string $action, Model|string $entity): bool
     {
-        return $this->bouncer->getClipboard()->check($authority, $action, $subject);
+        return $this->bouncer->getClipboard()->check($authority, $action, $entity);
     }
 }

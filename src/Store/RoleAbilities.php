@@ -33,8 +33,8 @@ final readonly class RoleAbilities
         $stances = $this->stances($role);
         $state = [];
 
-        foreach ($this->catalogs->current()->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach ($this->catalogs->current()->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 $state[$key][$action] = ($stances[$ability->identity()] ?? Stance::Neutral)->value;
             }
         }
@@ -179,8 +179,8 @@ final readonly class RoleAbilities
     {
         $stances = $this->stances($role);
 
-        foreach ($this->catalogs->current()->subjects as $key => $subject) {
-            foreach ($subject->cells() as $action => $ability) {
+        foreach ($this->catalogs->current()->entities as $key => $entity) {
+            foreach ($entity->cells() as $action => $ability) {
                 // A cell the state does not mention is one nobody was asked about, and
                 // silence is not an instruction to clear it. This is what lets the
                 // abilities screen write a single cell without taking every other

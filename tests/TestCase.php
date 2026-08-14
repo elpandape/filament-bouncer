@@ -153,7 +153,7 @@ abstract class TestCase extends ApplicationTestCase
         $config->set('auth.providers.users', ['driver' => 'eloquent', 'model' => User::class]);
 
         // The fixture panel only carries resources, pages and widgets, so these two
-        // keys are the only way the suite reaches the other two kinds of subject.
+        // keys are the only way the suite reaches the other two kinds of entity.
         $config->set('filament-bouncer.models', [Tag::class, Comment::class]);
         $config->set('filament-bouncer.custom', ['impersonate-users' => 'write']);
 
