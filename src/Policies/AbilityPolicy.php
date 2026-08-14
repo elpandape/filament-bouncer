@@ -5,28 +5,57 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Policies;
 
 use Illuminate\Database\Eloquent\Model;
-use Silber\Bouncer\Bouncer;
+use Silber\Bouncer\Database\Ability;
+use Silber\Bouncer\Database\Models;
 
 /**
- * What a generated policy is built on.
+ * Who may read the abilities screen, rename what it lists, and narrow an ability.
  *
- * It carries no actions of its own, and that is the point: the methods a policy declares
- * are exactly the abilities the catalogue offers for that model, so the file is the
- * declaration. A base class quietly supplying twelve of them would put restoring and
- * force deleting in front of an administrator for a model that has neither.
+ * `create` makes exactly one kind of row: a narrowed one, about a single record or about
+ * what its holder owns. Those are the rows the reconciliation deliberately never speaks
+ * for, so `--check` does not fail on them and `--prune` does not take them away. The
+ * plain row stays out of reach, because that one the catalogue owns: it is a method on a
+ * policy, a page, a widget or a name in configuration, and `filament-bouncer:reconcile`
+ * is what writes it.
+ *
+ * There is deliberately no `delete`. A row is only ever removed by the reconciliation
+ * that stopped declaring it, and taking one away here would take every grant pointing at
+ * it with no second question asked.
+ *
+ * `update` is offered because exactly one field is the reader's: the title. The name the
+ * code asks the Gate and the model it asks about are declarations, and the form shows
+ * them without letting them be touched.
  */
-abstract class AbilityPolicy
+final class AbilityPolicy extends BouncerPolicy
 {
-    public function __construct(private readonly Bouncer $bouncer) {}
+    public function viewAny(Model $user): bool
+    {
+        return $this->allows($user, 'viewAny', $this->model());
+    }
+
+    public function create(Model $user): bool
+    {
+        return $this->allows($user, 'create', $this->model());
+    }
+
+    public function view(Model $user, Model $ability): bool
+    {
+        return $this->allows($user, 'view', $ability);
+    }
+
+    public function update(Model $user, Model $ability): bool
+    {
+        return $this->allows($user, 'update', $ability);
+    }
 
     /**
-     * Asks Bouncer's clipboard rather than the Gate.
-     *
-     * Going through the Gate would resolve this very policy and ask it the same
-     * question, and the question would never end.
+     * @return class-string<Ability>
      */
-    protected function allows(Model $authority, string $action, Model|string $entity): bool
+    private function model(): string
     {
-        return $this->bouncer->getClipboard()->check($authority, $action, $entity);
+        /** @var class-string<Ability> $model */
+        $model = Models::classname(Ability::class);
+
+        return $model;
     }
 }

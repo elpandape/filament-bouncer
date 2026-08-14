@@ -378,6 +378,12 @@ for something that has no resource. Publish the stub with
 
 The generated methods are the declaration: the catalogue reads them straight back, so what
 an administrator is offered for a model is exactly what its policy is prepared to answer.
+
+Each one extends `ElPandaPe\FilamentBouncer\Policies\BouncerPolicy`, which carries no actions
+of its own — a base quietly supplying twelve of them would offer restoring and force deleting
+for a model that has neither — and one `allows()` that asks Bouncer's clipboard rather than
+the Gate, since going through the Gate would resolve that very policy and ask it the same
+question forever.
 Delete a method you do not want and its row goes with it.
 
 The roles screen is governed the same way, by a policy this package registers for the role

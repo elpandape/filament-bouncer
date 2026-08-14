@@ -7,6 +7,24 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [9.0.0] - 2026-08-13
+
+The two policies swap names, because they were the wrong way round: the one named after the
+model was the abstract base every generated policy extends, and the one for the model was
+named after a row.
+
+### Changed
+
+- `Policies\AbilityPolicy` → `Policies\BouncerPolicy`. It is the base a generated policy
+  extends, and it decides nothing about abilities: it carries no actions and one `allows()`
+  that asks Bouncer's clipboard. **If your policies extend it, that import is the upgrade** —
+  or regenerate them with `filament-bouncer:policy --force`.
+- `Policies\AbilityRowPolicy` → `Policies\AbilityPolicy`. It is the policy of Bouncer's
+  `Ability` model, and now it is named the way `RolePolicy` is. The package registers it
+  itself, so nothing needs doing unless you named it.
+- The published stub says `extends BouncerPolicy`. Republish it with
+  `--tag=filament-bouncer-stubs --force` if you keep your own copy.
+
 ## [8.0.0] - 2026-08-13
 
 One word, carried all the way through. What the catalogue holds a row for is now called an

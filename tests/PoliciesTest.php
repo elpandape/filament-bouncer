@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Policies\AbilityPolicy;
-use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
+use ElPandaPe\FilamentBouncer\Policies\BouncerPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
@@ -26,9 +26,9 @@ function rolePolicy(): RolePolicy
     return app(RolePolicy::class);
 }
 
-function abilityRowPolicy(): AbilityRowPolicy
+function abilityRowPolicy(): AbilityPolicy
 {
-    return app(AbilityRowPolicy::class);
+    return app(AbilityPolicy::class);
 }
 
 /**
@@ -302,7 +302,7 @@ test('the gate hands the ability model to the packaged policy', function (): voi
 
     grant($user, [['view', policyAbilityModel()]]);
 
-    expect(Gate::getPolicyFor(policyAbilityModel()))->toBeInstanceOf(AbilityRowPolicy::class)
+    expect(Gate::getPolicyFor(policyAbilityModel()))->toBeInstanceOf(AbilityPolicy::class)
         ->and(Gate::forUser($user)->allows('view', $ability))->toBeTrue();
 });
 
@@ -317,9 +317,9 @@ test('the roles policy declares the five actions the screen has and no bulk dele
 });
 
 test('the abilities policy declares four actions and no way to take a row away', function (): void {
-    expect(declaredActions(AbilityRowPolicy::class))->toBe(['create', 'update', 'view', 'viewAny']);
+    expect(declaredActions(AbilityPolicy::class))->toBe(['create', 'update', 'view', 'viewAny']);
 });
 
 test('the base policy carries no actions of its own', function (): void {
-    expect(declaredActions(AbilityPolicy::class))->toBeEmpty();
+    expect(declaredActions(BouncerPolicy::class))->toBeEmpty();
 });

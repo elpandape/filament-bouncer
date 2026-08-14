@@ -30,7 +30,7 @@ use Silber\Bouncer\Database\Role;
  * An application that wants its own answer registers a policy for the role model from a
  * provider of its own, which boots after this one and wins.
  */
-final class RolePolicy extends AbilityPolicy
+final class RolePolicy extends BouncerPolicy
 {
     public function viewAny(Model $user): bool
     {

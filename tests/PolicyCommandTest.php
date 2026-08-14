@@ -39,9 +39,9 @@ test('the policy it writes declares the six actions the catalogue then offers', 
 
     expect($written)
         ->toContain('namespace App\Policies;')
-        ->toContain('use ElPandaPe\FilamentBouncer\Policies\AbilityPolicy;')
+        ->toContain('use ElPandaPe\FilamentBouncer\Policies\BouncerPolicy;')
         ->toContain('use '.Comment::class.';')
-        ->toContain('class CommentPolicy extends AbilityPolicy')
+        ->toContain('class CommentPolicy extends BouncerPolicy')
         ->toContain("return \$this->allows(\$user, 'viewAny', Comment::class);")
         ->toContain('public function view(User $user, Comment $comment): bool')
         ->toContain('public function deleteAny(User $user): bool');
@@ -63,7 +63,7 @@ test('forcing it overwrites what was there', function (): void {
 
     Artisan::call('filament-bouncer:policy', ['--force' => true]);
 
-    expect(File::get(policyPath('CommentPolicy')))->toContain('extends AbilityPolicy');
+    expect(File::get(policyPath('CommentPolicy')))->toContain('extends BouncerPolicy');
 });
 
 test('it writes for a model named on the command line, resource or not', function (): void {

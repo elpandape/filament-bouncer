@@ -4,7 +4,7 @@ namespace {{ namespace }};
 
 {{ imports }}
 
-class {{ class }} extends AbilityPolicy
+class {{ class }} extends BouncerPolicy
 {
     public function viewAny({{ userClass }} $user): bool
     {

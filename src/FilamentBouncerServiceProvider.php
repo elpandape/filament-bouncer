@@ -8,7 +8,7 @@ use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Console\AssignCommand;
 use ElPandaPe\FilamentBouncer\Console\PolicyCommand;
 use ElPandaPe\FilamentBouncer\Console\ReconcileCommand;
-use ElPandaPe\FilamentBouncer\Policies\AbilityRowPolicy;
+use ElPandaPe\FilamentBouncer\Policies\AbilityPolicy;
 use ElPandaPe\FilamentBouncer\Policies\RolePolicy;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\Diagnosis;
@@ -67,7 +67,7 @@ final class FilamentBouncerServiceProvider extends ServiceProvider
         // And the abilities screen is governed the same way. Without a policy Filament
         // falls open, and the screen that names every ability in the panel is exactly
         // the one nobody unasked should be reading.
-        Gate::policy(Models::classname(Ability::class), AbilityRowPolicy::class);
+        Gate::policy(Models::classname(Ability::class), AbilityPolicy::class);
 
         // Nobody owns a role, and saying so out loud is what keeps this package working
         // in an application that runs Eloquent strictly.

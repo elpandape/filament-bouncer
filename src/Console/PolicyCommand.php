@@ -119,7 +119,7 @@ final class PolicyCommand extends Command
         $imports = array_unique([
             'use '.$model.';',
             'use '.$user.';',
-            'use ElPandaPe\FilamentBouncer\Policies\AbilityPolicy;',
+            'use ElPandaPe\FilamentBouncer\Policies\BouncerPolicy;',
         ]);
 
         sort($imports);

@@ -41,7 +41,7 @@ use UnitEnum;
  * being one click apart.
  *
  * Saying so out loud matters more than it looks: Filament falls open on a policy method
- * that is not there, and `AbilityRowPolicy` deliberately declares no `delete`. Left to the
+ * that is not there, and `AbilityPolicy` deliberately declares no `delete`. Left to the
  * policy alone, the button would be offered to everybody.
  */
 final class AbilityResource extends Resource
