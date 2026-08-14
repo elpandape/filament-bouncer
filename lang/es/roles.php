@@ -32,7 +32,7 @@ return [
     ],
 
     'grid' => [
-        'subject' => 'Sujeto',
+        'subject' => 'Entidad',
         'clear' => 'Vaciar',
         'undeclared' => 'no declarada',
         'preset_read' => 'Solo lectura',
@@ -78,11 +78,11 @@ return [
         'owned' => 'solo lo que le pertenece',
         'record_gone' => 'ya no existe',
         'silent_spelled' => 'No dice nada sobre :names.',
-        'silent_counted' => 'No dice nada sobre otros :count sujetos.',
+        'silent_counted' => 'No dice nada sobre otras :count entidades.',
         'silent_more' => 'Ver cuáles',
         'and' => 'y',
         'tags_empty' => 'Este rol no concede ni prohíbe nada.',
-        'orphans_loose' => 'Sin sujeto',
+        'orphans_loose' => 'Sin entidad',
         'orphans_none' => 'Nada por perder',
         'orphans_some' => 'Se perderán',
         'orphans_note_none' => 'Ninguna regla de este rol apunta a una habilidad que el código haya dejado de declarar.',

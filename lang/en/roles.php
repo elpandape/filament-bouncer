@@ -32,7 +32,7 @@ return [
     ],
 
     'grid' => [
-        'subject' => 'Subject',
+        'subject' => 'Entity',
         'clear' => 'Clear',
         'undeclared' => 'not declared',
         'preset_read' => 'Read only',
@@ -78,11 +78,11 @@ return [
         'owned' => 'only what it owns',
         'record_gone' => 'gone',
         'silent_spelled' => 'Says nothing about :names.',
-        'silent_counted' => 'Says nothing about another :count subjects.',
+        'silent_counted' => 'Says nothing about another :count entities.',
         'silent_more' => 'See which',
         'and' => 'and',
         'tags_empty' => 'This role grants nothing and forbids nothing.',
-        'orphans_loose' => 'No subject',
+        'orphans_loose' => 'No entity',
         'orphans_none' => 'Nothing to lose',
         'orphans_some' => 'About to be lost',
         'orphans_note_none' => 'Nothing this role says points at an ability the code has stopped declaring.',
