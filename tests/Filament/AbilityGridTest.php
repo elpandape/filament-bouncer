@@ -327,3 +327,12 @@ test('a cell holding a rule the grid cannot write is marked', function (): void 
     livewire(GridHost::class, ['role' => gridRole()->getKey()])
         ->assertSeeHtml('class="fb-narrowed"');
 });
+
+test('a cell reads the manage box live, and not only what the role already holds', function (): void {
+    // The whole-model grant stores one row and never the columns beside it, so the hollow tick over
+    // those columns has to be worked out in the browser: the server only knows what was saved.
+    // No test here runs Alpine — the package has no browser suite — so what is fixed is that the
+    // expression the cell carries names the manage box at all.
+    livewire(GridHost::class)
+        ->assertSeeHtml("this.at(subject, '".Ability::MANAGE_ACTION."')");
+});

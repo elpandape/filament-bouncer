@@ -34,9 +34,19 @@ says(subject, action) {
     return this.labels[this.at(subject, action)] ?? this.at(subject, action)
 },
 {{-- Only while the cell is still unmarked: the moment somebody puts a stance on it, the
-     broader rule stops being what decides. --}}
+     broader rule stops being what decides.
+
+     `reached` is what the role already holds, worked out on the server. The manage box is
+     read here as well and live, because granting a whole model is a rule composed on this
+     very screen: it stores one row, `*` over that model, and never the columns beside it —
+     so without this those columns stay blank until the form is saved and opened again,
+     which is exactly when it is too late to check what was about to be handed out. --}}
 inherits(subject, action, reached) {
-    return reached && this.at(subject, action) === @js($getNeutral())
+    if (this.at(subject, action) !== @js($getNeutral())) {
+        return false
+    }
+
+    return reached || (action !== @js($columns['manage']['action']) && this.at(subject, @js($columns['manage']['action'])) === 'granted')
 },
 {{-- A shortcut leaves the row saying exactly what it names: it grants its own and
      silences the rest. Adding without taking away would turn "read only" into "reading on
