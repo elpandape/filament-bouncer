@@ -7,6 +7,36 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [10.0.0] - 2026-08-16
+
+### Fixed
+
+- **Fencing is offered only where there is a model to pick a record of.** The row that holds
+  everything reaches every model and a simple ability names none, and a rule fenced to a
+  record of no model answers about nothing — yet the action sat on both. On the first it sat
+  beside the padlock that refuses to edit that row, which read as a way around the lock.
+
+### Changed
+
+- **Every screen this package draws is configured in one place, one entry each.** `navigation`
+  used to mean "the roles resource" without saying so, while `abilities` sat beside it as a
+  sibling that was also navigation. They are now two entries of one block, which is what the
+  shape says out loud:
+
+  | Before | Now |
+  | --- | --- |
+  | `navigation.icon` · `.group` · `.sort` · `.slug` | `navigation.roles.icon` · `.group` · `.sort` · `.slug` |
+  | `abilities.icon` · `.sort` · `.slug` | `navigation.abilities.icon` · `.sort` · `.slug` |
+
+  A published configuration has to be moved by hand. A key left behind reads as null, so an
+  icon or a group would go quietly missing rather than fail — check the sidebar after
+  upgrading.
+
+  `relation.icon` stays where it is: a tab inside a record's page is not navigation.
+
+  Abilities still carry no group of their own and take the roles one, because the two are
+  sides of the same thing.
+
 ## [9.1.2] - 2026-08-16
 
 ### Added
