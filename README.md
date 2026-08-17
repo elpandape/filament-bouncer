@@ -605,7 +605,9 @@ person to want one finds the reasoning rather than the silence.
   is written and the clipboard is refreshed. If a later cell throws, the earlier writes in that
   same save stay in the database — Bouncer never rolls anything back — but the events already
   collected for them are thrown away with the request, so a listener writing an audit trail
-  never hears about grants that are sitting in the store regardless. The honest fix is wrapping
+  never hears about grants that are sitting in the store regardless. `Bouncer::refresh()` never
+  runs either, since it comes after the loop that threw, so the clipboard stays stale for
+  whatever is left of the request on top of the events nobody heard. The honest fix is wrapping
   the save in a transaction and dispatching after the commit, which is a design decision this
   package has not made yet.
 

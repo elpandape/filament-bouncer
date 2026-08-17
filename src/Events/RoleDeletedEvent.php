@@ -12,8 +12,6 @@ use Illuminate\Support\Collection;
  *
  * The holders are read before the delete: afterwards there is nothing left to read, since the
  * foreign key retracts them and Bouncer's own hook detaches the abilities.
- *
- * @param  Collection<int, Model>  $holders
  */
 final readonly class RoleDeletedEvent
 {
