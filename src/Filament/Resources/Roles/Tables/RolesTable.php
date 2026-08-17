@@ -103,6 +103,10 @@ final class RolesTable
      * What is about to be lost with the role: its holders, resolved through the pivot, and how
      * many stances it carried. A morph type that no longer resolves to a class is left out —
      * there is no model to hand a listener.
+     *
+     * Grouped by `entity_type` and fetched with one `whereIn` per group, rather than one query
+     * per row: forty holders of the same type is forty single-row selects otherwise, synchronous
+     * and inside a panel action.
      */
     private static function departure(Model $role): RoleDeletedEvent
     {
@@ -112,10 +116,11 @@ final class RolesTable
             ->where('role_id', $role->getKey())
             ->get(['entity_type', 'entity_id']);
 
-        foreach ($rows as $row) {
-            /** @var string $entityType */
-            $entityType = $row->entity_type;
+        /** @var Collection<string, Collection<int, object>> $groups */
+        $groups = $rows->groupBy('entity_type');
 
+        foreach ($groups as $entityType => $group) {
+            /** @var string $entityType */
             $class = Relation::getMorphedModel($entityType) ?? $entityType;
 
             if (! class_exists($class)) {
@@ -126,11 +131,7 @@ final class RolesTable
                 continue;
             }
 
-            $holder = $class::query()->find($row->entity_id);
-
-            if ($holder instanceof Model) {
-                $holders->push($holder);
-            }
+            $holders = $holders->merge($class::query()->whereKey($group->pluck('entity_id'))->get());
         }
 
         /** @var string $name */

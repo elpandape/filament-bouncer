@@ -508,6 +508,41 @@ test('a holder whose morph type cannot be resolved to a model is left out of wha
         && $event->causer?->is($editor) === true);
 });
 
+test('deleting a role with many holders of the same type reads them in one query, not one per holder', function (): void {
+    signInAsRoleManager();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $holderCount = 20;
+
+    for ($i = 0; $i < $holderCount; $i++) {
+        $holder = User::forceCreate([
+            'name' => "Holder {$i}",
+            'email' => Str::random(12).'@example.test',
+            'password' => 'irrelevant',
+        ]);
+
+        Bouncer::assign('auditor')->to($holder);
+    }
+
+    Bouncer::refresh();
+
+    Event::fake();
+
+    $queries = 0;
+
+    DB::listen(function () use (&$queries): void {
+        $queries++;
+    });
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($role));
+
+    Event::assertDispatched(RoleDeletedEvent::class, fn (RoleDeletedEvent $event): bool => $event->holders->count() === $holderCount);
+
+    expect($queries)->toBeLessThan($holderCount);
+});
+
 test('a listener asking the gate after an assignment from the create form finds the holder already granted', function (): void {
     signInAsRoleManager();
 
