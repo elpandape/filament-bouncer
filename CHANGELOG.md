@@ -18,12 +18,15 @@ under count as public API, because they are rows in somebody's database.
 
 ### Fixed
 
-- **Deleting a role now clears Bouncer's clipboard.** It was the only write here with no
-  refresh behind it, and within the same request the clipboard went on answering yes for a
-  role that no longer existed.
+- **Deleting a role now clears Bouncer's clipboard.** It was the only assignment-or-stance
+  write here with no refresh behind it, and within the same request the clipboard went on
+  answering yes for a role that no longer existed.
 - **The privileged role is granted the wildcard only when it is missing.** The deploy command
   wrote it on every run without asking, so repointing `privileged_role` at an ordinary role
   handed it everything with nothing said anywhere.
+- **Creating and editing an ability now clear Bouncer's clipboard too.** Neither writes an
+  event, but both write the row a rule is matched by: renaming one left the clipboard
+  answering for its old name for the rest of the request.
 
 ## [10.0.0] - 2026-08-16
 
