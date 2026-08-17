@@ -637,6 +637,28 @@ test('the role that holds everything is restored once, and said once', function 
     Event::assertNotDispatched(PrivilegedRoleRestoredEvent::class);
 });
 
+test('the role that holds everything is repaired once the wildcard is taken away, and said once', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->where('name', 'super-admin')->firstOrFail();
+
+    Bouncer::disallow('super-admin')->everything();
+    Bouncer::refresh();
+
+    expect(holds($role, 'anything-at-all'))->toBeFalse();
+
+    Event::fake();
+
+    reconcileStore();
+
+    Event::assertDispatchedTimes(PrivilegedRoleRestoredEvent::class, 1);
+
+    Event::assertDispatched(PrivilegedRoleRestoredEvent::class, fn (PrivilegedRoleRestoredEvent $event): bool => $event->role === 'super-admin');
+});
+
 test('reconciling says how much it wrote and how much it took away', function (): void {
     Event::fake();
 
