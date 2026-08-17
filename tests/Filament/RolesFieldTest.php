@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Filament\Forms\RolesField;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\RolesFieldHost;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
+
+use function Pest\Livewire\livewire;
 
 pest()->extend(TestCase::class);
 
@@ -132,4 +135,33 @@ test('the field keeps its state out of the attributes the account is written fro
 
     expect(RolesField::make()->isDehydrated())->toBeFalse()
         ->and(RolesField::make()->getName())->toBe(RolesField::NAME);
+});
+
+test('the field is offered on the form that creates an account', function (): void {
+    signInAsRoleManager();
+
+    fieldRole();
+
+    livewire(RolesFieldHost::class, ['operation' => 'create'])
+        ->assertSee('Roles')
+        ->assertSee('editor');
+});
+
+test('the field is not offered where ticking it would write nothing', function (): void {
+    signInAsRoleManager();
+
+    fieldRole();
+
+    livewire(RolesFieldHost::class, ['operation' => 'edit'])
+        ->assertDontSee('editor')
+        ->assertSee('wire:id');
+});
+
+test('a form that wants the field anyway says so and gets it', function (): void {
+    signInAsRoleManager();
+
+    fieldRole();
+
+    livewire(RolesFieldHost::class, ['operation' => 'edit', 'wantedAnyway' => true])
+        ->assertSee('editor');
 });

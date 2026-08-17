@@ -6,6 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Filament\Forms;
 
 use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Support\Enums\Operation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -16,6 +17,11 @@ use Silber\Bouncer\Database\Models;
  *
  * A relation manager needs a record to hang a row off and a creation screen has none, so the roles
  * are chosen here and written by `assign()` once there is something to assign them to.
+ *
+ * It shows on creation and nowhere else, because nowhere else can it act: `assign()` is called by
+ * the creating page, so on an editing form the same ticks would be read, dropped and never
+ * written — a control that cannot do what it offers. Editing an account's roles is the relation
+ * manager's, which writes as it is used. A form that wants it anyway says so with `visibleOn()`.
  *
  * The privileged role is shown to everybody and ticked by only some: left off the list, somebody
  * would compose an account and never learn that the role holding everything exists.
@@ -50,6 +56,10 @@ final class RolesField extends CheckboxList
         // attributes would be handed to a mass assignment as a field that does not
         // exist — which under strict Eloquent throws rather than being ignored.
         $this->dehydrated(false);
+
+        // Last, so a form that means to show it elsewhere overrides this with a call of its
+        // own rather than having to fight the order of the two.
+        $this->visibleOn(Operation::Create);
     }
 
     public static function getDefaultName(): string
