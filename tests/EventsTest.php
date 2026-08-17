@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
+use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Events\AbilityRef;
 use ElPandaPe\FilamentBouncer\Events\AbilityStanceChangedEvent;
 use ElPandaPe\FilamentBouncer\Events\CatalogReconciledEvent;
@@ -13,6 +14,8 @@ use ElPandaPe\FilamentBouncer\Events\RoleDeletedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
 use ElPandaPe\FilamentBouncer\Filament\Forms\RolesField;
 use ElPandaPe\FilamentBouncer\Filament\RelationManagers\RolesRelationManager;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
+use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Causer;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\Users\Pages\ViewUser;
@@ -270,4 +273,70 @@ test('a command that assigns nothing says nothing', function (): void {
     expect(Artisan::call('filament-bouncer:assign', ['role' => 'nope', 'user' => 'nobody@example.test']))->toBe(1);
 
     Event::assertNotDispatched(RoleAssignedEvent::class);
+});
+
+test('a cell of the grid that changes is said out loud', function (): void {
+    $editor = signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['view' => Stance::Granted->value]]])
+        ->call('save');
+
+    Event::assertDispatched(AbilityStanceChangedEvent::class, fn (AbilityStanceChangedEvent $event): bool => $event->authority->is($role)
+        && $event->ability->name === 'view'
+        && $event->from === Stance::Neutral
+        && $event->to === Stance::Granted
+        && $event->causer?->is($editor) === true);
+});
+
+test('a cell saved with the stance it already had says nothing', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['view' => Stance::Granted->value]]])
+        ->call('save');
+
+    Event::fake();
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['view' => Stance::Granted->value]]])
+        ->call('save');
+
+    Event::assertNotDispatched(AbilityStanceChangedEvent::class);
+});
+
+test('forbidding is a stance of its own, and comes back to neutral by name', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    /** @var Model $ability */
+    $ability = Models::ability()->newQuery()->where('name', 'view')->where('entity_type', Post::class)->firstOrFail();
+
+    Event::fake();
+
+    app(RoleAbilities::class)->saveRow($role, $ability, Stance::Forbidden);
+    app(RoleAbilities::class)->saveRow($role, $ability, Stance::Neutral);
+
+    Event::assertDispatchedTimes(AbilityStanceChangedEvent::class, 2);
+
+    Event::assertDispatched(AbilityStanceChangedEvent::class, fn (AbilityStanceChangedEvent $event): bool => $event->from === Stance::Forbidden
+        && $event->to === Stance::Neutral
+        && $event->ability->name === 'view'
+        && $event->ability->entityMorphClass === Post::class);
 });

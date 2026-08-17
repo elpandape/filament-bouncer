@@ -6,6 +6,9 @@ namespace ElPandaPe\FilamentBouncer\Store;
 
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Events\AbilityRef;
+use ElPandaPe\FilamentBouncer\Events\AbilityStanceChangedEvent;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\Bouncer;
@@ -141,7 +144,9 @@ final readonly class RoleAbilities
      */
     public function saveRow(Model $role, Model $ability, Stance $stance): void
     {
-        if ($stance === $this->stanceOnRow($role, $ability)) {
+        $was = $this->stanceOnRow($role, $ability);
+
+        if ($stance === $was) {
             return;
         }
 
@@ -157,6 +162,8 @@ final readonly class RoleAbilities
         }
 
         $this->bouncer->refresh();
+
+        event(new AbilityStanceChangedEvent($role, AbilityRef::fromRow($ability), $was, $stance, Causer::current()));
     }
 
     /**
@@ -193,6 +200,14 @@ final readonly class RoleAbilities
 
                 $this->clear($role, $ability);
                 $this->apply($role, $ability, $wanted);
+
+                event(new AbilityStanceChangedEvent(
+                    $role,
+                    AbilityRef::fromCatalog($ability),
+                    $current,
+                    $wanted,
+                    Causer::current(),
+                ));
             }
         }
 
