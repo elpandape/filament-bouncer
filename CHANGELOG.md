@@ -11,10 +11,13 @@ under count as public API, because they are rows in somebody's database.
 
 ### Added
 
-- **Every write this package makes is now announced.** Six events under
-  `ElPandaPe\FilamentBouncer\Events`, each carrying who did it and `null` where nobody was
-  signed in, so a command is told apart from a screen. Nothing wraps Bouncer: a write your
-  application makes on its own fires nothing, and the README says so.
+- **Every role a hand gives or takes away is now announced.** Six events under
+  `ElPandaPe\FilamentBouncer\Events` cover assignment, retraction, deletion, a change to what a
+  role may do, the privileged role's repair and the reconciliation's summary — each carrying who
+  did it, and `null` where nobody was signed in, so a command is told apart from a screen. Two
+  writes stay silent and the README names them: the abilities screen editing the rows themselves,
+  and `reconcile` writing those rows one at a time, which the summary covers instead. Nothing
+  wraps Bouncer either, so a write your application makes on its own fires nothing.
 
 ### Fixed
 
