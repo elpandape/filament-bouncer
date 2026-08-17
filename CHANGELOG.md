@@ -7,6 +7,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [9.1.2] - 2026-08-16
+
+### Added
+
+- **An icon for the roles tab**, named in `relation.icon` and none by default, like every
+  other icon here: the family belongs to the application. Filament only builds that tab from
+  the second relation manager on, so a resource carrying this one alone draws the table plain
+  and the icon has nowhere to appear.
+
+### Fixed
+
+- **The roles field shows on creation and nowhere else.** Nowhere else could it act: the
+  ticks are written by the creating page, so on an editing form the same field read them,
+  dropped them and wrote nothing — a control that offers what it cannot do. Editing an
+  account's roles is the relation manager's, which writes as it is used. A form that wants
+  the field anyway asks for it with `visibleOn()`.
+
 ## [9.1.1] - 2026-08-13
 
 ### Changed
