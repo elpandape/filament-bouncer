@@ -455,3 +455,166 @@ test('a holder whose morph type cannot be resolved to a model is left out of wha
         && $event->holders->first()?->is($holder) === true
         && $event->causer?->is($editor) === true);
 });
+
+test('a listener asking the gate after an assignment from the create form finds the holder already granted', function (): void {
+    signInAsRoleManager();
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    expect(holds($account, 'view', Post::class))->toBeFalse();
+
+    $seen = [];
+
+    Event::listen(RoleAssignedEvent::class, function () use ($account, &$seen): void {
+        $seen[] = holds($account, 'view', Post::class);
+    });
+
+    RolesField::assign($account, ['auditor']);
+
+    expect($seen)->toBe([true]);
+});
+
+test('a listener asking the gate after an assignment from the tab finds the holder already granted', function (): void {
+    signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($account, 'view', Post::class))->toBeFalse();
+
+    $seen = [];
+
+    Event::listen(RoleAssignedEvent::class, function () use ($account, &$seen): void {
+        $seen[] = holds($account, 'view', Post::class);
+    });
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ])->callAction(TestAction::make('assign')->table(), ['role' => 'auditor']);
+
+    expect($seen)->toBe([true]);
+});
+
+test('a listener asking the gate after a retraction from the tab finds the holder already stripped', function (): void {
+    signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Bouncer::assign('auditor')->to($account);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($account, 'view', Post::class))->toBeTrue();
+
+    $seen = [];
+
+    Event::listen(RoleRetractedEvent::class, function () use ($account, &$seen): void {
+        $seen[] = holds($account, 'view', Post::class);
+    });
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ])->callAction(TestAction::make('retract')->table($role));
+
+    expect($seen)->toBe([false]);
+});
+
+test('a listener asking the gate after an assignment from the command finds the holder already granted', function (): void {
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => 'sisa@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($account, 'view', Post::class))->toBeFalse();
+
+    $seen = [];
+
+    Event::listen(RoleAssignedEvent::class, function () use ($account, &$seen): void {
+        $seen[] = holds($account, 'view', Post::class);
+    });
+
+    expect(Artisan::call('filament-bouncer:assign', ['role' => 'auditor', 'user' => 'sisa@example.test']))->toBe(0)
+        ->and($seen)->toBe([true]);
+});
+
+test('a listener asking the gate after a role deletion finds its former holder already stripped', function (): void {
+    signInAsRoleManager();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $holder = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Bouncer::assign('auditor')->to($holder);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($holder, 'view', Post::class))->toBeTrue();
+
+    $seen = [];
+
+    Event::listen(RoleDeletedEvent::class, function () use ($holder, &$seen): void {
+        $seen[] = holds($holder, 'view', Post::class);
+    });
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($role));
+
+    expect($seen)->toBe([false]);
+});
+
+test('a listener asking the gate after a single row is saved finds the new stance already answered', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    /** @var Model $ability */
+    $ability = Models::ability()->newQuery()->where('name', 'view')->where('entity_type', Post::class)->firstOrFail();
+
+    expect(holds($role, 'view', Post::class))->toBeFalse();
+
+    $seen = [];
+
+    Event::listen(AbilityStanceChangedEvent::class, function () use ($role, &$seen): void {
+        $seen[] = holds($role, 'view', Post::class);
+    });
+
+    app(RoleAbilities::class)->saveRow($role, $ability, Stance::Granted);
+
+    expect($seen)->toBe([true]);
+});
