@@ -7,9 +7,11 @@ namespace ElPandaPe\FilamentBouncer\Console;
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\Catalog;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
+use ElPandaPe\FilamentBouncer\Events\CatalogReconciledEvent;
 use ElPandaPe\FilamentBouncer\Filament\PanelGuard;
 use ElPandaPe\FilamentBouncer\Store\AbilityStore;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -57,6 +59,12 @@ final class ReconcileCommand extends Command
         // Bouncer invalidates nothing of its own accord, so without this the very next
         // check in this process would still answer from the state before the write.
         Bouncer::refresh();
+
+        event(new CatalogReconciledEvent(
+            count($missing),
+            $this->option('prune') ? count($extra) : 0,
+            Causer::current(),
+        ));
 
         return self::SUCCESS;
     }

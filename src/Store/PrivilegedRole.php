@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Store;
 
+use ElPandaPe\FilamentBouncer\Events\PrivilegedRoleRestoredEvent;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -120,10 +122,15 @@ final readonly class PrivilegedRole
     {
         $name = $this->name();
 
-        if ($name === null) {
+        // Asked before writing, not after: without this the deploy command grants the
+        // wildcard on every run, and pointing the configuration at an ordinary role hands
+        // it everything with nothing said.
+        if ($name === null || ! $this->needsRestoring()) {
             return;
         }
 
         $this->bouncer->allow($name)->everything();
+
+        event(new PrivilegedRoleRestoredEvent($name, Causer::current()));
     }
 }

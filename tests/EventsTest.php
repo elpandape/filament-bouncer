@@ -618,3 +618,52 @@ test('a listener asking the gate after a single row is saved finds the new stanc
 
     expect($seen)->toBe([true]);
 });
+
+test('the role that holds everything is restored once, and said once', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    Event::fake();
+
+    reconcileStore();
+
+    Event::assertDispatchedTimes(PrivilegedRoleRestoredEvent::class, 1);
+
+    Event::assertDispatched(PrivilegedRoleRestoredEvent::class, fn (PrivilegedRoleRestoredEvent $event): bool => $event->role === 'super-admin' && ! $event->causer instanceof Model);
+
+    Event::fake();
+
+    reconcileStore();
+
+    Event::assertNotDispatched(PrivilegedRoleRestoredEvent::class);
+});
+
+test('reconciling says how much it wrote and how much it took away', function (): void {
+    Event::fake();
+
+    reconcileStore();
+
+    Event::assertDispatched(CatalogReconciledEvent::class, fn (CatalogReconciledEvent $event): bool => $event->written === 20 && $event->pruned === 0 && ! $event->causer instanceof Model);
+
+    Event::fake();
+
+    reconcileStore();
+
+    Event::assertDispatched(CatalogReconciledEvent::class, fn (CatalogReconciledEvent $event): bool => $event->written === 0);
+
+    Bouncer::allow('editor')->to('sing-a-song');
+
+    Event::fake();
+
+    Artisan::call('filament-bouncer:reconcile', ['--prune' => true]);
+
+    Event::assertDispatched(CatalogReconciledEvent::class, fn (CatalogReconciledEvent $event): bool => $event->written === 0 && $event->pruned === 1);
+});
+
+test('checking writes nothing, so it says nothing', function (): void {
+    Event::fake();
+
+    Artisan::call('filament-bouncer:reconcile', ['--check' => true]);
+
+    Event::assertNotDispatched(CatalogReconciledEvent::class);
+    Event::assertNotDispatched(PrivilegedRoleRestoredEvent::class);
+});
