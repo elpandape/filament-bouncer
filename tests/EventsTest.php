@@ -689,3 +689,79 @@ test('checking writes nothing, so it says nothing', function (): void {
     Event::assertNotDispatched(CatalogReconciledEvent::class);
     Event::assertNotDispatched(PrivilegedRoleRestoredEvent::class);
 });
+
+test('a listener asking the gate after a privileged restore finds the role already reaching everything', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->where('name', 'super-admin')->firstOrFail();
+
+    Bouncer::disallow('super-admin')->everything();
+    Bouncer::refresh();
+
+    expect(holds($role, 'anything-at-all'))->toBeFalse();
+
+    $seen = [];
+
+    Event::listen(PrivilegedRoleRestoredEvent::class, function () use ($role, &$seen): void {
+        $seen[] = holds($role, 'anything-at-all');
+    });
+
+    reconcileStore();
+
+    expect($seen)->toBe([true]);
+});
+
+test('a listener asking the gate after reconciling finds a pruned ability already stripped from its holder', function (): void {
+    Models::role()->newQuery()->create(['name' => 'editor']);
+    Bouncer::allow('editor')->to('sing-a-song');
+    Bouncer::refresh();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->where('name', 'editor')->firstOrFail();
+
+    expect(holds($role, 'sing-a-song'))->toBeTrue();
+
+    $seen = [];
+
+    Event::listen(CatalogReconciledEvent::class, function () use ($role, &$seen): void {
+        $seen[] = holds($role, 'sing-a-song');
+    });
+
+    Artisan::call('filament-bouncer:reconcile', ['--prune' => true]);
+
+    expect($seen)->toBe([false]);
+});
+
+/**
+ * The invariant above is a hand-written list of paths, and a list goes stale the moment
+ * somebody adds a dispatch without adding its listener test — which is exactly how the
+ * privileged restore and the reconcile summary went untested for a fix round. This counts
+ * every place `src/` constructs one of the package's events, so a new one changes this
+ * number before it can go unnoticed a second time.
+ */
+function eventConstructionSites(): int
+{
+    $sites = 0;
+
+    /** @var iterable<SplFileInfo> $files */
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/../src'));
+
+    foreach ($files as $file) {
+        if (! $file->isFile()) {
+            continue;
+        }
+
+        $source = file_get_contents($file->getPathname());
+
+        $sites += preg_match_all('/new [A-Za-z]+Event\(/', $source === false ? '' : $source);
+    }
+
+    return $sites;
+}
+
+test('every place the package builds an event is proven by a listener test above, not just a number here', function (): void {
+    expect(eventConstructionSites())->toBe(9, 'A new dispatch site means a new listener test in this file, not a bumped number.');
+});

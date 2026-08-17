@@ -131,6 +131,10 @@ final readonly class PrivilegedRole
 
         $this->bouncer->allow($name)->everything();
 
+        // Bouncer invalidates nothing of its own accord, so without this a listener that
+        // asks the Gate about this very role would still answer from before the grant.
+        $this->bouncer->refresh();
+
         event(new PrivilegedRoleRestoredEvent($name, Causer::current()));
     }
 }

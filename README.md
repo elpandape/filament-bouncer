@@ -537,12 +537,13 @@ truth about a break-glass path rather than a missing value.
 
 **Every write refreshes Bouncer's clipboard before its event goes out.** A listener may ask the
 Gate from inside its own handler and get the answer that is true after the write, not the one
-that was true a moment before it. This cost two rounds of fixes to hold everywhere, and it is now
-held by a test on each of the seven paths that write a role assignment, a retraction, a deletion
-or an ability stance: assigning from the account's create screen, from the roles tab, or from the
-command; retracting from the tab; deleting a role; `RoleAbilities::saveRow()`; and the abilities
-grid's own save, which holds every changed cell's event back until the whole form is written and
-the clipboard is refreshed once, rather than firing cell by cell against a grid only half applied.
+that was true a moment before it. This took more than one fix round to hold everywhere, and a test
+holds it on every path that announces something: assigning a role from the account's create
+screen, from the roles tab, or from the command; retracting from the tab; deleting a role;
+`RoleAbilities::saveRow()`; the abilities grid's own save, which holds every changed cell's event
+back until the whole form is written and the clipboard is refreshed once, rather than firing cell
+by cell against a grid only half applied; restoring the role that holds everything; and
+reconciling the catalogue.
 
 Here is a listener that turns an assignment into an audit entry, using
 [`spatie/laravel-activitylog`](https://spatie.be/docs/laravel-activitylog)'s `activity()`
