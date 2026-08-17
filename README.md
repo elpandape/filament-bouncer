@@ -567,7 +567,11 @@ Event::listen(function (RoleAssignedEvent $event): void {
 The ability events carry an `AbilityRef`, which names the rule the way the store spells it:
 `name`, `entityMorphClass`, `entityId`, `onlyOwned`, `scope` and `title`, plus `identity()` and
 `describe()`. A listener that needs the model class resolves it with
-`Relation::getMorphedModel($ref->entityMorphClass)`.
+`Relation::getMorphedModel($ref->entityMorphClass) ?? $ref->entityMorphClass` — without a morph
+map, which is the default, `entityMorphClass` already **is** the class, and `getMorphedModel()`
+returns `null` for anything it does not recognise. The package writes it exactly this way in
+every place it needs the class back: `RolesTable`, `AbilityTags`, `ProbeAbility`, `Diagnosis`
+and `AbilityForm`.
 
 `RoleAbilities::saveRow()` also emits. Nothing inside this package calls it — it is store API for
 a consumer writing a single stored row.
