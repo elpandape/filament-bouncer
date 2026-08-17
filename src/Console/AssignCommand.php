@@ -6,6 +6,7 @@ namespace ElPandaPe\FilamentBouncer\Console;
 
 use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
 use ElPandaPe\FilamentBouncer\Support\Causer;
+use ElPandaPe\FilamentBouncer\Support\RoleHolding;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
@@ -52,10 +53,16 @@ final class AssignCommand extends Command
             return self::FAILURE;
         }
 
+        // Asked before the write: assign() is idempotent, and afterwards the pivot row
+        // exists either way, leaving nothing to tell whether it was already there.
+        $alreadyHeld = RoleHolding::of($user, $name);
+
         $bouncer->assign($name)->to($user);
         $bouncer->refresh();
 
-        event(new RoleAssignedEvent($user, $name, Causer::current()));
+        if (! $alreadyHeld) {
+            event(new RoleAssignedEvent($user, $name, Causer::current()));
+        }
 
         $this->components->info(sprintf('[%s] now holds the role [%s].', $identifier, $name));
 

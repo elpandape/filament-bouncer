@@ -19,6 +19,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Causer;
+use ElPandaPe\FilamentBouncer\Support\RoleHolding;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\Users\Pages\ViewUser;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
@@ -251,6 +252,40 @@ test('taking a role away from the tab is said out loud', function (): void {
         && $event->causer?->is($editor) === true);
 });
 
+test('handing the tab a role the account already holds says it once, not twice', function (): void {
+    signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    $component = livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ]);
+
+    $component->callAction(TestAction::make('assign')->table(), ['role' => 'auditor']);
+    $component->callAction(TestAction::make('assign')->table(), ['role' => 'auditor']);
+
+    Event::assertDispatchedTimes(RoleAssignedEvent::class, 1);
+});
+
+test('nobody holds a role that has not been created yet', function (): void {
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    expect(RoleHolding::of($account, 'a-role-that-does-not-exist'))->toBeFalse();
+});
+
 test('the command that hands a role out speaks for nobody', function (): void {
     $account = User::forceCreate([
         'name' => 'Sisa',
@@ -275,6 +310,23 @@ test('a command that assigns nothing says nothing', function (): void {
     expect(Artisan::call('filament-bouncer:assign', ['role' => 'nope', 'user' => 'nobody@example.test']))->toBe(1);
 
     Event::assertNotDispatched(RoleAssignedEvent::class);
+});
+
+test('a command handing out a role the account already holds says it once, not twice', function (): void {
+    User::forceCreate([
+        'name' => 'Sisa',
+        'email' => 'sisa@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    expect(Artisan::call('filament-bouncer:assign', ['role' => 'auditor', 'user' => 'sisa@example.test']))->toBe(0)
+        ->and(Artisan::call('filament-bouncer:assign', ['role' => 'auditor', 'user' => 'sisa@example.test']))->toBe(0);
+
+    Event::assertDispatchedTimes(RoleAssignedEvent::class, 1);
 });
 
 test('a cell of the grid that changes is said out loud', function (): void {

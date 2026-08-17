@@ -11,6 +11,7 @@ use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
 use ElPandaPe\FilamentBouncer\Support\Causer;
+use ElPandaPe\FilamentBouncer\Support\RoleHolding;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -142,10 +143,18 @@ final class RolesRelationManager extends RelationManager
 
                         $account = $manager->getOwnerRecord();
 
+                        // Asked before the write: assign() is idempotent, and afterwards the
+                        // pivot row exists either way, leaving nothing to tell whether it was
+                        // already there. The pull-down still offers a role already held —
+                        // that stays a harmless no-op write, only the announcement is guarded.
+                        $alreadyHeld = RoleHolding::of($account, $name);
+
                         Bouncer::assign($name)->to($account);
                         Bouncer::refresh();
 
-                        event(new RoleAssignedEvent($account, $name, Causer::current()));
+                        if (! $alreadyHeld) {
+                            event(new RoleAssignedEvent($account, $name, Causer::current()));
+                        }
                     }),
             ])
             ->recordActions([
