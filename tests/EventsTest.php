@@ -5,9 +5,18 @@ declare(strict_types=1);
 use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Events\AbilityRef;
+use ElPandaPe\FilamentBouncer\Events\AbilityStanceChangedEvent;
+use ElPandaPe\FilamentBouncer\Events\CatalogReconciledEvent;
+use ElPandaPe\FilamentBouncer\Events\PrivilegedRoleRestoredEvent;
+use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
+use ElPandaPe\FilamentBouncer\Events\RoleDeletedEvent;
+use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
+use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Silber\Bouncer\Database\Models;
 
 pest()->extend(TestCase::class);
@@ -58,4 +67,31 @@ test('an ability about no model at all is described by its bare name', function 
     expect($ref->entityMorphClass)->toBeNull()
         ->and($ref->title)->toBeNull()
         ->and($ref->describe())->toBe('impersonate-users');
+});
+
+test('every event carries its subject, and an author that may be nobody', function (): void {
+    $account = signIn();
+    $ref = new AbilityRef('view', 'post', null, false, null, 'Posts: View');
+
+    $assigned = new RoleAssignedEvent($account, 'editor', $account);
+    $retracted = new RoleRetractedEvent($account, 'editor', null);
+    $changed = new AbilityStanceChangedEvent($account, $ref, Stance::Neutral, Stance::Granted, null);
+    /** @var Collection<int, Model> */
+    $holders = new Collection([$account]);
+    $deleted = new RoleDeletedEvent('editor', $holders, 3, null);
+    $restored = new PrivilegedRoleRestoredEvent('super-admin', null);
+    $reconciled = new CatalogReconciledEvent(4, 2, null);
+
+    expect($assigned->authority->is($account))->toBeTrue()
+        ->and($assigned->role)->toBe('editor')
+        ->and($assigned->causer?->is($account))->toBeTrue()
+        ->and($retracted->causer)->toBeNull()
+        ->and($changed->from)->toBe(Stance::Neutral)
+        ->and($changed->to)->toBe(Stance::Granted)
+        ->and($changed->ability->identity())->toBe($ref->identity())
+        ->and($deleted->holders)->toHaveCount(1)
+        ->and($deleted->abilities)->toBe(3)
+        ->and($restored->role)->toBe('super-admin')
+        ->and($reconciled->written)->toBe(4)
+        ->and($reconciled->pruned)->toBe(2);
 });
