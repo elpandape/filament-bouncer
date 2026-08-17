@@ -173,6 +173,28 @@ test('a role the screen would never have offered is written by nobody and said b
     Event::assertNotDispatched(RoleAssignedEvent::class);
 });
 
+test('out of a mixed request, only the role that was actually written is said', function (): void {
+    $editor = signInAsRoleManager();
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    RolesField::assign($account, ['auditor', 'a-role-that-does-not-exist']);
+
+    Event::assertDispatchedTimes(RoleAssignedEvent::class, 1);
+
+    Event::assertDispatched(RoleAssignedEvent::class, fn (RoleAssignedEvent $event): bool => $event->authority->is($account)
+        && $event->role === 'auditor'
+        && $event->causer?->is($editor) === true);
+});
+
 test('handing a role out from the tab is said out loud', function (): void {
     $editor = signInAsRoleManager();
 
