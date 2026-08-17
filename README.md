@@ -522,7 +522,7 @@ listener that invalidates a cache must not read "no event" as "no change".
 
 | Event | When |
 |---|---|
-| `RoleAssignedEvent` | A role was handed out, from a form, from the roles tab or from `filament-bouncer:assign` |
+| `RoleAssignedEvent` | A role was handed out, from a form, from the roles tab or from `filament-bouncer:assign` — and only when the account did not already hold it, since handing over a role somebody has writes nothing |
 | `RoleRetractedEvent` | A role was taken away from the roles tab |
 | `RoleDeletedEvent` | A role was deleted, taking its holders' assignments and all its stances with it |
 | `AbilityStanceChangedEvent` | What a role says about one rule changed, in either direction |
