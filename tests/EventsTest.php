@@ -739,10 +739,12 @@ test('a listener asking the gate after reconciling finds a pruned ability alread
  * The invariant above is a hand-written list of paths, and a list goes stale the moment
  * somebody adds a dispatch without adding its listener test — which is exactly how the
  * privileged restore and the reconcile summary went untested for a fix round. This counts
- * every place `src/` constructs one of the package's events, so a new one changes this
- * number before it can go unnoticed a second time.
+ * every place `src/` calls the `event()` helper — the dispatch itself, not merely
+ * constructing an event object, which a fully-qualified `new \Foo\BarEvent(` or a named
+ * constructor could pass through unnoticed — so a new dispatch site changes this number
+ * before it can go unnoticed a second time.
  */
-function eventConstructionSites(): int
+function eventDispatchSites(): int
 {
     $sites = 0;
 
@@ -756,12 +758,72 @@ function eventConstructionSites(): int
 
         $source = file_get_contents($file->getPathname());
 
-        $sites += preg_match_all('/new [A-Za-z]+Event\(/', $source === false ? '' : $source);
+        $sites += preg_match_all('/\bevent\(/', $source === false ? '' : $source);
     }
 
     return $sites;
 }
 
-test('every place the package builds an event is proven by a listener test above, not just a number here', function (): void {
-    expect(eventConstructionSites())->toBe(9, 'A new dispatch site means a new listener test in this file, not a bumped number.');
+test('every place the package dispatches an event is proven by a listener test above, not just a number here', function (): void {
+    expect(eventDispatchSites())->toBe(9, 'A new dispatch site means a new listener test in this file, not a bumped number.');
+});
+
+/**
+ * The count above can be starved rather than grown: a dispatch site that never fires — an
+ * event class declared and never announced — leaves every number honest and every listener
+ * test above green, because none of them would know to look for it. A wildcard listener
+ * catches that the other way around: it watches every path this file exercises and demands
+ * the set of classes it actually saw equal every event class this package declares.
+ */
+test('every event class this package declares is seen at least once by exercising it here', function (): void {
+    config()->set('filament-bouncer.privileged_role', 'super-admin');
+
+    /** @var array<class-string, true> $seen */
+    $seen = [];
+
+    Event::listen('*', function (string $event) use (&$seen): void {
+        if (str_starts_with($event, 'ElPandaPe\\FilamentBouncer\\Events\\')) {
+            $seen[$event] = true;
+        }
+    });
+
+    reconcileStore();
+
+    signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    /** @var Model $auditor */
+    $auditor = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    RolesField::assign($account, ['auditor']);
+
+    Bouncer::refresh();
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ])->callAction(TestAction::make('retract')->table($auditor));
+
+    livewire(EditRole::class, ['record' => $auditor->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['view' => Stance::Granted->value]]])
+        ->call('save');
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($auditor));
+
+    /** @var array<int, string> $files */
+    $files = glob(__DIR__.'/../src/Events/*.php') ?: [];
+
+    $declared = collect($files)
+        ->map(static fn (string $path): string => 'ElPandaPe\\FilamentBouncer\\Events\\'.basename($path, '.php'))
+        ->reject(static fn (string $class): bool => $class === AbilityRef::class)
+        ->sort()
+        ->values()
+        ->all();
+
+    expect(collect($seen)->keys()->sort()->values()->all())->toBe($declared);
 });
