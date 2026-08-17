@@ -259,9 +259,9 @@ test('the command that hands a role out speaks for nobody', function (): void {
 
     expect(Artisan::call('filament-bouncer:assign', ['role' => 'auditor', 'user' => 'sisa@example.test']))->toBe(0);
 
-    Event::assertDispatched(RoleAssignedEvent::class, fn(RoleAssignedEvent $event): bool => $event->authority->is($account)
+    Event::assertDispatched(RoleAssignedEvent::class, fn (RoleAssignedEvent $event): bool => $event->authority->is($account)
         && $event->role === 'auditor'
-        && !$event->causer instanceof \Illuminate\Database\Eloquent\Model);
+        && ! $event->causer instanceof Model);
 });
 
 test('a command that assigns nothing says nothing', function (): void {
