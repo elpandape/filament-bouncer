@@ -15,6 +15,7 @@ use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
 use ElPandaPe\FilamentBouncer\Filament\Forms\RolesField;
 use ElPandaPe\FilamentBouncer\Filament\RelationManagers\RolesRelationManager;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\EditRole;
+use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\Pages\ListRoles;
 use ElPandaPe\FilamentBouncer\Store\RoleAbilities;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Causer;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -368,4 +370,88 @@ test('a listener asking the gate from inside its handler sees the grid already f
         ->call('save');
 
     expect($seenComplete)->toBe([true, true]);
+});
+
+test('deleting a role says whose it was and how much went with it', function (): void {
+    $editor = signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $holder = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Bouncer::assign('auditor')->to($holder);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    Event::fake();
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($role));
+
+    Event::assertDispatchedTimes(RoleDeletedEvent::class, 1);
+
+    Event::assertDispatched(RoleDeletedEvent::class, fn (RoleDeletedEvent $event): bool => $event->role === 'auditor'
+        && $event->holders->count() === 1
+        && $event->holders->first()?->is($holder) === true
+        && $event->abilities === 1
+        && $event->causer?->is($editor) === true);
+});
+
+test('deleting a role stops it answering yes in the same breath', function (): void {
+    signInAsRoleManager();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $holder = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Bouncer::assign('auditor')->to($holder);
+    Bouncer::allow('auditor')->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($holder, 'view', Post::class))->toBeTrue();
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($role));
+
+    expect(holds($holder, 'view', Post::class))->toBeFalse();
+});
+
+test('a holder whose morph type cannot be resolved to a model is left out of what a role deletion says', function (): void {
+    $editor = signInAsRoleManager();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $holder = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Bouncer::assign('auditor')->to($holder);
+    Bouncer::refresh();
+
+    DB::table(Models::table('assigned_roles'))->insert([
+        ['role_id' => $role->getKey(), 'entity_id' => 1, 'entity_type' => 'App\\Models\\Gone'],
+        ['role_id' => $role->getKey(), 'entity_id' => 1, 'entity_type' => stdClass::class],
+    ]);
+
+    Event::fake();
+
+    livewire(ListRoles::class)->callAction(TestAction::make('delete')->table($role));
+
+    Event::assertDispatched(RoleDeletedEvent::class, fn (RoleDeletedEvent $event): bool => $event->role === 'auditor'
+        && $event->holders->count() === 1
+        && $event->holders->first()?->is($holder) === true
+        && $event->causer?->is($editor) === true);
 });
