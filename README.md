@@ -340,8 +340,10 @@ where the write happens, so a request built by hand meets the same refusal:
 
 Handing out abilities is itself an ability, so a panel can be talked into a state where
 nobody left is able to hand anything out. Name a role in `privileged_role` and
-`filament-bouncer:reconcile` will make sure it exists and holds Bouncer's wildcard on every
-run — including after somebody deletes it. `--check` fails while it is missing.
+`filament-bouncer:reconcile` makes sure it exists and holds Bouncer's wildcard — creating the
+role and granting the wildcard back whenever either is missing, including after somebody
+deletes the role or strips it of the wildcard by hand, but never rewriting a role that already
+holds it. `--check` fails while it is missing.
 
 A role nobody holds opens no doors, so there is a command for the last step too:
 
@@ -508,6 +510,63 @@ file is cached, and `config:cache` throws on anything it cannot serialise.
 > An application that relied on Bouncer's `user_id` guess loses it here, silently and
 > towards denying. Name the models whose records have owners.
 
+## Events
+
+Every write this package makes is announced. Nothing is dispatched by Bouncer itself, so
+**a `Bouncer::allow()` your application calls on its own fires nothing** — a listener that
+invalidates a cache must not read "no event" as "no change".
+
+| Event | When |
+|---|---|
+| `RoleAssignedEvent` | A role was handed out, from a form, from the roles tab or from `filament-bouncer:assign` |
+| `RoleRetractedEvent` | A role was taken away from the roles tab |
+| `RoleDeletedEvent` | A role was deleted, taking its holders' assignments and all its stances with it |
+| `AbilityStanceChangedEvent` | What a role says about one rule changed, in either direction |
+| `PrivilegedRoleRestoredEvent` | The role that holds everything was created or handed the wildcard back |
+| `CatalogReconciledEvent` | `filament-bouncer:reconcile` finished, with what it wrote and what it took away |
+
+`filament-bouncer:reconcile --check` writes nothing, so it announces nothing either — neither
+this event nor `PrivilegedRoleRestoredEvent` fires. `CatalogReconciledEvent` itself fires at the
+end of every real run, including one that wrote nothing and pruned nothing: it reports that the
+command ran, not that anything changed. That is the opposite of `AbilityStanceChangedEvent`,
+which stays quiet when a cell is saved holding the stance it already had — worth saying once, or
+the contrast reads as a bug rather than as two different questions answered two different ways.
+
+Each carries `?Model $causer` — whoever was signed in, and `null` from a command, which is the
+truth about a break-glass path rather than a missing value.
+
+**Every write refreshes Bouncer's clipboard before its event goes out.** A listener may ask the
+Gate from inside its own handler and get the answer that is true after the write, not the one
+that was true a moment before it. This cost two rounds of fixes to hold everywhere, and it is now
+held by a test on each of the seven paths that write a role assignment, a retraction, a deletion
+or an ability stance: assigning from the account's create screen, from the roles tab, or from the
+command; retracting from the tab; deleting a role; `RoleAbilities::saveRow()`; and the abilities
+grid's own save, which holds every changed cell's event back until the whole form is written and
+the clipboard is refreshed once, rather than firing cell by cell against a grid only half applied.
+
+Here is a listener that turns an assignment into an audit entry, using
+[`spatie/laravel-activitylog`](https://spatie.be/docs/laravel-activitylog)'s `activity()`
+helper — it is **not** a dependency of this package, so install it yourself if you want this
+exact shape:
+
+```php
+Event::listen(function (RoleAssignedEvent $event): void {
+    activity()
+        ->causedBy($event->causer)
+        ->performedOn($event->authority)
+        ->event('assigned the role')
+        ->log($event->role);
+});
+```
+
+The ability events carry an `AbilityRef`, which names the rule the way the store spells it:
+`name`, `entityMorphClass`, `entityId`, `onlyOwned`, `scope` and `title`, plus `identity()` and
+`describe()`. A listener that needs the model class resolves it with
+`Relation::getMorphedModel($ref->entityMorphClass)`.
+
+`RoleAbilities::saveRow()` also emits. Nothing inside this package calls it — it is store API for
+a consumer writing a single stored row.
+
 ## What this deliberately does not do
 
 Each of these was considered and turned down. They are written here so that the next
@@ -532,6 +591,14 @@ person to want one finds the reasoning rather than the silence.
   through, but nothing here is tested against a scoped installation, and
   `assigned_roles.restricted_to_id` is a dead column in Bouncer 1.0.4 whatever the schema
   suggests.
+- **A transaction around the abilities grid's save.** Its cells are written one at a time and
+  the events they raise are collected as they go, dispatched together only once the whole form
+  is written and the clipboard is refreshed. If a later cell throws, the earlier writes in that
+  same save stay in the database — Bouncer never rolls anything back — but the events already
+  collected for them are thrown away with the request, so a listener writing an audit trail
+  never hears about grants that are sitting in the store regardless. The honest fix is wrapping
+  the save in a transaction and dispatching after the commit, which is a design decision this
+  package has not made yet.
 
 ## Things about Bouncer worth knowing before you build on it
 

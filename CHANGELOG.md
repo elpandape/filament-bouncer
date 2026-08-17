@@ -7,6 +7,24 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). F
 `1.0.0`, breaking the public API takes a major bump — and the names abilities are stored
 under count as public API, because they are rows in somebody's database.
 
+## [10.1.0] - 2026-08-17
+
+### Added
+
+- **Every write this package makes is now announced.** Six events under
+  `ElPandaPe\FilamentBouncer\Events`, each carrying who did it and `null` where nobody was
+  signed in, so a command is told apart from a screen. Nothing wraps Bouncer: a write your
+  application makes on its own fires nothing, and the README says so.
+
+### Fixed
+
+- **Deleting a role now clears Bouncer's clipboard.** It was the only write here with no
+  refresh behind it, and within the same request the clipboard went on answering yes for a
+  role that no longer existed.
+- **The privileged role is granted the wildcard only when it is missing.** The deploy command
+  wrote it on every run without asking, so repointing `privileged_role` at an ordinary role
+  handed it everything with nothing said anywhere.
+
 ## [10.0.0] - 2026-08-16
 
 ### Fixed
@@ -1261,6 +1279,7 @@ No Filament resource, no screens, no permission catalogue, no synchronisation co
 panel guard, and no migration path from `spatie/laravel-permission`. All of that is later
 work.
 
+[10.1.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v10.1.0
 [5.0.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v5.0.0
 [4.4.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.4.0
 [4.3.0]: https://github.com/elpandape/filament-bouncer/releases/tag/v4.3.0
