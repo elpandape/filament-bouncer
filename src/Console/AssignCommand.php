@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Console;
 
+use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
@@ -52,6 +54,8 @@ final class AssignCommand extends Command
 
         $bouncer->assign($name)->to($user);
         $bouncer->refresh();
+
+        event(new RoleAssignedEvent($user, $name, Causer::current()));
 
         $this->components->info(sprintf('[%s] now holds the role [%s].', $identifier, $name));
 

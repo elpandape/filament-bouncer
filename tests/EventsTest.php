@@ -25,6 +25,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Silber\Bouncer\BouncerFacade as Bouncer;
@@ -243,4 +244,30 @@ test('taking a role away from the tab is said out loud', function (): void {
     Event::assertDispatched(RoleRetractedEvent::class, fn (RoleRetractedEvent $event): bool => $event->authority->is($account)
         && $event->role === 'auditor'
         && $event->causer?->is($editor) === true);
+});
+
+test('the command that hands a role out speaks for nobody', function (): void {
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => 'sisa@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    expect(Artisan::call('filament-bouncer:assign', ['role' => 'auditor', 'user' => 'sisa@example.test']))->toBe(0);
+
+    Event::assertDispatched(RoleAssignedEvent::class, fn(RoleAssignedEvent $event): bool => $event->authority->is($account)
+        && $event->role === 'auditor'
+        && !$event->causer instanceof \Illuminate\Database\Eloquent\Model);
+});
+
+test('a command that assigns nothing says nothing', function (): void {
+    Event::fake();
+
+    expect(Artisan::call('filament-bouncer:assign', ['role' => 'nope', 'user' => 'nobody@example.test']))->toBe(1);
+
+    Event::assertNotDispatched(RoleAssignedEvent::class);
 });
