@@ -75,7 +75,7 @@ final class AbilityResource extends Resource
     public static function getSlug(?Panel $panel = null): string
     {
         /** @var string $slug */
-        $slug = config('filament-bouncer.abilities.slug', 'security/abilities');
+        $slug = config('filament-bouncer.navigation.abilities.slug', 'security/abilities');
 
         return $slug;
     }
@@ -89,7 +89,7 @@ final class AbilityResource extends Resource
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
     {
         /** @var string|BackedEnum|Htmlable|null $icon */
-        $icon = config('filament-bouncer.abilities.icon');
+        $icon = config('filament-bouncer.navigation.abilities.icon');
 
         return $icon;
     }
@@ -97,7 +97,7 @@ final class AbilityResource extends Resource
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         /** @var string|UnitEnum|null $group */
-        $group = config('filament-bouncer.navigation.group');
+        $group = config('filament-bouncer.navigation.roles.group');
 
         return $group;
     }
@@ -105,7 +105,7 @@ final class AbilityResource extends Resource
     public static function getNavigationSort(): ?int
     {
         /** @var int|null $sort */
-        $sort = config('filament-bouncer.abilities.sort');
+        $sort = config('filament-bouncer.navigation.abilities.sort');
 
         return $sort;
     }

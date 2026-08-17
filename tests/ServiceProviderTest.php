@@ -15,7 +15,7 @@ test('the service provider is registered by the package discovery', function ():
 });
 
 test('the packaged configuration is merged under its own key', function (): void {
-    expect(config('filament-bouncer.navigation.slug'))->toBe('security/roles');
+    expect(config('filament-bouncer.navigation.roles.slug'))->toBe('security/roles');
 });
 
 test('bouncer is installed and its tables are migrated', function (): void {

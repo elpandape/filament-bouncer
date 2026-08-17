@@ -64,9 +64,9 @@ function declaredAbility(): Model
 }
 
 test('the screen announces itself where the configuration says', function (): void {
-    config()->set('filament-bouncer.abilities.icon', 'heroicon-o-key');
-    config()->set('filament-bouncer.abilities.sort', 3);
-    config()->set('filament-bouncer.navigation.group', 'Security');
+    config()->set('filament-bouncer.navigation.abilities.icon', 'heroicon-o-key');
+    config()->set('filament-bouncer.navigation.abilities.sort', 3);
+    config()->set('filament-bouncer.navigation.roles.group', 'Security');
 
     expect(AbilityResource::getNavigationIcon())->toBe('heroicon-o-key')
         ->and(AbilityResource::getNavigationSort())->toBe(3)

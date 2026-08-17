@@ -55,7 +55,7 @@ test('it presents itself the way the package ships when nothing says otherwise',
 });
 
 test('it takes from configuration how it presents itself', function (): void {
-    config()->set('filament-bouncer.navigation', [
+    config()->set('filament-bouncer.navigation.roles', [
         'icon' => 'heroicon-o-shield-check',
         'group' => 'Access',
         'sort' => 7,
@@ -135,8 +135,8 @@ test('a refusal of the abilities still refuses, whoever holds no role', function
 });
 
 test('an icon named as an enum reaches the sidebar instead of a type error', function (): void {
-    config()->set('filament-bouncer.navigation.icon', ResourceIcon::Shield);
-    config()->set('filament-bouncer.navigation.group', ResourceGroup::Security);
+    config()->set('filament-bouncer.navigation.roles.icon', ResourceIcon::Shield);
+    config()->set('filament-bouncer.navigation.roles.group', ResourceGroup::Security);
 
     expect(RoleResource::getNavigationIcon())->toBe(ResourceIcon::Shield)
         ->and(RoleResource::getNavigationGroup())->toBe(ResourceGroup::Security);

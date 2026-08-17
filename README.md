@@ -459,10 +459,12 @@ The title Bouncer stores alongside each ability follows the locale in force when
 |---|---|
 | `panel` | The panel whose components declare the catalogue. `null` uses the default one |
 | `tenancy` | Whether the tenant is part of the screens' vocabulary at all. `null` asks the panel |
-| `navigation.icon` | The icon of the roles resource. `null` leaves it without one |
-| `navigation.group` | The navigation group it belongs to. `null` leaves it ungrouped |
-| `navigation.sort` | Its position. `null` leaves Filament's own ordering |
-| `navigation.slug` | The path under the panel. Defaults to `security/roles` |
+| `navigation.roles.icon` | The icon of the roles resource. `null` leaves it without one |
+| `navigation.roles.group` | The navigation group it belongs to, and the one abilities take too. `null` leaves both ungrouped |
+| `navigation.roles.sort` | Its position. `null` leaves Filament's own ordering |
+| `navigation.roles.slug` | The path under the panel. Defaults to `security/roles` |
+| `navigation.abilities.icon` · `.sort` · `.slug` | The same three decisions for the abilities screen. Defaults to `security/abilities` |
+| `relation.icon` | The icon on the roles tab of an account's page. Filament draws that tab from the second relation manager on |
 | `scopes` | Which actions count as reading, withdrawing and irreversible |
 | `models` | Models with a policy but no resource, which would otherwise never be reached |
 | `custom` | Abilities no component declares, as a map of name to scope |

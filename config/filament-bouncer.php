@@ -22,26 +22,27 @@ return [
     'tenancy' => null,
 
     /*
-     * How the roles resource presents itself inside the panel. These are the consuming
-     * application's decisions, not the package's: the group may be called something
-     * else, the order depends on what else that panel holds, and the icon on whichever
-     * family that project already uses.
+     * How each of this package's screens presents itself inside the panel. These are the
+     * consuming application's decisions, not the package's: the group may be called
+     * something else, the order depends on what else that panel holds, and the icon on
+     * whichever family that project already uses.
+     *
+     * Abilities carry no group of their own: they take the roles one, because the two are
+     * sides of the same thing and splitting them across the sidebar would say otherwise.
      */
     'navigation' => [
-        'icon' => null,
-        'group' => null,
-        'sort' => null,
-        'slug' => 'security/roles',
-    ],
+        'roles' => [
+            'icon' => null,
+            'group' => null,
+            'sort' => null,
+            'slug' => 'security/roles',
+        ],
 
-    /*
-     * How the abilities screen presents itself. It shares the navigation group with the
-     * roles resource, because they are the two sides of one thing.
-     */
-    'abilities' => [
-        'icon' => null,
-        'sort' => null,
-        'slug' => 'security/abilities',
+        'abilities' => [
+            'icon' => null,
+            'sort' => null,
+            'slug' => 'security/abilities',
+        ],
     ],
 
     /*
