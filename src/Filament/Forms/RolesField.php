@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\Forms;
 
+use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Support\Enums\Operation;
 use Illuminate\Database\Eloquent\Model;
@@ -92,6 +94,12 @@ final class RolesField extends CheckboxList
 
         Bouncer::assign(new Collection($named))->to($account);
         Bouncer::refresh();
+
+        $causer = Causer::current();
+
+        foreach ($named as $role) {
+            event(new RoleAssignedEvent($account, $role, $causer));
+        }
     }
 
     /**

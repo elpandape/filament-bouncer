@@ -11,18 +11,26 @@ use ElPandaPe\FilamentBouncer\Events\PrivilegedRoleRestoredEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleDeletedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
+use ElPandaPe\FilamentBouncer\Filament\Forms\RolesField;
+use ElPandaPe\FilamentBouncer\Filament\RelationManagers\RolesRelationManager;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Support\Causer;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Filament\Resources\Users\Pages\ViewUser;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
+use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
+
+use function Pest\Livewire\livewire;
 
 pest()->extend(TestCase::class);
 
@@ -127,4 +135,90 @@ test('a command speaks for nobody, and says so', function (): void {
     Filament::setCurrentPanel(null);
 
     expect(Causer::current())->toBeNull();
+});
+
+test('handing a role out on the form that creates an account is said out loud', function (): void {
+    $editor = signInAsRoleManager();
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    RolesField::assign($account, ['auditor']);
+
+    Event::assertDispatched(RoleAssignedEvent::class, fn (RoleAssignedEvent $event): bool => $event->authority->is($account)
+        && $event->role === 'auditor'
+        && $event->causer?->is($editor) === true);
+});
+
+test('a role the screen would never have offered is written by nobody and said by nobody', function (): void {
+    signInAsRoleManager();
+
+    Event::fake();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    RolesField::assign($account, ['a-role-that-does-not-exist']);
+
+    Event::assertNotDispatched(RoleAssignedEvent::class);
+});
+
+test('handing a role out from the tab is said out loud', function (): void {
+    $editor = signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ])->callAction(TestAction::make('assign')->table(), ['role' => 'auditor']);
+
+    Event::assertDispatched(RoleAssignedEvent::class, fn (RoleAssignedEvent $event): bool => $event->authority->is($account)
+        && $event->role === 'auditor'
+        && $event->causer?->is($editor) === true);
+});
+
+test('taking a role away from the tab is said out loud', function (): void {
+    $editor = signInAsRoleManager();
+
+    $account = User::forceCreate([
+        'name' => 'Sisa',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Bouncer::assign('auditor')->to($account);
+    Bouncer::refresh();
+
+    Event::fake();
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewUser::class,
+    ])->callAction(TestAction::make('retract')->table($role));
+
+    Event::assertDispatched(RoleRetractedEvent::class, fn (RoleRetractedEvent $event): bool => $event->authority->is($account)
+        && $event->role === 'auditor'
+        && $event->causer?->is($editor) === true);
 });

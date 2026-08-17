@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentBouncer\Filament\RelationManagers;
 
 use BackedEnum;
+use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
+use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -137,8 +140,12 @@ final class RolesRelationManager extends RelationManager
                         /** @var string $name */
                         $name = $data['role'];
 
-                        Bouncer::assign($name)->to($manager->getOwnerRecord());
+                        $account = $manager->getOwnerRecord();
+
+                        Bouncer::assign($name)->to($account);
                         Bouncer::refresh();
+
+                        event(new RoleAssignedEvent($account, $name, Causer::current()));
                     }),
             ])
             ->recordActions([
@@ -158,8 +165,12 @@ final class RolesRelationManager extends RelationManager
                         /** @var string $name */
                         $name = $record->getAttribute('name');
 
-                        Bouncer::retract($name)->from($manager->getOwnerRecord());
+                        $account = $manager->getOwnerRecord();
+
+                        Bouncer::retract($name)->from($account);
                         Bouncer::refresh();
+
+                        event(new RoleRetractedEvent($account, $name, Causer::current()));
                     }),
             ])
             ->defaultSort('name')
