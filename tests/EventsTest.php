@@ -7,6 +7,7 @@ use ElPandaPe\FilamentBouncer\Catalog\AbilityScope;
 use ElPandaPe\FilamentBouncer\Catalog\Entity;
 use ElPandaPe\FilamentBouncer\Events\AbilityRef;
 use ElPandaPe\FilamentBouncer\Events\AbilityStanceChangedEvent;
+use ElPandaPe\FilamentBouncer\Events\AbilityStancesSavedEvent;
 use ElPandaPe\FilamentBouncer\Events\CatalogReconciledEvent;
 use ElPandaPe\FilamentBouncer\Events\PrivilegedRoleRestoredEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
@@ -422,6 +423,124 @@ test('a listener asking the gate from inside its handler sees the grid already f
         ->call('save');
 
     expect($seenComplete)->toBe([true, true]);
+});
+
+test('a grid save closes with one event that counts the cells it wrote', function (): void {
+    $editor = signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    Event::fake();
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => [
+            'viewAny' => Stance::Granted->value,
+            'create' => Stance::Granted->value,
+        ]]])
+        ->call('save');
+
+    Event::assertDispatchedTimes(AbilityStancesSavedEvent::class, 1);
+
+    Event::assertDispatched(AbilityStancesSavedEvent::class, fn (AbilityStancesSavedEvent $event): bool => $event->authority->is($role)
+        && $event->changes === 2
+        && $event->causer?->is($editor) === true);
+});
+
+test('a grid save that changed nothing closes nothing', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]]])
+        ->call('save');
+
+    Event::fake();
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => ['viewAny' => Stance::Granted->value]]])
+        ->call('save');
+
+    Event::assertNotDispatched(AbilityStancesSavedEvent::class);
+});
+
+test('a single row saved closes as a save of its own', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    /** @var Model $ability */
+    $ability = Models::ability()->newQuery()->where('name', 'view')->where('entity_type', Post::class)->firstOrFail();
+
+    Event::fake();
+
+    app(RoleAbilities::class)->saveRow($role, $ability, Stance::Granted);
+
+    Event::assertDispatchedTimes(AbilityStancesSavedEvent::class, 1);
+
+    Event::assertDispatched(AbilityStancesSavedEvent::class, fn (AbilityStancesSavedEvent $event): bool => $event->authority->is($role)
+        && $event->changes === 1);
+});
+
+test('a listener told a grid save closed has already heard every cell', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $order = [];
+
+    Event::listen(AbilityStanceChangedEvent::class, function () use (&$order): void {
+        $order[] = 'cell';
+    });
+
+    Event::listen(AbilityStancesSavedEvent::class, function () use ($role, &$order): void {
+        $order[] = holds($role, 'viewAny', Post::class) && holds($role, 'create', Post::class)
+            ? 'closed'
+            : 'closed over an unsettled store';
+    });
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => [
+            'viewAny' => Stance::Granted->value,
+            'create' => Stance::Granted->value,
+        ]]])
+        ->call('save');
+
+    expect($order)->toBe(['cell', 'cell', 'closed']);
+});
+
+test('a listener told a single row closed finds its stance already answered', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    /** @var Model $ability */
+    $ability = Models::ability()->newQuery()->where('name', 'view')->where('entity_type', Post::class)->firstOrFail();
+
+    $seen = [];
+
+    Event::listen(AbilityStancesSavedEvent::class, function () use ($role, &$seen): void {
+        $seen[] = holds($role, 'view', Post::class);
+    });
+
+    app(RoleAbilities::class)->saveRow($role, $ability, Stance::Granted);
+
+    expect($seen)->toBe([true]);
 });
 
 test('deleting a role says whose it was and how much went with it', function (): void {
@@ -852,7 +971,7 @@ function eventDispatchSites(): int
 }
 
 test('every place the package dispatches an event is proven by a listener test above, not just a number here', function (): void {
-    expect(eventDispatchSites())->toBe(9, 'A new dispatch site means a new listener test in this file, not a bumped number.');
+    expect(eventDispatchSites())->toBe(11, 'A new dispatch site means a new listener test in this file, not a bumped number.');
 });
 
 /**

@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Catalog\Ability;
 use ElPandaPe\FilamentBouncer\Catalog\CatalogRegistry;
 use ElPandaPe\FilamentBouncer\Events\AbilityRef;
 use ElPandaPe\FilamentBouncer\Events\AbilityStanceChangedEvent;
+use ElPandaPe\FilamentBouncer\Events\AbilityStancesSavedEvent;
 use ElPandaPe\FilamentBouncer\Support\Causer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -163,7 +164,13 @@ final readonly class RoleAbilities
 
         $this->bouncer->refresh();
 
-        event(new AbilityStanceChangedEvent($role, AbilityRef::fromRow($ability), $was, $stance, Causer::current()));
+        $causer = Causer::current();
+
+        event(new AbilityStanceChangedEvent($role, AbilityRef::fromRow($ability), $was, $stance, $causer));
+
+        // One row is still a save. Without this, a listener that groups would keep waiting for a
+        // close that never came and the write would go unrecorded.
+        event(new AbilityStancesSavedEvent($role, 1, $causer));
     }
 
     /**
@@ -223,6 +230,12 @@ final readonly class RoleAbilities
 
         foreach ($changes as $change) {
             event($change);
+        }
+
+        // After the cells, never instead of them: a listener grouping a save into one fact needs
+        // to have heard every cell by the time it is told there are no more.
+        if ($changes !== []) {
+            event(new AbilityStancesSavedEvent($role, count($changes), $causer));
         }
     }
 

@@ -526,6 +526,7 @@ listener that invalidates a cache must not read "no event" as "no change".
 | `RoleRetractedEvent` | A role was taken away from the roles tab |
 | `RoleDeletedEvent` | A role was deleted, taking its holders' assignments and all its stances with it |
 | `AbilityStanceChangedEvent` | What a role says about one rule changed, in either direction |
+| `AbilityStancesSavedEvent` | A write of a role's stances finished, after the last of its cells was announced |
 | `PrivilegedRoleRestoredEvent` | The role that holds everything was created or handed the wildcard back |
 | `CatalogReconciledEvent` | `filament-bouncer:reconcile` finished, with what it wrote and what it took away |
 
@@ -575,6 +576,34 @@ and `AbilityForm`.
 
 `RoleAbilities::saveRow()` also emits. Nothing inside this package calls it — it is store API for
 a consumer writing a single stored row.
+
+### Treating one save as one fact
+
+`AbilityStanceChangedEvent` fires once per cell, which is the truth about what was written but not
+about what somebody did: marking ten boxes and pressing save is one act, not ten. So a write of a
+role's stances ends with `AbilityStancesSavedEvent`, carrying the role and how many cells changed.
+
+```php
+$changes = [];
+
+Event::listen(AbilityStanceChangedEvent::class, function (AbilityStanceChangedEvent $event) use (&$changes): void {
+    $changes[] = $event;
+});
+
+Event::listen(AbilityStancesSavedEvent::class, function (AbilityStancesSavedEvent $event) use (&$changes): void {
+    // every cell of this save has already been heard
+    record($event->authority, $changes);
+    $changes = [];
+});
+```
+
+It carries no detail of its own, because a listener that wants the cells already heard them. It
+never fires over a save that changed nothing, and never before the cells it closes — a single
+`saveRow()` closes too, with one change, so no write is left waiting for a close that never comes.
+
+Only the store knows where a save ends, which is why this is here rather than in your application:
+guessing the boundary from outside means flushing a buffer when the request happens to end, and a
+request that ends somewhere you did not expect loses the entry.
 
 ## What this deliberately does not do
 
