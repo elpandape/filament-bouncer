@@ -8,6 +8,7 @@ use ElPandaPe\FilamentBouncer\Filament\Resources\Abilities\AbilityResource;
 use ElPandaPe\FilamentBouncer\Store\Diagnosis;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
 
 final class CreateAbility extends CreateRecord
@@ -52,6 +53,10 @@ final class CreateAbility extends CreateRecord
         $ability->forceFill($data)->save();
 
         resolve(Diagnosis::class)->forget();
+
+        // Every other write this package makes refreshes Bouncer's clipboard right after it;
+        // this one follows the same rule rather than being the one write nobody can rely on.
+        Bouncer::refresh();
 
         return $ability;
     }

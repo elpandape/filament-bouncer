@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Silber\Bouncer\BouncerFacade as Bouncer;
 
 /**
  * There is no delete action here, and none is to be added. The resource refuses the answer to every
@@ -48,6 +49,10 @@ final class EditAbility extends EditRecord
         // What was saved may have made or unmade a twin, and the diagnosis remembers within the
         // request.
         resolve(Diagnosis::class)->forget();
+
+        // A rename leaves a permission pointing at this row's old name: the clipboard would go
+        // on answering for it until something clears the cache.
+        Bouncer::refresh();
 
         return $record;
     }

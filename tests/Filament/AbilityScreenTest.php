@@ -234,6 +234,27 @@ test('composing writes every column the store holds', function (): void {
         ->and($rule->getAttribute('only_owned'))->toBeTrue();
 });
 
+test("composing clears Bouncer's clipboard, so a grant made right after is answered correctly", function (): void {
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'support']);
+
+    livewire(CreateAbility::class)
+        ->fillForm([
+            AbilityForm::NAME_CUSTOM => true,
+            'name' => 'unarchive',
+            'entity_type' => Post::class,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $rule = Models::ability()->newQuery()->where('name', 'unarchive')->sole();
+
+    Bouncer::allow($role)->to($rule);
+    Bouncer::refresh();
+
+    expect(holds($role, 'unarchive', Post::class))->toBeTrue();
+});
+
 test('composing refuses a rule the store already holds down to the last column', function (): void {
     stored(['entity_type' => Post::class]);
 
@@ -344,6 +365,26 @@ test('changing a rule does not call it its own twin', function (): void {
         ->fillForm([AbilityForm::NAME_CUSTOM => true, 'name' => 'archive'])
         ->call('save')
         ->assertHasNoFormErrors();
+});
+
+test("renaming a rule clears Bouncer's clipboard, so it stops answering for the old name", function (): void {
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'support']);
+
+    Bouncer::allow($role)->to('view', Post::class);
+    Bouncer::refresh();
+
+    expect(holds($role, 'view', Post::class))->toBeTrue();
+
+    $rule = declaredAbility();
+
+    livewire(EditAbility::class, ['record' => $rule->getRouteKey()])
+        ->fillForm([AbilityForm::NAME_CUSTOM => true, 'name' => 'unarchive'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(holds($role, 'view', Post::class))->toBeFalse()
+        ->and(holds($role, 'unarchive', Post::class))->toBeTrue();
 });
 
 test('the record page reads the rule and asks the four questions about it', function (): void {
