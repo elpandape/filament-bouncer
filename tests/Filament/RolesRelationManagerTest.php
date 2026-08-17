@@ -217,3 +217,13 @@ test('a row on the tab opens the role it names', function (): void {
             checkActionUsing: fn (Action $action): bool => $action->getUrl() === RoleResource::getUrl('view', ['record' => $editor]),
         );
 });
+
+test('the tab carries no icon until an application names one', function (): void {
+    $account = tabbedAccount();
+
+    expect(RolesRelationManager::getIcon($account, ViewUser::class))->toBeNull();
+
+    config()->set('filament-bouncer.relation.icon', 'heroicon-o-shield-check');
+
+    expect(RolesRelationManager::getIcon($account, ViewUser::class))->toBe('heroicon-o-shield-check');
+});

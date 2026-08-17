@@ -45,6 +45,18 @@ return [
     ],
 
     /*
+     * The icon on the tab the roles relation manager draws on an account's screen. None by
+     * default, since the family is the application's to pick.
+     *
+     * Filament only builds that tab when the resource carries more than one relation
+     * manager; with just this one the table is drawn plain and an icon set here is never
+     * seen — which is a property of the consuming screen, not of this setting.
+     */
+    'relation' => [
+        'icon' => null,
+    ],
+
+    /*
      * Which actions weigh the same. The grid groups its columns by these and tints the
      * headings, so that "see a list" cannot sit next to "delete for good" looking like
      * the same decision. Anything not named here counts as a write.

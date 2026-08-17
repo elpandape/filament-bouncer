@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ElPandaPe\FilamentBouncer\Filament\RelationManagers;
 
+use BackedEnum;
 use ElPandaPe\FilamentBouncer\Filament\Concerns\HandsOutRoles;
 use ElPandaPe\FilamentBouncer\Filament\Resources\Roles\RoleResource;
 use ElPandaPe\FilamentBouncer\Store\PrivilegedRole;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Silber\Bouncer\BouncerFacade as Bouncer;
 use Silber\Bouncer\Database\Models;
@@ -38,6 +40,21 @@ final class RolesRelationManager extends RelationManager
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('filament-bouncer::roles.relation.title');
+    }
+
+    /**
+     * None unless the application names one: the icon family is its decision, like every
+     * other icon this package draws.
+     *
+     * It reaches the screen only where Filament builds a tab for the manager, which it does
+     * from the second one on; a resource carrying this one alone draws the table plain.
+     */
+    public static function getIcon(Model $ownerRecord, string $pageClass): string|BackedEnum|Htmlable|null
+    {
+        /** @var string|BackedEnum|Htmlable|null $icon */
+        $icon = config('filament-bouncer.relation.icon');
+
+        return $icon;
     }
 
     /**
