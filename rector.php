@@ -6,6 +6,7 @@ use Pest\Rector\Set\PestSetList;
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use Rector\Php85\Rector\Property\AddOverrideAttributeToOverriddenPropertiesRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
@@ -29,6 +30,12 @@ return RectorConfig::configure()
         MakeInheritedMethodVisibilitySameAsParentRector::class,
         AddOverrideAttributeToOverriddenPropertiesRector::class,
         SafeDeclareStrictTypesRector::class,
+        // Filament's facade docblock claims a default for `setCurrentPanel()` that the real
+        // method does not have, so this rule rewrites a required null argument away and the
+        // call dies with an ArgumentCountError.
+        RemoveNullArgOnNullDefaultParamRector::class => [
+            __DIR__.'/tests/EventsTest.php',
+        ],
     ])
     ->withPreparedSets(
         deadCode: true,

@@ -124,8 +124,7 @@ test('a command speaks for nobody, and says so', function (): void {
     $panel = Filament::getPanel('test');
     $panel->default(false);
 
-    $noPanel = null;
-    Filament::setCurrentPanel($noPanel);
+    Filament::setCurrentPanel(null);
 
     expect(Causer::current())->toBeNull();
 });
