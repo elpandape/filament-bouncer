@@ -335,8 +335,37 @@ test('forbidding is a stance of its own, and comes back to neutral by name', fun
 
     Event::assertDispatchedTimes(AbilityStanceChangedEvent::class, 2);
 
+    Event::assertDispatched(AbilityStanceChangedEvent::class, fn (AbilityStanceChangedEvent $event): bool => $event->from === Stance::Neutral
+        && $event->to === Stance::Forbidden
+        && $event->ability->name === 'view'
+        && $event->ability->entityMorphClass === Post::class);
+
     Event::assertDispatched(AbilityStanceChangedEvent::class, fn (AbilityStanceChangedEvent $event): bool => $event->from === Stance::Forbidden
         && $event->to === Stance::Neutral
         && $event->ability->name === 'view'
         && $event->ability->entityMorphClass === Post::class);
+});
+
+test('a listener asking the gate from inside its handler sees the grid already finished', function (): void {
+    signInAsRoleManager();
+
+    reconcileStore();
+
+    /** @var Model $role */
+    $role = Models::role()->newQuery()->create(['name' => 'auditor']);
+
+    $seenComplete = [];
+
+    Event::listen(AbilityStanceChangedEvent::class, function () use ($role, &$seenComplete): void {
+        $seenComplete[] = holds($role, 'viewAny', Post::class) && holds($role, 'create', Post::class);
+    });
+
+    livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        ->fillForm(['abilities' => [Entity::keyFor(Post::class) => [
+            'viewAny' => Stance::Granted->value,
+            'create' => Stance::Granted->value,
+        ]]])
+        ->call('save');
+
+    expect($seenComplete)->toBe([true, true]);
 });

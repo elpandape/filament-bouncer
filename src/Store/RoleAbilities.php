@@ -180,6 +180,12 @@ final readonly class RoleAbilities
     public function save(Model $role, array $state): void
     {
         $stances = $this->stances($role);
+        $causer = Causer::current();
+
+        // Held back until every cell is written and the clipboard is refreshed: a
+        // listener asking the Gate mid-loop would be reading a grid that is only
+        // partly applied, whichever cell it happens to be asked about.
+        $changes = [];
 
         foreach ($this->catalogs->current()->entities as $key => $entity) {
             foreach ($entity->cells() as $action => $ability) {
@@ -201,19 +207,23 @@ final readonly class RoleAbilities
                 $this->clear($role, $ability);
                 $this->apply($role, $ability, $wanted);
 
-                event(new AbilityStanceChangedEvent(
+                $changes[] = new AbilityStanceChangedEvent(
                     $role,
                     AbilityRef::fromCatalog($ability),
                     $current,
                     $wanted,
-                    Causer::current(),
-                ));
+                    $causer,
+                );
             }
         }
 
         // Bouncer invalidates nothing of its own accord, so without this the screen
         // would repaint from the state it held before the save.
         $this->bouncer->refresh();
+
+        foreach ($changes as $change) {
+            event($change);
+        }
     }
 
     /**
