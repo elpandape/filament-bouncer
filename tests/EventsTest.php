@@ -13,10 +13,12 @@ use ElPandaPe\FilamentBouncer\Events\RoleDeletedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
 use ElPandaPe\FilamentBouncer\Store\Stance;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
+use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Silber\Bouncer\Database\Models;
 
 pest()->extend(TestCase::class);
@@ -71,26 +73,34 @@ test('an ability about no model at all is described by its bare name', function 
 
 test('every event carries its subject, and an author that may be nobody', function (): void {
     $account = signIn();
+    $causer = User::forceCreate([
+        'name' => 'Causer User',
+        'email' => Str::random(12).'@example.test',
+        'password' => 'irrelevant',
+    ]);
     $ref = new AbilityRef('view', 'post', null, false, null, 'Posts: View');
 
-    $assigned = new RoleAssignedEvent($account, 'editor', $account);
+    $assigned = new RoleAssignedEvent($account, 'editor', $causer);
     $retracted = new RoleRetractedEvent($account, 'editor', null);
-    $changed = new AbilityStanceChangedEvent($account, $ref, Stance::Neutral, Stance::Granted, null);
+    $changed = new AbilityStanceChangedEvent($account, $ref, Stance::Neutral, Stance::Granted, $causer);
     /** @var Collection<int, Model> */
     $holders = new Collection([$account]);
-    $deleted = new RoleDeletedEvent('editor', $holders, 3, null);
+    $deleted = new RoleDeletedEvent('editor', $holders, 3, $causer);
     $restored = new PrivilegedRoleRestoredEvent('super-admin', null);
     $reconciled = new CatalogReconciledEvent(4, 2, null);
 
     expect($assigned->authority->is($account))->toBeTrue()
-        ->and($assigned->role)->toBe('editor')
-        ->and($assigned->causer?->is($account))->toBeTrue()
+        ->and($assigned->causer?->is($causer))->toBeTrue()
+        ->and($assigned->causer?->isNot($account))->toBeTrue()
+        ->and($retracted->authority->is($account))->toBeTrue()
         ->and($retracted->causer)->toBeNull()
+        ->and($changed->authority->is($account))->toBeTrue()
+        ->and($changed->causer?->is($causer))->toBeTrue()
         ->and($changed->from)->toBe(Stance::Neutral)
         ->and($changed->to)->toBe(Stance::Granted)
         ->and($changed->ability->identity())->toBe($ref->identity())
         ->and($deleted->holders)->toHaveCount(1)
-        ->and($deleted->abilities)->toBe(3)
+        ->and($deleted->causer?->is($causer))->toBeTrue()
         ->and($restored->role)->toBe('super-admin')
         ->and($reconciled->written)->toBe(4)
         ->and($reconciled->pruned)->toBe(2);
