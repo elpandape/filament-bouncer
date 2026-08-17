@@ -12,9 +12,12 @@ use ElPandaPe\FilamentBouncer\Events\RoleAssignedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleDeletedEvent;
 use ElPandaPe\FilamentBouncer\Events\RoleRetractedEvent;
 use ElPandaPe\FilamentBouncer\Store\Stance;
+use ElPandaPe\FilamentBouncer\Support\Causer;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\Post;
 use ElPandaPe\FilamentBouncer\Tests\Fixtures\Models\User;
 use ElPandaPe\FilamentBouncer\Tests\TestCase;
+use Filament\Facades\Filament;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -104,4 +107,25 @@ test('every event carries its subject, and an author that may be nobody', functi
         ->and($restored->role)->toBe('super-admin')
         ->and($reconciled->written)->toBe(4)
         ->and($reconciled->pruned)->toBe(2);
+});
+
+test('the author of a write is whoever is signed in, and nobody outside a panel', function (): void {
+    expect(Causer::current())->toBeNull();
+
+    $user = signIn();
+
+    expect(Causer::current()?->is($user))->toBeTrue();
+});
+
+test('a command speaks for nobody, and says so', function (): void {
+    signIn();
+
+    /** @var Panel $panel */
+    $panel = Filament::getPanel('test');
+    $panel->default(false);
+
+    $noPanel = null;
+    Filament::setCurrentPanel($noPanel);
+
+    expect(Causer::current())->toBeNull();
 });
