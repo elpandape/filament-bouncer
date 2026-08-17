@@ -121,6 +121,12 @@ final class AbilitiesTable
                     ->label(__('filament-bouncer::abilities.table.narrow'))
                     ->tooltip(__('filament-bouncer::abilities.table.narrow_note'))
                     ->icon('heroicon-m-viewfinder-circle')
+                    // Only where there is a model to pick a record of. The row that holds
+                    // everything reaches every model and a simple ability names none, so
+                    // fencing either to a record composes a rule that answers about nothing —
+                    // and on the first it was offered beside the padlock that refuses to edit
+                    // it, which read as a way around the lock.
+                    ->visible(static fn (Model $record): bool => self::namesAModel($record))
                     ->url(self::narrowUrl(...)),
                 ViewAction::make(),
                 EditAction::make()
@@ -143,6 +149,13 @@ final class AbilitiesTable
      * Composing a rule starts from one that already exists, with the record left blank — the one
      * thing whoever is fencing it came to write.
      */
+    private static function namesAModel(Model $record): bool
+    {
+        $entity = $record->getAttribute('entity_type');
+
+        return is_string($entity) && $entity !== AbilityStore::WILDCARD;
+    }
+
     private static function narrowUrl(Model $record): string
     {
         return AbilityResource::getUrl('create', array_filter([

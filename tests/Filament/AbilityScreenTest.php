@@ -460,7 +460,18 @@ test('the row that makes the privileged role privileged is not worked on from he
     livewire(ListAbilities::class)
         ->searchTable(AbilityStore::WILDCARD)
         ->assertActionVisible(TestAction::make('locked')->table($wildcard))
-        ->assertActionHidden(TestAction::make('edit')->table($wildcard));
+        ->assertActionHidden(TestAction::make('edit')->table($wildcard))
+        ->assertActionHidden(TestAction::make('narrow')->table($wildcard));
+});
+
+test('a rule naming no model of its own is not offered a record to be fenced to', function (): void {
+    $everyModel = stored(['name' => 'sweep', 'entity_type' => AbilityStore::WILDCARD]);
+    $noModel = stored(['name' => 'impersonate-users', 'entity_type' => null]);
+
+    livewire(ListAbilities::class)
+        ->assertActionHidden(TestAction::make('narrow')->table($everyModel))
+        ->assertActionHidden(TestAction::make('narrow')->table($noModel))
+        ->assertActionVisible(TestAction::make('narrow')->table(declaredAbility()));
 });
 
 test('a rule reaching every model of one action is still worked on from here', function (): void {
