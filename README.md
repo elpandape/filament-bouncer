@@ -512,9 +512,13 @@ file is cached, and `config:cache` throws on anything it cannot serialise.
 
 ## Events
 
-Every write this package makes is announced. Nothing is dispatched by Bouncer itself, so
-**a `Bouncer::allow()` your application calls on its own fires nothing** — a listener that
-invalidates a cache must not read "no event" as "no change".
+Every assignment, retraction, deletion and stance change this package writes is announced,
+and so are the privileged role's restore and the reconciliation's summary. Two writes are
+not: the abilities screen creates and edits rows in the `abilities` table and says nothing
+about either, and `reconcile` writes and prunes those same rows one at a time with no event
+per row — only the summary below covers that. Nothing is dispatched by Bouncer itself
+either, so **a `Bouncer::allow()` your application calls on its own fires nothing** — a
+listener that invalidates a cache must not read "no event" as "no change".
 
 | Event | When |
 |---|---|
